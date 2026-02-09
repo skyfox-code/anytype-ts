@@ -60,6 +60,7 @@ const PageAuthSetup = observer(forwardRef<I.PageRef, I.PageComponent>((props, re
 
 			S.Auth.accountSet(account);
 			S.Common.configSet(account.config, false);
+			Renderer.send('closeOtherWindows');
 
 			const spaceId = Storage.get('spaceId');
 			const routeParam = { 

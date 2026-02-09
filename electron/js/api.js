@@ -674,6 +674,10 @@ class Api {
 		WindowManager.removeTab(win, id, updateActive);
 	};
 
+	closeOtherWindows (win) {
+		WindowManager.closeOtherWindows(win);
+	};
+
 	closeOtherTabs (win, id, forced) {
 		WindowManager.closeOtherTabs(win, id, forced);
 	};
