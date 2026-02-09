@@ -939,8 +939,31 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		e.preventDefault();
 
 		preventMenu.current = true;
-		setText(marksRef.current, true);
-		onPaste(e, props);
+
+		// Extract clipboard data synchronously because the browser clears
+		// e.clipboardData after the event handler returns
+		const cb = e.clipboardData || e.originalEvent?.clipboardData;
+		const data: any = {
+			text: U.String.normalizeLineEndings(String(cb?.getData('text/plain') || '')),
+			html: String(cb?.getData('text/html') || ''),
+			anytype: JSON.parse(String(cb?.getData('application/json') || '{}')),
+			files: [],
+		};
+		data.anytype.range = data.anytype.range || { from: 0, to: 0 };
+
+		const files = cb?.items ? U.Common.getDataTransferFiles(cb.items) : [];
+
+		const pasteWithData = (pasteData: any) => {
+			setText(marksRef.current, true, () => {
+				onPaste(e, props, pasteData);
+			});
+		};
+
+		if (files.length) {
+			U.Common.saveClipboardFiles(files, data, pasteWithData);
+		} else {
+			pasteWithData(data);
+		};
 	};
 	
 	const onCheckbox = () => {
