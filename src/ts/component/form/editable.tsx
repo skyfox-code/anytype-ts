@@ -111,11 +111,14 @@ const Editable = forwardRef<EditableRefProps, Props>(({
 
 	const getTextValue = (): string => {
 		const obj = Mark.cleanHtml($(editableRef.current).html());
-		
+
 		let t = String(obj.get(0).innerText || '');
 		if (t == '\n') {
 			t = '';
 		};
+
+		// Safety: strip any remaining ZWS that survived cleanHtml
+		t = t.replace(/\u200B/g, '');
 
 		return t;
 	};
@@ -126,7 +129,19 @@ const Editable = forwardRef<EditableRefProps, Props>(({
 
 	const getRangeHandler = (): I.TextRange => {
 		const range = getRange(editableRef.current);
-		return range ? { from: range.start, to: range.end } : null;
+		if (!range) {
+			return null;
+		};
+
+		// Convert DOM offsets (with ZWS) to model offsets (without ZWS)
+		if (Mark.hasZws(editableRef.current)) {
+			return {
+				from: Mark.domToModel(range.start, editableRef.current),
+				to: Mark.domToModel(range.end, editableRef.current),
+			};
+		};
+
+		return { from: range.start, to: range.end };
 	};
 
 	const setRangeHandler = (range: I.TextRange) => {
@@ -135,7 +150,16 @@ const Editable = forwardRef<EditableRefProps, Props>(({
 		};
 
 		editableRef.current.focus({ preventScroll: true });
-		setRange(editableRef.current, { start: range.from, end: range.to });
+
+		// Convert model offsets (without ZWS) to DOM offsets (with ZWS)
+		if (Mark.hasZws(editableRef.current)) {
+			const domFrom = Mark.modelToDom(range.from, editableRef.current);
+			const domTo = Mark.modelToDom(range.to, editableRef.current);
+
+			setRange(editableRef.current, { start: domFrom, end: domTo });
+		} else {
+			setRange(editableRef.current, { start: range.from, end: range.to });
+		};
 	};
 
 	const onPasteHandler = (e: any) => {
