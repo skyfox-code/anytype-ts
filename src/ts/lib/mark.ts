@@ -79,6 +79,23 @@ const Order = [
 class Mark {
 
 	/**
+	 * Trims trailing spaces from a text range (for intelligent formatting).
+	 * When a user double-clicks a word on Windows, the trailing space is included
+	 * in the selection. This method excludes that space so formatting doesn't
+	 * extend to it.
+	 */
+	trimRange (text: string, range: I.TextRange): I.TextRange {
+		const { from } = range;
+		let { to } = range;
+
+		while ((to > from) && (text[to - 1] == ' ')) {
+			to--;
+		};
+
+		return { from, to };
+	};
+
+	/**
 	 * Toggles a mark in the list of marks, handling overlaps and merging.
 	 * @param {I.Mark[]} marks - The current list of marks.
 	 * @param {I.Mark} mark - The mark to toggle.

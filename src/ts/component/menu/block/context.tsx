@@ -55,8 +55,8 @@ const MenuBlockContext = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => 
 		if (!block) {
 			return;
 		};
-		
-		const { from, to } = range;
+
+		const { from, to } = Mark.trimRange(block.getText(), range);
 		const object = S.Detail.get(rootId, rootId);
 		const element = $(`#${getId()}`);
 		

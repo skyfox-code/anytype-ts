@@ -1252,8 +1252,8 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 	};
 
 	const onTextButtonToggle = (type: I.MarkType, param: string) => {
-		const { from, to } = range.current;
 		const value = getTextValue();
+		const { from, to } = Mark.trimRange(value, range.current);
 
 		setMarks(Mark.toggle(marks.current, { type, param, range: { from, to } }));
 		updateMarkup(value, { from, to });
