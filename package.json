@@ -864,7 +864,8 @@
 				"entry": {
 					"Categories": "Utility;Office;Calendar;ProjectManagement;",
 					"Keywords": "project management;",
-					"StartupWMClass": "anytype"
+					"StartupWMClass": "anytype",
+					"MimeType": "x-scheme-handler/anytype;"
 				}
 			}
 		},

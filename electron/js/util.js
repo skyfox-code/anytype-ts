@@ -310,6 +310,52 @@ class Util {
 		return path.join(app.getPath('appData'), app.getName());
 	};
 
+	registerLinuxProtocolHandler () {
+		if (!is.linux) {
+			return;
+		};
+
+		const { execFile } = require('child_process');
+		const home = process.env.HOME || '';
+		const dataHome = process.env.XDG_DATA_HOME || path.join(home, '.local', 'share');
+		const applicationsDir = path.join(dataHome, 'applications');
+		const desktopFilePath = path.join(applicationsDir, 'anytype.desktop');
+		const execPath = process.env.APPIMAGE || process.execPath;
+
+		const content = [
+			'[Desktop Entry]',
+			'Name=Anytype',
+			'Comment=Project management and knowledge workspace',
+			`Exec="${execPath}" %u`,
+			'Terminal=false',
+			'Type=Application',
+			'Icon=anytype',
+			'Categories=Utility;Office;Calendar;ProjectManagement;',
+			'StartupWMClass=anytype',
+			'Keywords=project management;',
+			'MimeType=x-scheme-handler/anytype;',
+		].join('\n');
+
+		try {
+			fs.mkdirSync(applicationsDir, { recursive: true });
+			fs.writeFileSync(desktopFilePath, content, 'utf-8');
+
+			execFile('update-desktop-database', [ applicationsDir ], (err) => {
+				if (err) {
+					this.log('info', `update-desktop-database failed: ${err.message}`);
+				};
+			});
+
+			execFile('xdg-mime', [ 'default', 'anytype.desktop', 'x-scheme-handler/anytype' ], (err) => {
+				if (err) {
+					this.log('info', `xdg-mime default failed: ${err.message}`);
+				};
+			});
+		} catch (e) {
+			this.log('info', `registerLinuxProtocolHandler failed: ${e.message}`);
+		};
+	};
+
 	isWayland () {
 		return is.linux && (process.env.XDG_SESSION_TYPE === 'wayland');
 	};

@@ -198,6 +198,7 @@ function createWindow () {
 	Api.systemInfo(mainWindow);
 
 	installNativeMessagingHost();
+	Util.registerLinuxProtocolHandler();
 
 	//ipcMain.removeHandler('Api');
 	ipcMain.handle('Api', (e, id, cmd, args) => {
