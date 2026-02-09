@@ -949,10 +949,10 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			anytype: JSON.parse(String(cb?.getData('application/json') || '{}')),
 			files: [],
 		};
+		
 		data.anytype.range = data.anytype.range || { from: 0, to: 0 };
 
 		const files = cb?.items ? U.Common.getDataTransferFiles(cb.items) : [];
-
 		const pasteWithData = (pasteData: any) => {
 			setText(marksRef.current, true, () => {
 				onPaste(e, props, pasteData);
