@@ -131,6 +131,20 @@ class Focus {
 		if (node.hasClass('editable')) {
 			keyboard.setFocus(true);
 			setRange(el, { start: range.from, end: range.to });
+
+			const style = window.getComputedStyle(el);
+			if (style.direction === 'rtl') {
+				const selection = window.getSelection();
+				if (selection && selection.rangeCount) {
+					const r = selection.getRangeAt(0);
+					const rect = r.getBoundingClientRect();
+					const parentRect = el.getBoundingClientRect();
+
+					if (rect.left < parentRect.left) {
+						el.scrollLeft = el.scrollLeft - (parentRect.left - rect.left);
+					};
+				};
+			};
 		};
 		return this;
 	};

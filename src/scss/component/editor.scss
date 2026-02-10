@@ -5,6 +5,9 @@
 .editorWrapper { margin: 0px auto; min-width: 300px; }
 .editorWrapper {
 	.blocks { margin-left: -48px; }
+	.blocks {
+		> .block.blockText.align2 { margin-left: 48px; margin-right: -48px; }
+	}
 
 	> .note { 
 		background: linear-gradient(270deg, #262cd2 0%, #0c82ef 100%); border-radius: 4px; height: 80px; color: var(--color-bg-primary); position: absolute; 

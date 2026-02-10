@@ -56,6 +56,7 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	const timeoutClick = useRef(0);
 	const preventMenu = useRef(false);
 	const clickCnt = useRef(0);
+	const prevStyleRef = useRef(style);
 
 	useEffect(() => {
 		setValue(text);
@@ -106,6 +107,24 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 
 		onUpdate?.();
 	});
+
+	useEffect(() => {
+		const styleChanged = prevStyleRef.current !== style;
+		prevStyleRef.current = style;
+
+		if (!styleChanged) {
+			return;
+		};
+
+		const isRtl = U.String.checkRtl(text);
+
+		if (fields.isRtlDetected && !isRtl && text) {
+			U.Data.setRtl(rootId, block, false);
+		} else
+		if ((fields.isRtlDetected || isRtl) && (block.hAlign !== I.BlockHAlign.Right)) {
+			C.BlockListSetAlign(rootId, [ id ], I.BlockHAlign.Right);
+		};
+	}, [ style ]);
 
 	const setValue = (v: string, restoreRange?: I.TextRange) => {
 		const { focused } = focus.state;
