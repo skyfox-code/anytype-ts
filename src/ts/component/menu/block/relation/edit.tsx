@@ -433,7 +433,7 @@ const MenuBlockRelationEdit = observer(forwardRef<I.MenuRef, I.Menu>((props, ref
 				<div className="name">{translate('menuBlockRelationEditRelationType')}</div>
 				<MenuItemVertical 
 					id="relation-type" 
-					object={format === null ? undefined : { relationFormat: format, layout: I.ObjectLayout.Relation }}
+					icon={format === null ? undefined : `relation ${Relation.className(format)}`}
 					name={format === null ? translate('menuBlockRelationEditSelectRelationType') : translate(`relationName${format}`)}
 					onMouseEnter={onRelationType} 
 					onClick={onRelationType} 

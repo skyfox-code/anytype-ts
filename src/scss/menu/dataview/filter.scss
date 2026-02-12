@@ -20,7 +20,7 @@
 				&.advanced { background-image: url('~img/icon/dataview/filters/advanced0.svg'); }
 			}
 
-			.iconObject { flex-shrink: 0; }
+			.icon.relation { width: 20px; height: 20px; flex-shrink: 0; }
 
 			.filterContent { display: flex; gap: 6px; align-items: center; @include text-overflow-nw; }
 			.value { @include text-overflow-nw; }
@@ -41,7 +41,7 @@
 				.icon.filterIcon {
 					&.advanced { background-image: url('~img/icon/dataview/filters/advanced1.svg'); }
 				}
-				.iconRelation { background-color: var(--color-system-accent-100); }
+				.icon.relation { background-color: var(--color-system-accent-100); }
 
 				&:hover,
 				&.hover {

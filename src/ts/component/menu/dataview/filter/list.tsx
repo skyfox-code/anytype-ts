@@ -3,7 +3,7 @@ import $ from 'jquery';
 import { observer } from 'mobx-react';
 import { AutoSizer, CellMeasurer, InfiniteLoader, List, CellMeasurerCache } from 'react-virtualized';
 import { I, C, S, U, Relation, keyboard, translate, analytics, Dataview } from 'Lib';
-import { MenuItemVertical, Icon, IconObject, Label } from 'Component';
+import { MenuItemVertical, Icon, Label } from 'Component';
 
 const HEIGHT_ITEM = 28;
 const HEIGHT_FILTER = 32;
@@ -392,7 +392,7 @@ const MenuFilterList = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 							</>
 						) : (
 							<>
-								<IconObject size={20} object={{ relationFormat: item.relation.format, layout: I.ObjectLayout.Relation }} />
+								<Icon className={`relation ${Relation.className(item.relation.format)}`} />
 								<div className="filterContent">
 									<Label className="relationName" text={item.relation.name} />
 									{Relation.isFilterActive(item) ? (

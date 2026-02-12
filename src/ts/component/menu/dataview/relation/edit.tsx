@@ -149,7 +149,7 @@ const MenuDataviewRelationEdit = observer(forwardRef<I.MenuRef, I.Menu>((props, 
 				{
 					children: [
 						canAlign ? { id: 'align', icon: U.Data.alignHIcon(viewRelation?.align), name: translate('commonAlign'), arrow: true } : null,
-						canCalculate ? { id: 'calculate', object: { relationFormat: I.RelationType.Number, layout: I.ObjectLayout.Relation }, name: translate('commonCalculate'), arrow: true } : null,
+						canCalculate ? { id: 'calculate', icon: `relation ${Relation.className(I.RelationType.Number)}`, name: translate('commonCalculate'), arrow: true } : null,
 					]
 				},
 			]);
@@ -716,7 +716,7 @@ const MenuDataviewRelationEdit = observer(forwardRef<I.MenuRef, I.Menu>((props, 
 				<div className="name">{translate('menuDataviewRelationEditRelationType')}</div>
 				<MenuItemVertical 
 					id="relation-type" 
-					object={format === null ? undefined : { relationFormat: format, layout: I.ObjectLayout.Relation }}
+					icon={format === null ? undefined : `relation ${Relation.className(format)}`}
 					name={format === null ? translate('menuDataviewRelationEditSelectRelationType') : translate(`relationName${format}`)}
 					onMouseEnter={onRelationType} 
 					readonly={isReadonly}

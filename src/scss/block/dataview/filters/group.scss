@@ -17,8 +17,8 @@
 			.items { padding: 0px 16px; }
 			.rule { padding-bottom: 8px; }
 			.rule {
-				.inner { display: flex; align-items: center; gap: 0px 8px; }
-				.inner {
+				> .inner { display: flex; align-items: center; gap: 0px 8px; }
+				> .inner {
 					.relationSelect,
 					.conditionSelect,
 					.valueSelect .select { flex-shrink: 0; font-weight: 400; }
@@ -55,6 +55,9 @@
 						.objectsList { display: flex; gap: 6px; flex-wrap: nowrap; overflow: hidden; height: 100%; align-items: center; }
 						.optionsList,
 						.objectsList {
+							.tagItem {
+								.inner { max-width: 100px; }
+							}
 							.rest { @include text-common; color: var(--color-text-secondary); flex-shrink: 0; white-space: nowrap; }
 						}
 						.objectsList {
@@ -64,7 +67,7 @@
 
 						.dateWrapper {display: flex; flex-wrap: nowrap; gap: 6px; }
 						.dateWrapper {
-							.dateInput { flex-grow: 1; }
+							.dateInput { flex-grow: 1; min-width: 80px; }
 						}
 						
 						.select { justify-content: space-between; }

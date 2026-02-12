@@ -1,7 +1,7 @@
 import React, { forwardRef, useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react';
 import { ObjectName, IconObject } from 'Component';
-import { U } from 'Lib';
+import { U, I } from 'Lib';
 
 interface Props {
 	spaceview?: any;
@@ -21,7 +21,9 @@ const PreviewTab = observer(forwardRef<{}, Props>((props, ref) => {
 	const objectRef = useRef(object);
 
 	useEffect(() => {
-		if (!object?.id) {
+		if (!object?.id || (object?.layout == I.ObjectLayout.SpaceView)) {
+			objectRef.current = {};
+			setDummy(dummy + 1);
 			return;
 		};
 
@@ -47,7 +49,7 @@ const PreviewTab = observer(forwardRef<{}, Props>((props, ref) => {
 				<IconObject object={spaceview} />
 				<ObjectName object={spaceview} />
 			</div>
-			{object ? (
+			{objectRef.current && objectRef.current.name ? (
 				<div className="previewObject">
 					<IconObject object={objectRef.current} />
 					<ObjectName object={objectRef.current} />

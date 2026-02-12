@@ -634,7 +634,7 @@ class Relation {
 
 			ret.push({
 				id: relation.relationKey,
-				object: { relationFormat: relation.format, layout: I.ObjectLayout.Relation },
+				icon: `relation ${this.className(relation.format)}`,
 				name: relation.name,
 				isHidden: relation.isHidden,
 				format: relation.format,

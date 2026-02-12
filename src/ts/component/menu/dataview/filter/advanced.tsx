@@ -8,7 +8,7 @@ import relation from 'json/relation';
 
 const MenuFilterAdvanced = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 
-	const { param, getId, getSize, onKeyDown, setActive } = props;
+	const { param, getId, getSize, onKeyDown, setActive, position } = props;
 	const { data, className, classNameWrap } = param;
 	const { rootId, blockId, getView, loadData, isInline, getTarget, readonly } = data;
 	const nodeRef = useRef(null);
@@ -117,6 +117,7 @@ const MenuFilterAdvanced = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =
 				loadData={loadData}
 				readonly={isReadonly}
 				onDelete={onDelete}
+				position={position}
 			/>
 			<div className="bottom">
 				<MenuItemVertical id="delete" name={translate('menuDataviewFilterDeleteFilter')} icon="remove" onClick={onDelete} />

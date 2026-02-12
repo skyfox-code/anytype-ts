@@ -234,7 +234,7 @@
 					.icon.sortArrow { width: 20px; height: 20px; margin: 0px; background-image: url('~img/icon/dataview/filters/sort.svg'); }
 					.icon.sortArrow.c1 { transform: rotateZ(180deg); }
 					.icon.advanced { width: 20px; height: 20px; background-image: url('~img/icon/dataview/filters/advanced0.svg'); }
-					.iconObject { flex-shrink: 0; }
+					.icon.relation { width: 20px; height: 20px; flex-shrink: 0; }
 					.icon.arrow { width: 8px; height: 8px; background-image: url('~img/arrow/filterValue0.svg'); }
 
 					&.isActive { color: var(--color-system-accent-100); background-color: var(--color-system-selection); }
@@ -243,7 +243,7 @@
 						.name { font-weight: 500; }
 
 						.icon.advanced { background-image: url('~img/icon/dataview/filters/advanced1.svg'); }
-						.iconRelation { background-color: var(--color-system-accent-100); }
+						.icon.relation { background-color: var(--color-system-accent-100); }
 						.icon.arrow { background-image: url('~img/arrow/filterValue1.svg'); }
 					}
 					&:hover, &.hover { background-color: var(--color-shape-highlight-medium); border-color: transparent; }
