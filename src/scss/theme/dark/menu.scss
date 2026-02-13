@@ -9,17 +9,18 @@
     .menu {
         .icon.textParagraph { background-image: url('#{$themePath}/icon/menu/action/block/text/paragraph.svg'); }
 
-		.icon.textHeader1 { background-image: url('#{$themePath}/icon/menu/action/block/text/header1.svg'); }
-		.icon.textHeader2 { background-image: url('#{$themePath}/icon/menu/action/block/text/header2.svg'); }
-		.icon.textHeader3 { background-image: url('#{$themePath}/icon/menu/action/block/text/header3.svg'); }
+		.icon.textHeader1,
+		.icon.textHeader2,
+		.icon.textHeader3 { background-image: url('#{$themePath}/icon/menu/action/block/text/header.svg'); }
 		.icon.textQuote { background-image: url('#{$themePath}/icon/menu/action/block/text/quote.svg'); }
 
         .icon.textBulleted { background-image: url('#{$themePath}/icon/menu/action/block/text/bulleted.svg'); }
 		.icon.textNumbered { background-image: url('#{$themePath}/icon/menu/action/block/text/numbered.svg'); }
 		.icon.textToggle { background-image: url('#{$themePath}/icon/menu/action/block/text/toggle.svg'); }
-		.icon.textToggleHeader1 { background-image: url('#{$themePath}/icon/menu/action/block/text/toggleHeader1.svg'); }
-		.icon.textToggleHeader2 { background-image: url('#{$themePath}/icon/menu/action/block/text/toggleHeader2.svg'); }
-		.icon.textToggleHeader3 { background-image: url('#{$themePath}/icon/menu/action/block/text/toggleHeader3.svg'); }
+
+		.icon.textToggleHeader1,
+		.icon.textToggleHeader2,
+		.icon.textToggleHeader3 { background-image: url('#{$themePath}/icon/menu/action/block/text/toggleHeader.svg'); }
 
         .icon.more { background-image: url('#{$themePath}/icon/menu/action/more0.svg'); }
 
