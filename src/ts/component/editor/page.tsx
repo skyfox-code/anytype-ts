@@ -1091,7 +1091,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	const onCtrlShiftArrowBlock = (e: any, pressed: string) => {
 		e.preventDefault();
 
-		const { focused } = focus.state;
+		const { focused, range } = focus.state;
 		const block = S.Block.getLeaf(rootId, focused);
 
 		if (!block) {
@@ -1157,8 +1157,14 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				S.Block.toggle(rootId, next.id, true);
 			};
 
-			focus.apply();
-			focus.scroll(isPopup, block.id);
+			// Defer focus restore to after React commits DOM changes.
+			// Without this, React's unmount/remount of the block triggers
+			// a blur event that clears focus.state before the new element mounts.
+			window.setTimeout(() => {
+				focus.set(block.id, range);
+				focus.apply();
+				focus.scroll(isPopup, block.id);
+			}, 0);
 		});
 	};
 
