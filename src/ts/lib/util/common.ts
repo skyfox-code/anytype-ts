@@ -1581,14 +1581,12 @@ class UtilCommon {
 
 	tabTooltipShow (data: any) {
 		const spaceview = U.Space.getSpaceviewBySpaceId(data.spaceId);
-		const x = data.isPinned ? data.offsetLeft : data.offsetLeft + 6;
-
 		if (!spaceview) {
 			return;
 		};
 
 		Preview.previewShow({
-			rect: { x, y: 0, width: data.width, height: 0 },
+			rect: { x: data.offsetLeft, y: 0, width: data.width, height: 0 },
 			classNameWrap: 'isTab',
 			object: spaceview,
 			target: spaceview.id,
@@ -1601,7 +1599,8 @@ class UtilCommon {
 			relatedData: {
 				action: data?.action,
 				name: data?.objectName,
-				object: data?.objectData
+				object: data?.objectData,
+				minWidth: data.width,
 			},
 			delay: 0,
 			type: I.PreviewType.Tab,

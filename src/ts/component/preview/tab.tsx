@@ -1,7 +1,7 @@
 import React, { forwardRef, useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react';
-import { ObjectName, IconObject, ObjectType } from 'Component';
-import { U, I, translate } from 'Lib';
+import { ObjectName, IconObject, Label } from 'Component';
+import { U, I, translate, S } from 'Lib';
 
 interface Props {
 	spaceview?: any;
@@ -17,33 +17,34 @@ const PreviewTab = observer(forwardRef<{}, Props>((props, ref) => {
 		position,
 	} = props;
 
-	const { object, name, action } = data;
-	const [ dummy, setDummy ] = useState(0);
-	const objectRef = useRef({});
+	const { object, name, action, minWidth } = data;
+	const [ displayObject, setDisplayObject ] = useState<any>(null);
+	const [ displayObjectType, setDisplayObjectType ] = useState<any>(null);
 	const cancelRef = useRef(false);
 
 	useEffect(() => {
+		cancelRef.current = false;
+		setDisplayObject(null);
 		load();
 
 		return () => {
 			cancelRef.current = true;
-			objectRef.current = {};
+			setDisplayObjectType(null);
 		};
-	}, [ object?.id ]);
+	}, [ object?.id, action ]);
 
 	useEffect(position);
 
 	const load = () => {
-		const isChat = object?.layout == I.ObjectLayout.SpaceView && (spaceview.isOneToOne || spaceview.isChat)
+		const isChat = (object?.layout == I.ObjectLayout.SpaceView) && (spaceview.isOneToOne || spaceview.isChat);
 
 		if (isChat) {
-			objectRef.current = { layout: I.ObjectLayout.Chat, name: translate('commonMainChat') };
-		} else
-		if (object && object.id) {
-			loadObject();
+			setDisplayObject({ layout: I.ObjectLayout.Chat, name: translate('commonMainChat') });
 		} else
 		if (action && name) {
 			objectByAction();
+		} else {
+			loadObject();
 		};
 	};
 
@@ -56,34 +57,46 @@ const PreviewTab = observer(forwardRef<{}, Props>((props, ref) => {
 		};
 
 		if (layouts[action]) {
-			objectRef.current = { layout: layouts[action], name };
-			setDummy(dummy + 1);
+			setDisplayObject({ layout: layouts[action], name });
+		} else {
+			loadObject();
 		};
 	};
 
 	const loadObject = () => {
+		if (!object || !object.id) {
+			return;
+		};
 		U.Object.getById(object.id, { spaceId: spaceview.targetSpaceId }, (loaded: any) => {
 			if (loaded && !cancelRef.current) {
-				objectRef.current = loaded;
-				setDummy(dummy + 1);
+				setDisplayObject(loaded);
+				loadType(loaded.type)
+			};
+		});
+	};
+
+	const loadType = (id: string) => {
+		U.Object.getById(id, { spaceId: spaceview.targetSpaceId }, (loaded: any) => {
+			if (loaded && !cancelRef.current) {
+				setDisplayObjectType(loaded);
 			};
 		});
 	};
 
 	return (
-		<div className="previewTab">
+		<div className="previewTab" style={{ minWidth }}>
 			<div className="previewHeader">
 				<IconObject object={spaceview} />
 				<ObjectName object={spaceview} />
 			</div>
-			{objectRef.current && objectRef.current.name ? (
+			{displayObject?.name ? (
 				<div className="previewObject">
 					<div className="side left">
-						<IconObject object={objectRef.current} size={48} />
+						<IconObject object={displayObject} size={48} iconSize={28} />
 					</div>
 					<div className="side right">
-						<ObjectName object={objectRef.current} />
-						{objectRef?.current.type ? <ObjectType object={objectRef.current} /> : ''}
+						<ObjectName object={displayObject} />
+						{displayObjectType ? <Label className="type" text={displayObjectType.name} /> : ''}
 					</div>
 				</div>
 			) : null}

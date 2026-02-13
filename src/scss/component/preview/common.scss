@@ -26,6 +26,9 @@
 	}
 
 	&.isTab { width: auto; }
+	&.isTab {
+		.content { border-radius: 16px; }
+	}
 }
 .previewWrapper.passThrough { pointer-events: none; }
 
