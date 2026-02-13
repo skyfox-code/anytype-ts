@@ -1588,7 +1588,7 @@ class UtilCommon {
 		};
 
 		Preview.previewShow({
-			rect: { x, y: 2, width: data.width, height: 0 },
+			rect: { x, y: 0, width: data.width, height: 0 },
 			classNameWrap: 'isTab',
 			object: spaceview,
 			target: spaceview.id,

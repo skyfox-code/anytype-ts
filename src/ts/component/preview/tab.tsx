@@ -1,7 +1,7 @@
 import React, { forwardRef, useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react';
-import { ObjectName, IconObject } from 'Component';
-import { U, I } from 'Lib';
+import { ObjectName, IconObject, ObjectType } from 'Component';
+import { U, I, translate } from 'Lib';
 
 interface Props {
 	spaceview?: any;
@@ -19,39 +19,55 @@ const PreviewTab = observer(forwardRef<{}, Props>((props, ref) => {
 
 	const { object, name, action } = data;
 	const [ dummy, setDummy ] = useState(0);
-	const objectRef = useRef(object);
+	const objectRef = useRef({});
+	const cancelRef = useRef(false);
 
 	useEffect(() => {
-		if (action && name) {
-			objectByAction();
-			return;
-		};
+		load();
 
-		if (!object?.id || (object?.layout == I.ObjectLayout.SpaceView)) {
+		return () => {
+			cancelRef.current = true;
 			objectRef.current = {};
-			setDummy(dummy + 1);
-			return;
 		};
-
-		let cancelled = false;
-
-		objectRef.current = object;
-
-		U.Object.getById(object.id, { spaceId: spaceview.targetSpaceId }, (loaded: any) => {
-			if (loaded && !cancelled) {
-				objectRef.current = loaded;
-				setDummy(dummy + 1);
-			};
-		});
-
-		return () => { cancelled = true; };
 	}, [ object?.id ]);
 
 	useEffect(position);
 
+	const load = () => {
+		const isChat = object?.layout == I.ObjectLayout.SpaceView && (spaceview.isOneToOne || spaceview.isChat)
+
+		if (isChat) {
+			objectRef.current = { layout: I.ObjectLayout.Chat, name: translate('commonMainChat') };
+		} else
+		if (object && object.id) {
+			loadObject();
+		} else
+		if (action && name) {
+			objectByAction();
+		};
+	};
+
 	const objectByAction = () => {
-		console.log('ACTION: ', action)
-		console.log('NAME: ', name)
+		const layouts = {
+			navigation: I.ObjectLayout.Navigation,
+			graph: I.ObjectLayout.Graph,
+			archive: I.ObjectLayout.Archive,
+			settings: I.ObjectLayout.Settings,
+		};
+
+		if (layouts[action]) {
+			objectRef.current = { layout: layouts[action], name };
+			setDummy(dummy + 1);
+		};
+	};
+
+	const loadObject = () => {
+		U.Object.getById(object.id, { spaceId: spaceview.targetSpaceId }, (loaded: any) => {
+			if (loaded && !cancelRef.current) {
+				objectRef.current = loaded;
+				setDummy(dummy + 1);
+			};
+		});
 	};
 
 	return (
@@ -62,8 +78,13 @@ const PreviewTab = observer(forwardRef<{}, Props>((props, ref) => {
 			</div>
 			{objectRef.current && objectRef.current.name ? (
 				<div className="previewObject">
-					<IconObject object={objectRef.current} />
-					<ObjectName object={objectRef.current} />
+					<div className="side left">
+						<IconObject object={objectRef.current} size={48} />
+					</div>
+					<div className="side right">
+						<ObjectName object={objectRef.current} />
+						{objectRef?.current.type ? <ObjectType object={objectRef.current} /> : ''}
+					</div>
 				</div>
 			) : null}
 		</div>

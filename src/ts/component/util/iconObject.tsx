@@ -427,6 +427,13 @@ const IconObject = observer(forwardRef<IconObjectRefProps, Props>((props, ref) =
 			break;
 		};
 
+		case I.ObjectLayout.Archive:
+		case I.ObjectLayout.Graph:
+		case I.ObjectLayout.Navigation:
+		case I.ObjectLayout.Settings: {
+			break;
+		};
+
 	};
 
 	if (isDeleted) {
