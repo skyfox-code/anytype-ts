@@ -1598,7 +1598,11 @@ class UtilCommon {
 			noAnimation: true,
 			noOffset: true,
 			typeX: I.MenuDirection.Left,
-			relatedObject: data.objectData ? { ...data.objectData, name: data.title } : null,
+			relatedData: {
+				action: data?.action,
+				name: data?.objectName,
+				object: data?.objectData
+			},
 			delay: 0,
 			type: I.PreviewType.Tab,
 		});

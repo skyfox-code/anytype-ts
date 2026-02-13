@@ -222,7 +222,7 @@ const PreviewIndex = observer(forwardRef(() => {
 		};
 
 		case I.PreviewType.Tab: {
-			content = <PreviewTab spaceview={initialObject} object={preview.relatedObject} position={position} />;
+			content = <PreviewTab spaceview={initialObject} data={preview.relatedData} position={position} />;
 			break;
 		};
 	};

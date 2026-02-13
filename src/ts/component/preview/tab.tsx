@@ -5,7 +5,7 @@ import { U, I } from 'Lib';
 
 interface Props {
 	spaceview?: any;
-	object?: any;
+	data?: any;
 	position?: () => void;
 };
 
@@ -13,14 +13,20 @@ const PreviewTab = observer(forwardRef<{}, Props>((props, ref) => {
 
 	const {
 		spaceview = {},
-		object,
+		data,
 		position,
 	} = props;
 
+	const { object, name, action } = data;
 	const [ dummy, setDummy ] = useState(0);
 	const objectRef = useRef(object);
 
 	useEffect(() => {
+		if (action && name) {
+			objectByAction();
+			return;
+		};
+
 		if (!object?.id || (object?.layout == I.ObjectLayout.SpaceView)) {
 			objectRef.current = {};
 			setDummy(dummy + 1);
@@ -42,6 +48,11 @@ const PreviewTab = observer(forwardRef<{}, Props>((props, ref) => {
 	}, [ object?.id ]);
 
 	useEffect(position);
+
+	const objectByAction = () => {
+		console.log('ACTION: ', action)
+		console.log('NAME: ', name)
+	};
 
 	return (
 		<div className="previewTab">

@@ -300,6 +300,8 @@ $(() => {
 				isPinned: Boolean(item.data.isPinned),
 				offsetLeft: offset.left,
 				width: tab.outerWidth(),
+				objectName: item.data.title || '',
+				action: item.data.action || '',
 			};
 
 			tooltipTimeout = window.setTimeout(() => {

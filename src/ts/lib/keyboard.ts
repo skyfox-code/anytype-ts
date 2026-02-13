@@ -1369,7 +1369,7 @@ class Keyboard {
 
 		if (title) {
 			U.Data.setWindowTitleText(title);
-			U.Data.setTabTitleText(title);
+			U.Data.setTabTitleText(title, action);
 		} else {
 			U.Data.setWindowTitle(rootId, rootId);
 			U.Data.setTabTitle(rootId, rootId);
