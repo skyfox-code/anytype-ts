@@ -94,6 +94,7 @@ body.platform-win32.showMenuBar {
 		color: var(--color-text-secondary); display: flex; flex-direction: row; align-items: center; position: relative; z-index: 2;
 		transition: color 0.1s ease-in-out; -webkit-app-region: no-drag;
 	}
+	.tab * { -webkit-app-region: no-drag; }
 	
 	.tab.noClose {
 		.icon.close { display: none !important; }
@@ -160,7 +161,7 @@ body.platform-win32.showMenuBar {
 
 #tabsBackground {
 	height: 100%; background: var(--color-shape-tertiary); top: 0px; position: absolute;
-	border-radius: 18px; z-index: 0; pointer-events: none; -webkit-app-region: drag;
+	border-radius: 18px; z-index: 0; pointer-events: none;
 }
 
 #marker {
