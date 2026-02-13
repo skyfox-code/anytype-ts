@@ -137,10 +137,14 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 
 		if (hoverData.current && (position.current != I.BlockPosition.None)) {
 			data = hoverData.current;
-		} else 
+		} else
 		if (last && isFileDrop) {
 			data = objectData.current.get([ I.DropType.Block, last.id ].join('-'));
 			position.current = I.BlockPosition.Bottom;
+		};
+
+		if (!data && !isFileDrop) {
+			console.log('[DragProvider].onDropCommon no valid drop target');
 		};
 
 		if (data) {
@@ -250,15 +254,19 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 		e.preventDefault();
 		e.stopPropagation();
 
-		const x = e.pageX;
-		const y = e.pageY;
+		let x = e.pageX;
+		let y = e.pageY;
 
 		// Save last known good coordinates for Linux fallback
 		if (x || y) {
 			lastKnownCoords.current = { x, y };
+		} else
+		if (lastKnownCoords.current.x || lastKnownCoords.current.y) {
+			x = lastKnownCoords.current.x;
+			y = lastKnownCoords.current.y;
 		};
 
-		scrollOnMove.onMouseMove(e.clientX, e.clientY);
+		scrollOnMove.onMouseMove(e.clientX || x, e.clientY || y);
 		initData();
 		checkNodes(e, x, y);
 
@@ -316,6 +324,13 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 	};
 
 	const onDragEnd = (e: any) => {
+		console.log('[DragProvider].onDragEnd fallback check', {
+			hasHoverData: !!hoverData.current,
+			position: position.current,
+			canDrop: canDrop.current,
+			hasDragData: !!dragData.current,
+		});
+
 		// On Linux, the drop event may not fire. If hoverData is still set,
 		// it means onDropCommon never ran - perform the drop using saved drag data.
 		if (hoverData.current && (position.current != I.BlockPosition.None) && canDrop.current && dragData.current) {
