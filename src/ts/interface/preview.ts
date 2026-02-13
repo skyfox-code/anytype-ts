@@ -39,7 +39,7 @@ export interface Preview {
 	withPlural?: boolean;
 	typeX?: I.MenuDirection.Left | I.MenuDirection.Center | I.MenuDirection.Right;
 	noOffset?: boolean;
-	relatedObject?: any;
+	relatedData?: any;
 	delay?: number;
 	x?: number;
 	y?: number;

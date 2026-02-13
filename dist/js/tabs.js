@@ -28,6 +28,15 @@ $(() => {
 	const TOOLTIP_DELAY = 650;
 	const TOOLTIP_DELAY_SHORT = 50;
 
+	const tooltipReset = () => {
+		window.clearTimeout(tooltipTimeout);
+		window.clearTimeout(tooltipHideTimeout);
+		if (tooltipVisible) {
+			tooltipVisible = false;
+			electron.Api(winId, 'tabHideTooltip');
+		};
+	};
+
 	// Tab detach state
 	let windowBounds = null;
 	let draggedTabId = null;
@@ -267,6 +276,7 @@ $(() => {
 
 		tab.find('.icon.close').off('click').on('click', (e) => {
 			e.stopPropagation();
+			tooltipReset();
 			electron.Api(winId, 'removeTab', [ item.id, true ]);
 		});
 
@@ -290,6 +300,8 @@ $(() => {
 				isPinned: Boolean(item.data.isPinned),
 				offsetLeft: offset.left,
 				width: tab.outerWidth(),
+				objectName: item.data.title || '',
+				action: item.data.action || '',
 			};
 
 			tooltipTimeout = window.setTimeout(() => {
@@ -385,12 +397,7 @@ $(() => {
 				draggedTabId = $(evt.item).attr('data-id');
 
 				// Hide tooltip on drag start
-				window.clearTimeout(tooltipTimeout);
-				window.clearTimeout(tooltipHideTimeout);
-				if (tooltipVisible) {
-					tooltipVisible = false;
-					electron.Api(winId, 'tabHideTooltip');
-				};
+				tooltipReset();
 
 				const item = $(evt.item);
 				item.css('visibility', 'hidden');
@@ -486,12 +493,7 @@ $(() => {
 		};
 
 		// Hide tooltip on tabs update
-		window.clearTimeout(tooltipTimeout);
-		window.clearTimeout(tooltipHideTimeout);
-		if (tooltipVisible) {
-			tooltipVisible = false;
-			electron.Api(winId, 'tabHideTooltip');
-		};
+		tooltipReset();
 
 		container.empty();
 
@@ -558,6 +560,7 @@ $(() => {
 	electron.on('remove-tab', (e, id) => {
 		if (isDragging) return;
 
+		tooltipReset();
 		container.find(`#tab-${id}`).remove();
 		resize();
 		setTimeout(() => initSortable(), 10);

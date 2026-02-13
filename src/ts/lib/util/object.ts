@@ -117,6 +117,7 @@ class UtilObject {
 			uxType: spaceview?.uxType,
 			objectData: { id: object.id, type: object.type, layout: object.layout },
 			route,
+			action: '',
 		};
 	};
 
@@ -973,6 +974,10 @@ class UtilObject {
 				case I.ObjectLayout.Date: id = 'date'; break;
 				case I.ObjectLayout.Type: id = 'type'; break;
 				case I.ObjectLayout.Bookmark: id = 'page'; break;
+				case I.ObjectLayout.Settings: id = 'settings'; break;
+				case I.ObjectLayout.Graph: id = 'graph'; break;
+				case I.ObjectLayout.Navigation: id = 'graph'; break;
+				case I.ObjectLayout.Archive: id = 'archive'; break;
 			};
 			src = U.Common.updateSvg(require(`img/icon/default/${id}.svg`), { id, size, fill: J.Theme[theme].iconDefault });
 		};
