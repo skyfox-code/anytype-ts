@@ -260,14 +260,10 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			{ key: 'indent', preventDefault: true },
 			{ key: 'outdent', preventDefault: true },
 			{ key: 'pageLock' },
-			{ key: `${cmd}+shift+arrowleft` },
-			{ key: `${cmd}+shift+arrowright` },
 			{ key: `${cmd}+v` },
 			{ key: `${cmd}+c`, preventDefault: true },
 			{ key: `${cmd}+x`, preventDefault: true },
 			{ key: `shift+space` },
-			{ key: `shift+arrowleft` },
-			{ key: `shift+arrowright` },
 			{ key: `ctrl+shift+/` },
 			{ key: 'theme' },
 		];
@@ -1058,7 +1054,7 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				return;
 			};
 
-			setText(marksRef.current, true, () => {
+			setText(marksRef.current, false, () => {
 				S.Menu.open('blockContext', {
 					classNameWrap: 'fromBlock',
 					element: el,
