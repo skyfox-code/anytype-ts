@@ -25,13 +25,13 @@ const PreviewTab = observer(forwardRef<{}, Props>((props, ref) => {
 	useEffect(() => {
 		cancelRef.current = false;
 		setDisplayObject(null);
+		setDisplayObjectType(null);
 		load();
 
 		return () => {
 			cancelRef.current = true;
-			setDisplayObjectType(null);
 		};
-	}, [ object?.id, action ]);
+	}, [ object?.id, action, spaceview.targetSpaceId ]);
 
 	useEffect(position);
 
