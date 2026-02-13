@@ -2337,6 +2337,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			} else {
 				style = range.to ? content.style : I.TextStyle.Paragraph;
 			};
+
 			mode = range.to ? I.BlockSplitMode.Bottom : I.BlockSplitMode.Top;
 		};
 
