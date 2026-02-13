@@ -1,7 +1,7 @@
 
 .previewTab {
     padding: 16px 32px 16px 16px; display: flex; flex-direction: column; gap: 12px;
-    box-shadow: 0 2px 28px 0 rgba(0, 0, 0, 0.20);
+    min-width: 288px; max-width: 360px;
 }
 .previewTab {
     .previewHeader,
@@ -16,10 +16,11 @@
         .iconObject { border-radius: 3px; }
     }
 
-    .previewObject { gap: 0px 12px; }
+    .previewObject { gap: 0px 12px;  }
     .previewObject {
+        .side.right { @include text-overflow-nw; }
         .iconObject { flex-shrink: 0; border-radius: 8px !important; background-color: var(--color-shape-highlight-medium) !important; }
-        .name { font-weight: 500; }
+        .name { font-weight: 500; @include text-overflow-nw; }
         .type { @include text-small; color: var(--color-text-secondary); }
     }
 }

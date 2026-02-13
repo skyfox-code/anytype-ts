@@ -117,6 +117,7 @@ class UtilObject {
 			uxType: spaceview?.uxType,
 			objectData: { id: object.id, type: object.type, layout: object.layout },
 			route,
+			action: '',
 		};
 	};
 

@@ -1600,7 +1600,6 @@ class UtilCommon {
 				action: data?.action,
 				name: data?.objectName,
 				object: data?.objectData,
-				minWidth: data.width,
 			},
 			delay: 0,
 			type: I.PreviewType.Tab,

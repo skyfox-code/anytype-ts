@@ -17,7 +17,7 @@ const PreviewTab = observer(forwardRef<{}, Props>((props, ref) => {
 		position,
 	} = props;
 
-	const { object, name, action, minWidth } = data;
+	const { object, name, action } = data;
 	const [ displayObject, setDisplayObject ] = useState<any>(null);
 	const [ displayObjectType, setDisplayObjectType ] = useState<any>(null);
 	const cancelRef = useRef(false);
@@ -84,7 +84,7 @@ const PreviewTab = observer(forwardRef<{}, Props>((props, ref) => {
 	};
 
 	return (
-		<div className="previewTab" style={{ minWidth }}>
+		<div className="previewTab">
 			<div className="previewHeader">
 				<IconObject object={spaceview} />
 				<ObjectName object={spaceview} />
