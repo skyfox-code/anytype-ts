@@ -84,7 +84,7 @@
 		}
 
 		&.withAttachment {
-			.text { @include text-overflow-nw; display: block; height: var(--line-height-small); }
+			.text { @include clamp1; display: block; height: var(--line-height-small); }
 			.markuplink { white-space: normal; }
 		}
 	}

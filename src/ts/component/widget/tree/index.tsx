@@ -427,6 +427,7 @@ const WidgetTree = observer(forwardRef<WidgetTreeRefProps, I.WidgetComponent>((p
 
 	useEffect(() => {
 		links.current = object.links;
+
 		updateData();
 		resize();
 	}, []);
