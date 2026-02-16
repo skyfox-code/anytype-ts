@@ -180,7 +180,7 @@ const MenuSearchChat = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		const menu = $(`#${getId()}`);
 		const obj = menu.find('.content');
 		const { wh } = U.Common.getWindowDimensions();
-		const header = $('#header .side.center');
+		const header = U.Common.getScrollContainer(data.isPopup).find('#header .side.center');
 		const width = Math.min(header.width(), J.Size.editor);
 
 		let height = 0;

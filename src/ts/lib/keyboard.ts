@@ -1216,31 +1216,34 @@ class Keyboard {
 	onSearchText (value: string, route?: string) {
 		const isPopup = this.isPopup();
 		const popupMatch = this.getPopupMatch();
+		const match = this.getMatch();
+		const isChat = match.params.action == 'chat';
 
 		let isDisabled = false;
 		if (!isPopup) {
 			isDisabled = this.isMainSet() || this.isMainGraph() || this.isMainVoid() || this.isMainArchive();
 		} else {
-			isDisabled = [ 'set', 'store', 'graph', 'chat', 'archive' ].includes(popupMatch.params.action);
+			isDisabled = [ 'set', 'store', 'graph', 'archive' ].includes(popupMatch.params.action);
 		};
 
 		if (isDisabled) {
 			return;
 		};
 
-		const menuId = this.isMainChat() ? 'searchChat' : 'searchText';
+		const menuId = isChat ? 'searchChat' : 'searchText';
+		const element = U.Common.getScrollContainer(isPopup).find('#header .side.center');
 		const menuParam: Partial<I.MenuParam> = {
-			element: '#header .side.center',
+			element,
 			horizontal: I.MenuDirection.Center,
 			vertical: I.MenuDirection.Bottom,
 			classNameWrap: 'fromHeader',
 			noBorderY: true,
 			noFlipY: true,
-			fixedY: 0,
+			offsetY: -52,
 			data: {},
 		};
 
-		if (this.isMainChat()) {
+		if (isChat) {
 			const rootId = this.getRootId();
 			const object = S.Detail.get(rootId, rootId, [ 'chatId' ]);
 			const chatId = object.chatId || rootId;
