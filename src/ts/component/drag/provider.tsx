@@ -27,6 +27,7 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 	const timeoutDragOver = useRef(0);
 	const prevTargetKey = useRef<string | null>(null);
 	const lastKnownCoords = useRef({ x: 0, y: 0 });
+	const lastValidTarget = useRef<{ data: any, position: I.BlockPosition } | null>(null);
 	const dragData = useRef<any>(null);
 
 	const getContainer = () => {
@@ -137,6 +138,10 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 
 		if (hoverData.current && (position.current != I.BlockPosition.None)) {
 			data = hoverData.current;
+		} else
+		if (lastValidTarget.current) {
+			data = lastValidTarget.current.data;
+			position.current = lastValidTarget.current.position;
 		} else
 		if (last && isFileDrop) {
 			data = objectData.current.get([ I.DropType.Block, last.id ].join('-'));
@@ -324,17 +329,14 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 	};
 
 	const onDragEnd = (e: any) => {
-		console.log('[DragProvider].onDragEnd fallback check', {
-			hasHoverData: !!hoverData.current,
-			position: position.current,
-			canDrop: canDrop.current,
-			hasDragData: !!dragData.current,
-		});
-
 		// On Linux, the drop event may not fire. If hoverData is still set,
 		// it means onDropCommon never ran - perform the drop using saved drag data.
-		if (hoverData.current && (position.current != I.BlockPosition.None) && canDrop.current && dragData.current) {
-			let targetId = String(hoverData.current.id || '');
+		// Fall back to lastValidTarget if hoverData was cleared by a late event.
+		const target = hoverData.current || lastValidTarget.current?.data;
+		const pos = (position.current != I.BlockPosition.None) ? position.current : (lastValidTarget.current?.position ?? I.BlockPosition.None);
+
+		if (target && (pos != I.BlockPosition.None) && canDrop.current && dragData.current) {
+			let targetId = String(target.id || '');
 
 			if (targetId == 'blockLast') {
 				targetId = '';
@@ -347,7 +349,7 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 				},
 			};
 
-			onDrop(fakeEvent, hoverData.current.dropType, targetId, position.current);
+			onDrop(fakeEvent, target.dropType, targetId, pos);
 		};
 
 		dragData.current = null;
@@ -844,6 +846,10 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 			};
 		};
 
+		if (hd && (position.current != I.BlockPosition.None) && canDrop.current) {
+			lastValidTarget.current = { data: hd, position: position.current };
+		};
+
 		if (frame.current) {
 			raf.cancel(frame.current);
 		};
@@ -957,6 +963,7 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 		objectData.current.clear();
 		prevTargetKey.current = null;
 		lastKnownCoords.current = { x: 0, y: 0 };
+		lastValidTarget.current = null;
 	};
 
 	const setHoverData = (v: any) => {
