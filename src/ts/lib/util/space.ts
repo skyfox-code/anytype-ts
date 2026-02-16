@@ -300,7 +300,7 @@ class UtilSpace {
 	 * @returns {any[]} The list of participants.
 	 */
 	getParticipantsList (statuses?: I.ParticipantStatus[]) {
-		const ret = S.Record.getRecords(J.Constant.subId.participant);
+		const ret = S.Record.getRecords(U.Subscription.spaceSubId(J.Constant.subId.participant));
 		return statuses ? ret.filter(it => statuses.includes(it.status)) : ret;
 	};
 
@@ -350,7 +350,7 @@ class UtilSpace {
 			return null;
 		};
 
-		const object = S.Detail.get(J.Constant.subId.participant, id || this.getParticipantId(space, account.id));
+		const object = S.Detail.get(U.Subscription.spaceSubId(J.Constant.subId.participant), id || this.getParticipantId(space, account.id));
 		return object._empty_ ? null : object;
 	};
 

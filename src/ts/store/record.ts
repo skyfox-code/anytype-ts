@@ -405,7 +405,7 @@ class RecordStore {
 			return null;
 		};
 
-		const object = S.Detail.get(J.Constant.subId.type, id, J.Relation.type);
+		const object = S.Detail.get(U.Subscription.spaceSubId(J.Constant.subId.type), id, J.Relation.type);
 		return object._empty_ ? null : object;
 	};
 
@@ -542,8 +542,9 @@ class RecordStore {
 	 * @returns {any[]} The type objects.
 	 */
 	getTypes () {
-		return this.sortTypes(this.getRecordIds(J.Constant.subId.type, '').
-			map(id => S.Detail.get(J.Constant.subId.type, id, U.Subscription.typeRelationKeys(true))).
+		const subId = U.Subscription.spaceSubId(J.Constant.subId.type);
+		return this.sortTypes(this.getRecordIds(subId, '').
+			map(id => S.Detail.get(subId, id, U.Subscription.typeRelationKeys(true))).
 			filter(it => it && !it._empty_ && !it.isArchived && !it.isDeleted));
 	};
 
@@ -571,7 +572,7 @@ class RecordStore {
 	 * @returns {any[]} The relation objects.
 	 */
 	getRelations () {
-		return this.getRecordIds(J.Constant.subId.relation, '').map(id => this.getRelationById(id)).
+		return this.getRecordIds(U.Subscription.spaceSubId(J.Constant.subId.relation), '').map(id => this.getRelationById(id)).
 			filter(it => it && !it.isArchived && !it.isDeleted);
 	};
 
@@ -670,7 +671,7 @@ class RecordStore {
 			return null;
 		};
 
-		const object = S.Detail.get(J.Constant.subId.relation, id, J.Relation.relation, true);
+		const object = S.Detail.get(U.Subscription.spaceSubId(J.Constant.subId.relation), id, J.Relation.relation, true);
 		return object._empty_ ? null : object;
 	};
 
@@ -681,7 +682,7 @@ class RecordStore {
 	 * @returns {any|null} The option object or null.
 	 */
 	getOption (id: string) {
-		const object = S.Detail.get(J.Constant.subId.option, id, U.Subscription.optionRelationKeys(true), true);
+		const object = S.Detail.get(U.Subscription.spaceSubId(J.Constant.subId.option), id, U.Subscription.optionRelationKeys(true), true);
 		return object._empty_ ? null : object;
 	};
 

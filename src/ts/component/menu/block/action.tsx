@@ -291,10 +291,21 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 				menuParam.data = Object.assign(menuParam.data, {
 					onSelect: (item: any) => {
 						if (item.type == I.BlockType.Text) {
+							const isToggle = [ 
+								I.TextStyle.Toggle, 
+								I.TextStyle.ToggleHeader1, 
+								I.TextStyle.ToggleHeader2, 
+								I.TextStyle.ToggleHeader3,
+							].includes(item.itemId);
+
+							if (isToggle) {
+								ids = selection?.getForClick(blockId, false, false);
+							};
+
 							C.BlockListTurnInto(rootId, ids, item.itemId, () => {
 								setFocus(ids[0]);
 
-								if ([ I.TextStyle.Toggle, I.TextStyle.ToggleHeader1, I.TextStyle.ToggleHeader2, I.TextStyle.ToggleHeader3 ].includes(item.itemId)) {
+								if (isToggle) {
 									ids.forEach(id => S.Block.toggle(rootId, id, true));
 								};
 							});

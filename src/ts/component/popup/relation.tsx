@@ -28,7 +28,6 @@ const PopupRelation = observer(forwardRef<{}, I.Popup>((props, ref) => {
 		let ret = getRelationKeys().map(relationKey => S.Record.getRelationByKey(relationKey));
 		ret = S.Record.checkHiddenObjects(ret);
 		ret = ret.filter(it => it && !it.isReadonlyValue);
-		ret = ret.sort(U.Data.sortByName);
 		return ret;
 	};
 

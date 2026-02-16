@@ -851,7 +851,7 @@ class Dispatcher {
 
 					this.detailsUpdate(details, rootId, id, subIds, true);
 
-					if (subIds.includes(J.Constant.subId.type)) {
+					if (subIds.some(id => id.startsWith(J.Constant.subId.type + '-'))) {
 						U.Subscription.createTypeCheck();
 					};
 

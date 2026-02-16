@@ -46,7 +46,7 @@ const MenuSearchText = forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 	};
 
 	const expandToggle = (el: JQuery<Element>) => {
-		const toggleParent = el.parents('.block.textToggle:not(.isToggled)').first();
+		const toggleParent = el.parents('.block.textToggle:not(.isToggled), .block.textToggleHeader:not(.isToggled)').first();
 		if (!toggleParent.length) {
 			return;
 		}
@@ -55,7 +55,7 @@ const MenuSearchText = forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		if (id && !expandedRef.current.toggles.includes(id)) {
 			expandedRef.current.toggles.push(id);
 			toggleParent.addClass('isToggled');
-		}
+		};
 	};
 
 	const collapseExpanded = (keepToggleId?: string) => {
@@ -106,7 +106,8 @@ const MenuSearchText = forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 	};
 
 	const updateActiveMatch = (matchEl: JQuery<Element>) => {
-		const toggle = matchEl.closest('.block.textToggle');
+		const toggle = matchEl.closest('.block.textToggle, .block.textToggleHeader');
+
 		activeMatchRef.current.toggleId = toggle.length ? toggle.attr('data-id') || '' : '';
 
 		updateActivePosition(matchEl);

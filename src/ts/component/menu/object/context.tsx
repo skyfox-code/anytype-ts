@@ -391,10 +391,6 @@ const MenuObjectContext = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =>
 						return;
 					};
 
-					if (first) {
-						U.Object.openConfig(null, { id: message.ids[0], layout: first.layout });
-					};
-
 					analytics.event('DuplicateObject', { count: length, route });
 
 					if (isCollection) {
