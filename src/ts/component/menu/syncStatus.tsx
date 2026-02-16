@@ -195,12 +195,12 @@ const MenuSyncStatus = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 
 		switch (p2p) {
 			case I.P2PStatus.Connected: {
-				className = 'connected';
+				className = 'c-connected';
 				break;
 			};
 			case I.P2PStatus.NotPossible: {
 				message = translate('menuSyncStatusP2PRestricted');
-				className = 'error';
+				className = 'c-error';
 				break;
 			};
 		};
@@ -232,25 +232,25 @@ const MenuSyncStatus = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 			case I.SyncStatusSpace.Syncing:
 			case I.SyncStatusSpace.Synced: {
 				isConnected = true;
-				className = 'connected';
+				className = 'c-connected';
 				break;
 			};
 
 			case I.SyncStatusSpace.Upgrade: {
 				isConnected = true;
 				isSlow = true;
-				className = 'connectedSlow';
+				className = 'c-connectedSlow';
 				break;
 			};
 
 			case I.SyncStatusSpace.Error: {
 				isError = true;
-				className = 'error';
+				className = 'c-error';
 				break;
 			};
 
 			case I.SyncStatusSpace.Offline: {
-				className = 'offline';
+				className = 'c-offline';
 			};
 		};
 

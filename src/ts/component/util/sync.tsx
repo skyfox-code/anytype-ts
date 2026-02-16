@@ -40,7 +40,7 @@ const Sync = observer(forwardRef<HTMLDivElement, Props>(({
 			onMouseEnter={e => Preview.tooltipShow({ text: tooltip, element: $(e.currentTarget), typeY: I.MenuDirection.Bottom })}
 			onMouseLeave={() => Preview.tooltipHide(false)}
 		>
-			<Icon className={String(icon).toLowerCase()} />
+			<Icon className={'c-' + String(icon).toLowerCase()} />
 		</div>
 	);
 
