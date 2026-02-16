@@ -49,6 +49,10 @@ app.commandLine.appendSwitch('ignore-connections-limit', 'localhost, 127.0.0.1')
 app.commandLine.appendSwitch('gtk-version', '3');
 app.commandLine.appendSwitch('js-flags', '--max-old-space-size=4096');
 
+if (Util.isWayland()) {
+	app.commandLine.appendSwitch('ozone-platform-hint', 'auto');
+};
+
 // GPU/Hardware acceleration settings
 // Check for --disable-gpu CLI argument or stored setting
 const disableGpu = process.argv.includes('--disable-gpu') || (store.get('hardwareAcceleration') === false);
@@ -196,6 +200,7 @@ function createWindow () {
 	MenuManager.initTray();
 
 	installNativeMessagingHost();
+	Util.registerLinuxProtocolHandler();
 
 	//ipcMain.removeHandler('Api');
 	ipcMain.handle('Api', (e, id, cmd, args) => {

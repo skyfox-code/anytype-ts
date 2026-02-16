@@ -1314,6 +1314,11 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	const onMarkBlock = (e: any, type: I.MarkType, text: string, marks: I.Mark[], param: string, range: I.TextRange) => {
 		e.preventDefault();
 
+		range = Mark.trimRange(text, range);
+		if (range.from == range.to) {
+			return;
+		};
+
 		const { focused } = focus.state;
 		const block = S.Block.getLeaf(rootId, focused);
 
@@ -1930,8 +1935,9 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			e.preventDefault();
 			onPaste(data);
 		} else {
-			const clipboardItems = (e.clipboardData || e.originalEvent.clipboardData).items;
-			const files = U.Common.getDataTransferFiles(clipboardItems);
+			const cb = e.clipboardData || e.originalEvent?.clipboardData;
+			const clipboardItems = cb?.items;
+			const files = clipboardItems ? U.Common.getDataTransferFiles(clipboardItems) : [];
 
 			if (files.length && !data.files.length) {
 				U.Common.saveClipboardFiles(files, data, data => onPasteEvent(e, props, data));

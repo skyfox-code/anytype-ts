@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import { setRange } from 'selection-ranges';
-import { I, C, U, J, keyboard } from 'Lib';
+import { I, C, U, J, keyboard, Mark } from 'Lib';
 
 /**
  * Focus manages the focus state and text selection within the application.
@@ -130,7 +130,16 @@ class Focus {
 		} else
 		if (node.hasClass('editable')) {
 			keyboard.setFocus(true);
-			setRange(el, { start: range.from, end: range.to });
+
+			// Convert model offsets to DOM offsets if ZWS cursor anchors are present
+			if (Mark.hasZws(el)) {
+				const domFrom = Mark.modelToDom(range.from, el);
+				const domTo = Mark.modelToDom(range.to, el);
+
+				setRange(el, { start: domFrom, end: domTo });
+			} else {
+				setRange(el, { start: range.from, end: range.to });
+			};
 
 			const style = window.getComputedStyle(el);
 			if (style.direction === 'rtl') {
