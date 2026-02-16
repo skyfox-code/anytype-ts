@@ -24,6 +24,7 @@ $(() => {
 	let tooltipTimeout = 0;
 	let tooltipHideTimeout = 0;
 	let tooltipVisible = false;
+	let isContextMenuOpen = false;
 
 	const TOOLTIP_DELAY = 650;
 	const TOOLTIP_DELAY_SHORT = 50;
@@ -283,11 +284,13 @@ $(() => {
 		tab.off('contextmenu').on('contextmenu', (e) => {
 			e.preventDefault();
 			e.stopPropagation();
+			tooltipReset();
+			isContextMenuOpen = true;
 			electron.Api(winId, 'showTabContextMenu', { tabId: item.id, isPinned });
 		});
 
 		tab.on('mouseenter', () => {
-			if (isDragging) return;
+			if (isDragging || isContextMenuOpen) return;
 
 			window.clearTimeout(tooltipTimeout);
 			window.clearTimeout(tooltipHideTimeout);
@@ -570,6 +573,9 @@ $(() => {
 	electron.on('update-tab-bar-visibility', (e, isVisible) => {
 		tabsWrapper.toggleClass('isHidden', !isVisible);
 		body.toggleClass('tabsHidden', !isVisible);
+	});
+	electron.on('tab-context-menu-closed', () => {
+		isContextMenuOpen = false;
 	});
 	electron.on('set-theme', (e, theme) => $('html').toggleClass('themeDark', theme == 'dark'));
 	electron.on('native-theme', (e, isDark) => $('html').toggleClass('themeDark', isDark));
