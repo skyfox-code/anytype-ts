@@ -86,6 +86,7 @@ class Keyboard {
 	};
 
 	onResize () {
+		const { hideSidebar } = S.Common;
 		const isPopup = this.isPopup();
 		const container = U.Common.getPageContainer(isPopup);
 		const cw = container.width();
@@ -95,7 +96,7 @@ class Keyboard {
 		if (!data.isClosed && (cw <= threshold)) {
 			sidebar.leftPanelClose(false, false);
 		} else
-		if (data.isClosed && !data.savedClosed && (cw > threshold + data.width)) {
+		if (!hideSidebar && data.isClosed && !data.savedClosed && (cw > threshold + data.width)) {
 			sidebar.leftPanelOpen(data.width, false, false);
 		};
 	};
@@ -387,8 +388,7 @@ class Keyboard {
 			this.shortcut('toggleSidebarAndWidgets', e, () => {
 				e.preventDefault();
 
-				sidebar.leftPanelToggle(false, true);
-				sidebar.leftPanelSubPageToggle('widget', false, false);
+				sidebar.toggleBothPanels();
 			});
 
 			if (canWrite) {
@@ -914,26 +914,6 @@ class Keyboard {
 				break;
 			};
 
-			case 'systemInfo': {
-				const props: any = {};
-				const { cpu, graphics, memLayout, diskLayout } = arg;
-				const { manufacturer, brand, speed, cores } = cpu;
-				const { controllers, displays } = graphics;
-
-				props.systemCpu = [ manufacturer, brand ].join(', ');
-				props.systemCpuSpeed = [ `${speed}GHz`, `${cores} cores` ].join(', ');
-				props.systemVideo = (controllers || []).map(it => it.model).join(', ');
-				props.systemDisplay = (displays || []).map(it => it.model).join(', ');
-				props.systemResolution = `${window.screen.width}x${window.screen.height}`;
-				props.systemMemory = (memLayout || []).map(it => U.File.size(it.size)).join(', ');
-				props.systemMemoryType = (memLayout || []).map(it => it.type).join(', ');
-				props.systemDisk = (diskLayout || []).map(it => U.File.size(it.size)).join(', ');
-				props.systemDiskName = (diskLayout || []).map(it => it.name).join(', ');
-
-				analytics.setProperty(props);
-				break;
-			};
-
 			case 'releaseChannel': {
 				const cb = () => Renderer.send('setChannel', arg);
 
@@ -1389,7 +1369,7 @@ class Keyboard {
 
 		if (title) {
 			U.Data.setWindowTitleText(title);
-			U.Data.setTabTitleText(title);
+			U.Data.setTabTitleText(title, action);
 		} else {
 			U.Data.setWindowTitle(rootId, rootId);
 			U.Data.setTabTitle(rootId, rootId);

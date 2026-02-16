@@ -4,16 +4,22 @@
 .input::-webkit-outer-spin-button,
 .input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
+.input.c36 { height: 36px; }
+.input.c40 { height: 40px; padding: 0px 16px; }
+
 .input.round {
-	border-radius: 15px; border: 1px solid var(--color-shape-secondary); 
+	border-radius: 15px; border: 1px solid transparent;
 	background: var(--color-shape-highlight-light-solid);
 }
+.input.round {
+	&:focus, &:hover {
+		background: var(--color-shape-highlight-medium);
+		border: 1px solid var(--color-shape-highlight-light-solid);
+	}
 
-.input.c40 { height: 40px; padding: 0px 16px; }
-.input.round.c40 { border-radius: 20px; }
-
-.input.c36 { height: 36px; }
-.input.round.c36 { border-radius: 18px; }
+	&.c36 { border-radius: 12px; }
+	&.c40 { border-radius: 14px; }
+}
 
 .input.isReadonly { cursor: default; }
 .input::placeholder { color: var(--color-text-tertiary); }

@@ -26,8 +26,8 @@ const WidgetTree = observer(forwardRef<WidgetTreeRefProps, I.WidgetComponent>((p
 	const targetId = block?.getTargetObjectId();
 	const nodeRef = useRef(null);
 	const listRef = useRef(null);
-	const deletedIds = new Set(S.Record.getRecordIds(J.Constant.subId.deleted, ''));
-	const archivedIds = new Set(S.Record.getRecordIds(J.Constant.subId.archived, ''));
+	const deletedIds = new Set(S.Record.getRecordIds(U.Subscription.spaceSubId(J.Constant.subId.deleted), ''));
+	const archivedIds = new Set(S.Record.getRecordIds(U.Subscription.spaceSubId(J.Constant.subId.archived), ''));
 	const dl = deletedIds.size;
 	const al = archivedIds.size;
 	const object = S.Detail.get(S.Block.widgets, targetId);
@@ -427,6 +427,7 @@ const WidgetTree = observer(forwardRef<WidgetTreeRefProps, I.WidgetComponent>((p
 
 	useEffect(() => {
 		links.current = object.links;
+
 		updateData();
 		resize();
 	}, []);

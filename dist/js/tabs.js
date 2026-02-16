@@ -20,6 +20,24 @@ $(() => {
 	let timeoutResize = 0;
 	let tabsData = [];
 
+	// Tooltip state
+	let tooltipTimeout = 0;
+	let tooltipHideTimeout = 0;
+	let tooltipVisible = false;
+	let isContextMenuOpen = false;
+
+	const TOOLTIP_DELAY = 650;
+	const TOOLTIP_DELAY_SHORT = 50;
+
+	const tooltipReset = () => {
+		window.clearTimeout(tooltipTimeout);
+		window.clearTimeout(tooltipHideTimeout);
+		if (tooltipVisible) {
+			tooltipVisible = false;
+			electron.Api(winId, 'tabHideTooltip');
+		};
+	};
+
 	// Tab detach state
 	let windowBounds = null;
 	let draggedTabId = null;
@@ -259,13 +277,49 @@ $(() => {
 
 		tab.find('.icon.close').off('click').on('click', (e) => {
 			e.stopPropagation();
+			tooltipReset();
 			electron.Api(winId, 'removeTab', [ item.id, true ]);
 		});
 
 		tab.off('contextmenu').on('contextmenu', (e) => {
 			e.preventDefault();
 			e.stopPropagation();
+			tooltipReset();
+			isContextMenuOpen = true;
 			electron.Api(winId, 'showTabContextMenu', { tabId: item.id, isPinned });
+		});
+
+		tab.on('mouseenter', () => {
+			if (isDragging || isContextMenuOpen) return;
+
+			window.clearTimeout(tooltipTimeout);
+			window.clearTimeout(tooltipHideTimeout);
+
+			const delay = tooltipVisible ? TOOLTIP_DELAY_SHORT : TOOLTIP_DELAY;
+			const offset = tab.offset();
+			const data = {
+				spaceId: item.data.spaceId || '',
+				objectData: item.data.objectData || null,
+				isPinned: Boolean(item.data.isPinned),
+				offsetLeft: offset.left,
+				width: tab.outerWidth(),
+				objectName: item.data.title || '',
+				action: item.data.action || '',
+			};
+
+			tooltipTimeout = window.setTimeout(() => {
+				tooltipVisible = true;
+				electron.Api(winId, 'tabShowTooltip', data);
+			}, delay);
+		});
+
+		tab.on('mouseleave', () => {
+			window.clearTimeout(tooltipTimeout);
+
+			tooltipHideTimeout = window.setTimeout(() => {
+				tooltipVisible = false;
+				electron.Api(winId, 'tabHideTooltip');
+			}, 100);
 		});
 
 		return tab;
@@ -280,8 +334,9 @@ $(() => {
 
 		tab.off('click').on('click', () => {
 			const activeTab = tabsData.find(it => it.id == activeId);
+			const { isPinned, ...data } = activeTab?.data || {};
 
-			electron.Api(winId, 'openTab', activeTab?.data, { setActive: true });
+			electron.Api(winId, 'openTab', data, { setActive: true });
 		});
 
 		return tab;
@@ -344,6 +399,9 @@ $(() => {
 			onStart: async (evt) => {
 				isDragging = true;
 				draggedTabId = $(evt.item).attr('data-id');
+
+				// Hide tooltip on drag start
+				tooltipReset();
 
 				const item = $(evt.item);
 				item.css('visibility', 'hidden');
@@ -438,6 +496,9 @@ $(() => {
 			return; // Don't update during drag
 		};
 
+		// Hide tooltip on tabs update
+		tooltipReset();
+
 		container.empty();
 
 		tabs = tabs || [];
@@ -503,6 +564,7 @@ $(() => {
 	electron.on('remove-tab', (e, id) => {
 		if (isDragging) return;
 
+		tooltipReset();
 		container.find(`#tab-${id}`).remove();
 		resize();
 		setTimeout(() => initSortable(), 10);
@@ -511,6 +573,9 @@ $(() => {
 	electron.on('update-tab-bar-visibility', (e, isVisible) => {
 		tabsWrapper.toggleClass('isHidden', !isVisible);
 		body.toggleClass('tabsHidden', !isVisible);
+	});
+	electron.on('tab-context-menu-closed', () => {
+		isContextMenuOpen = false;
 	});
 	electron.on('set-theme', (e, theme) => $('html').toggleClass('themeDark', theme == 'dark'));
 	electron.on('native-theme', (e, isDark) => $('html').toggleClass('themeDark', isDark));
