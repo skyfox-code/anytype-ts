@@ -26,6 +26,12 @@ class Api {
 	pinTimer = null;
 	pinTimeValue = 0;
 
+	// Commands that should only be processed from the active tab.
+	// Each tab has its own gRPC session/stream, so events like PayloadBroadcast
+	// and notifications arrive in every tab independently. Without this guard,
+	// the active tab would receive duplicate IPC messages (once per tab).
+	activeTabOnly = new Set([ 'payloadBroadcast', 'notification' ]);
+
 	getInitData (win, tabId) {
 		let route = win.route || '';
 
