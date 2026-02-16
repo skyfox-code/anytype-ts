@@ -37,7 +37,7 @@ export default () => {
 		h2(`Tabs`),
 		text(`One of the most requested features is here. You can now open multiple Objects side by side in a tab bar, just like in a browser. Open any Object in a new tab from the context menu, with ${hl('Cmd+Click')} / ${hl('Ctrl+Click')}, or from Widgets.`),
 		text(`Choose between two modes in Settings > Preferences: <b>Contextual</b>, where the tab bar appears only when you have more than one tab open, or <b>Always visible</b>.`),
-		text(`Drag tabs to reorder them, drag a tab out of the window to open it in a new window, and your open tabs are restored when you relaunch the app.`),
+		text(`Drag tabs to reorder them, pin important tabs to keep them in place, drag a tab out to open it in a new window, and return to your open tabs when you relaunch the app.`),
 		img('54/1.png'),
 		text(``),
 
@@ -71,7 +71,8 @@ export default () => {
 		text(``),
 
 		text(`<b>Toggled Headings</b>`),
-		text(`Title, Heading and Subheading can now be collapsible toggles. Create them from the ${hl('/')} menu or with Markdown shortcuts (${hl('#>')}, ${hl('##>')}, ${hl('###>')}). Select multiple toggles and open or close them all at once. Converting a regular heading to a toggle automatically captures everything beneath it as children.`),
+		text(`Title, Heading and Subheading can now be collapsible toggles. Create them from the ${hl('/')} menu or with Markdown shortcuts (${hl('#>')}, ${hl('##>')}, ${hl('###>')}). You can also create a toggle with ${hl('>')} + ${hl('Space')} and then use your heading markdown shortcut (${hl('#')}, ${hl('##')}, ${hl('###')}) to convert it into a toggled heading.`),
+		text(`Multiple toggle headings can be opened or closed at once, and converting a regular heading to a toggle automatically captures everything beneath it as children.`),
 		img('54/5.png'),
 		text(``),
 
@@ -101,6 +102,10 @@ export default () => {
 
 		text(`<b>Template Name Pre-fill</b>`),
 		text(`Templates now include a setting that lets you choose whether new objects inherit the template name. You can find it in the Template editor header and switch between <b>Pre-fill name</b> and <b>Empty name</b>.`),
+		text(``),
+
+		text(`<b>Toggle Sidebar and Widgets Together</b>`),
+		text(`You can now assign a keyboard shortcut to toggle both the Sidebar and Widget panel at the same time. This lets you quickly switch to a more focused view of the current object.`),
 		text(``),
 
 		text(`<b>Full-Text Search in Collections</b>`),
