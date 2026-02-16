@@ -76,12 +76,15 @@ const MenuItemVertical = forwardRef<{}, I.MenuItem>((props, ref) => {
 
 	if (object) {
 		iconMainElement = <IconObject object={object} size={iconSize} />;
-		nameElement = <ObjectName object={object} withPlural={withPlural} withPronoun={withPronoun} />;
+
+		if (!name) {
+			nameElement = <ObjectName object={object} withPlural={withPlural} withPronoun={withPronoun} />;
+		};
 
 		if (object.isHidden) {
 			cn.push('isHidden');
 		};
-	} else 
+	} else
 	if (icon) {
 		cn.push('withIcon');
 		iconMainElement = <Icon className={[ icon, 'iconMain' ].join(' ')} inner={inner} />;

@@ -61,7 +61,7 @@ const Block = observer(forwardRef<Ref, Props>((props, ref) => {
 	});
 
 	const initToggle = () => {
-		if (block && block.id && block.isTextToggle()) {
+		if (block && block.id && (block.isTextToggle() || block.isTextToggleHeader())) {
 			S.Block.toggle(rootId, block.id, Storage.checkToggle(rootId, block.id));
 		};
 	};
@@ -77,7 +77,7 @@ const Block = observer(forwardRef<Ref, Props>((props, ref) => {
 			ids.push(block.id);
 		};
 
-		const toggles = S.Block.getBlocks(rootId).filter(it => ids.includes(it.id) && it.isTextToggle());
+		const toggles = S.Block.getBlocks(rootId).filter(it => ids.includes(it.id) && (it.isTextToggle() || it.isTextToggleHeader()));
 
 		toggles.forEach(it => {
 			S.Block.toggle(rootId, it.id, value);

@@ -261,10 +261,14 @@ class UtilString {
 	 * @returns {string} The hostname without www or original URL.
 	 */
 	shortUrl (url: string, withPath?: boolean): string {
+		if (!url) {
+			return '';
+		};
+
 		let a: any = {};
 		let p = '';
-		try { 
-			a = new URL(url); 
+		try {
+			a = new URL(url);
 			if (withPath) {
 				p = U.String.shortMask(a.pathname, 3, 6);
 			};

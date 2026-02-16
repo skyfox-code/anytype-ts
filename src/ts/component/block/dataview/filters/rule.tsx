@@ -2,7 +2,7 @@ import React, { forwardRef, useRef, useEffect } from 'react';
 import $ from 'jquery';
 import { observer } from 'mobx-react';
 import { I, S, U, Relation, translate, Preview } from 'Lib';
-import { Icon, Select, Input, IconObject, Label, Tag } from 'Component';
+import { Icon, Select, Input, Label, Tag } from 'Component';
 import ItemObject from 'Component/cell/item/object';
 
 interface Props {
@@ -96,6 +96,7 @@ const DataviewFilterRule = observer(forwardRef<{}, Props>((props, ref) => {
 							key={`${nodeId}-days-${quickOption}`}
 							ref={inputRef}
 							value={value}
+							className="round c36"
 							placeholder={translate(`placeholderCell${I.RelationType.Number}`)}
 							onKeyUp={(e: any, v: string) => onUpdate(index, { value: v })}
 							readonly={readonly}
@@ -117,6 +118,7 @@ const DataviewFilterRule = observer(forwardRef<{}, Props>((props, ref) => {
 							key={`${nodeId}-date-${quickOption}`}
 							ref={inputRef}
 							value={value ? U.Date.date('d.m.Y', value) : ''}
+							className="round c36"
 							placeholder={ph}
 							maskOptions={{
 								mask,
@@ -152,6 +154,7 @@ const DataviewFilterRule = observer(forwardRef<{}, Props>((props, ref) => {
 				return (
 					<div className="dateWrapper">
 						<Select
+							className="round c36"
 							key={`${nodeId}-quick-${relationKey}-${condition}`}
 							id={`${nodeId}-quick`}
 							value={String(quickOption)}
@@ -179,6 +182,7 @@ const DataviewFilterRule = observer(forwardRef<{}, Props>((props, ref) => {
 						id={`${nodeId}-checkbox`}
 						value={value ? '1' : '0'}
 						options={checkboxOptions}
+						className="round c36"
 						onChange={v => onUpdate(index, { value: Boolean(Number(v)) })}
 						menuParam={{ classNameWrap: 'fromBlock', offsetY: 4 }}
 						readonly={readonly}
@@ -187,6 +191,7 @@ const DataviewFilterRule = observer(forwardRef<{}, Props>((props, ref) => {
 			};
 
 			case I.RelationType.ShortText:
+			case I.RelationType.LongText:
 			case I.RelationType.Number:
 			case I.RelationType.Url:
 			case I.RelationType.Phone:
@@ -195,6 +200,7 @@ const DataviewFilterRule = observer(forwardRef<{}, Props>((props, ref) => {
 					<Input
 						ref={inputRef}
 						value={value}
+						className="round c36"
 						placeholder={translate(`placeholderCell${relation.format}`)}
 						onKeyUp={(e: any, v: string) => onUpdate(index, { value: v })}
 						readonly={readonly}
@@ -209,7 +215,8 @@ const DataviewFilterRule = observer(forwardRef<{}, Props>((props, ref) => {
 					.filter(it => !it._empty_ && !it.isArchived && !it.isDeleted);
 
 				if (!items.length) {
-					return null;
+					const key = relation.format == I.RelationType.File ? 'filterPlaceholderFile' : 'filterPlaceholderObject';
+					return <Label className="placeholder" text={translate(key)} />;
 				};
 
 				const isFile = relation.format == I.RelationType.File;
@@ -267,7 +274,7 @@ const DataviewFilterRule = observer(forwardRef<{}, Props>((props, ref) => {
 					.filter(it => !it.isArchived && !it.isDeleted && !it._empty_);
 
 				if (!items.length) {
-					return null;
+					return <Label className="placeholder" text={translate('filterPlaceholderSelect')} />;
 				};
 
 				const visible = items.slice(0, 2);
@@ -320,6 +327,7 @@ const DataviewFilterRule = observer(forwardRef<{}, Props>((props, ref) => {
 		S.Menu.open('dataviewFilterValues', {
 			element: `#${nodeId} .valueSelect`,
 			classNameWrap: 'fromBlock',
+			className: 'compact',
 			horizontal: I.MenuDirection.Right,
 			offsetY: 4,
 			data: {
@@ -437,14 +445,14 @@ const DataviewFilterRule = observer(forwardRef<{}, Props>((props, ref) => {
 			)}
 
 			<div className="inner">
-				<div className="relationSelect select" onClick={onRelationClick}>
-					{relation ? <IconObject size={20} object={{ relationFormat: relation.format, layout: I.ObjectLayout.Relation }} /> : ''}
+				<div className="relationSelect select round c36" onClick={onRelationClick}>
+					{relation ? <Icon className={`relation ${Relation.className(relation.format)}`} /> : ''}
 					<Label text={relation?.name || ''} />
 					<Icon className="arrow" />
 				</div>
 
 				<Select
-					className="conditionSelect"
+					className="conditionSelect  round c36"
 					key={`${nodeId}-condition-${relationKey}`}
 					ref={conditionRef}
 					id={`${nodeId}-condition`}

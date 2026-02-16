@@ -1,6 +1,6 @@
 import React, { forwardRef, useRef, useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { analytics, I, J, keyboard, S, Storage, translate, U, sidebar } from 'Lib';
+import { analytics, I, J, keyboard, Relation, S, Storage, translate, U, sidebar } from 'Lib';
 import { Button, Filter, Icon, IconObject, ObjectName } from 'Component';
 import { AutoSizer, CellMeasurer, InfiniteLoader, List, CellMeasurerCache } from 'react-virtualized';
 
@@ -420,7 +420,11 @@ const SidebarPageSettingsLibrary = observer(forwardRef<{}, I.SidebarPageComponen
 					style={style}
 					onContextMenu={() => onContext(item)}
 				>
-					<IconObject object={item} />
+					{U.Object.isRelationLayout(item.layout) ? (
+						<Icon className={`relation ${Relation.className(item.format)}`} />
+					) : (
+						<IconObject object={item} />
+					)}
 					<ObjectName object={item} />
 				</div>
 			);

@@ -21,7 +21,6 @@ import ViewList from './dataview/view/list';
 import ViewCalendar from './dataview/view/calendar';
 import ViewGraph from './dataview/view/graph';
 import ViewTimeline from './dataview/view/timeline';
-import { format } from 'path';
 
 interface Props extends I.BlockComponent {
 	isInline?: boolean;
@@ -43,6 +42,7 @@ const BlockDataview = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	const editingRecordId = useRef('');
 	const filterRef = useRef('');
 	const viewIdRef = useRef('');
+	const viewTypeRef = useRef<I.ViewType | null>(null);
 	const menuContext = useRef(null);
 	const cellRefs = useRef<Map<string, any>>(new Map());
 	const recordRefs = useRef<Map<string, any>>(new Map());
@@ -104,7 +104,13 @@ const BlockDataview = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 
 	useEffect(() => {
 		const { routeParam } = S.Common;
-	
+		const view = getView();
+		const viewTypeChanged = view && (view.type !== viewTypeRef.current);
+
+		if (view) {
+			viewTypeRef.current = view.type;
+		};
+
 		let viewId = S.Record.getMeta(getSubId(), '').viewId;
 
 		if ((routeParam.ref == 'widget') && routeParam.viewId) {
@@ -112,7 +118,7 @@ const BlockDataview = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			S.Common.routeParam = {};
 		};
 
-		if (viewId && (viewId != viewIdRef.current)) {
+		if (viewId && ((viewId != viewIdRef.current) || viewTypeChanged)) {
 			loadData(viewId, 0, true);
 		};
 
@@ -194,6 +200,9 @@ const BlockDataview = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		S.Record.metaSet(subId, '', { offset, viewId });
 
 		if ([ I.ViewType.Calendar, I.ViewType.Timeline, I.ViewType.Graph, I.ViewType.Board ].includes(view.type)) {
+			if (view.type !== viewTypeRef.current) {
+				viewIdRef.current = '';
+			} else
 			if (viewRef.current && viewRef.current.load) {
 				viewRef.current.load();
 			} else {

@@ -1,6 +1,6 @@
 {
 	"name": "anytype",
-	"version": "0.53.44-beta",
+	"version": "0.53.51-alpha",
 	"description": "Anytype",
 	"main": "electron.js",
 	"scripts": {
@@ -172,7 +172,6 @@
 		"selection-ranges": "^4.0.3",
 		"sha1": "^1.1.1",
 		"swiper": "^12.0.3",
-		"systeminformation": "^5.23.5",
 		"usehooks-ts": "^3.1.1",
 		"util": "^0.12.5",
 		"with-open-file": "^0.1.7"
@@ -218,6 +217,7 @@
 			"dist/workers/**/*",
 			"dist/*.node",
 			"dist/cmaps/**/*",
+			"dist/wasm/**/*",
 			"dist/embed/**/*",
 			"dist/challenge/**/*",
 			"dist/img/**/*",
@@ -272,6 +272,7 @@
 			"dist/nativeMessagingHost",
 			"dist/*.node",
 			"dist/cmaps/**/*",
+			"dist/wasm/**/*",
 			"dist/font/**/*",
 			"dist/workers/**/*",
 			"!node_modules/**/*",

@@ -22,6 +22,8 @@
 			}
 
 			&.empty { padding-top: 16px; padding-bottom: 16px; @include text-small; }
+			&.empty::before { display: none; }
+
 			&::before { transition: none; }
 
 			.icon.plus { margin-right: 4px; background-image: url('~img/icon/plus/menu0.svg'); }

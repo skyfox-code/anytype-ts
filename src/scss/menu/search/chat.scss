@@ -22,7 +22,7 @@
 			.icon.arrow.disabled { opacity: 0.3; pointer-events: none; }
 		}
 
-		.filter { background-color: var(--color-bg-primary); flex-grow: 1; }
+		.filter { background-color: var(--color-bg-primary); flex-grow: 1; padding: 0px; }
 		.filter {
 			.inner { gap: 0px 6px; padding: 0px 12px; height: 32px; border-radius: 16px; }
 		}

@@ -6,8 +6,8 @@ import { DndContext, closestCenter, useSensors, useSensor, PointerSensor, Keyboa
 import { SortableContext, verticalListSortingStrategy, sortableKeyboardCoordinates, arrayMove, useSortable } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis, restrictToFirstScrollableAncestor } from '@dnd-kit/modifiers';
 import { CSS } from '@dnd-kit/utilities';
-import { I, C, S, J, U, keyboard, Dataview, translate, analytics } from 'Lib';
-import { Icon, IconObject, Switch } from 'Component';
+import { I, C, S, J, U, keyboard, Relation, Dataview, translate, analytics } from 'Lib';
+import { Icon, Switch } from 'Component';
 
 const HEIGHT = 28;
 const LIMIT = 20;
@@ -237,7 +237,7 @@ const MenuRelationList = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => 
 			>
 				{!isReadonly ? <Icon className="dnd" /> : ''}
 				<span className="clickable" onClick={e => onClick(e, item)}>
-					<IconObject object={item.relation} />
+					<Icon className={`relation ${Relation.className(item.relation.format)}`} />
 					<div className="name">{item.relation.name}</div>
 				</span>
 				{canHide ? (
