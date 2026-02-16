@@ -719,7 +719,12 @@ class Api {
 		};
 
 		const menu = Menu.buildFromTemplate(items);
-		menu.popup({ window: win });
+		menu.popup({
+			window: win,
+			callback: () => {
+				Util.send(win, 'tab-context-menu-closed');
+			},
+		});
 	};
 
 	reorderTabs (win, tabIds) {
