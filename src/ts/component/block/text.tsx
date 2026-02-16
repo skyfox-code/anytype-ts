@@ -56,6 +56,7 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	const timeoutClick = useRef(0);
 	const preventMenu = useRef(false);
 	const clickCnt = useRef(0);
+	const prevStyleRef = useRef(style);
 
 	useEffect(() => {
 		setValue(text);
@@ -92,7 +93,12 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			renderMarkup();
 		};
 
-		setValue(text);
+		// Only sync contenteditable from props when not focused or when content changed.
+		// When focused, the local editable state may be ahead of props during active editing
+		// (e.g. RTL flag change triggers re-render before text is saved to middleware).
+		if ((focused != block.id) || textChanged || marksChanged) {
+			setValue(text);
+		};
 
 		if (text) {
 			placeholderHide();
@@ -106,6 +112,24 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 
 		onUpdate?.();
 	});
+
+	useEffect(() => {
+		const styleChanged = prevStyleRef.current !== style;
+		prevStyleRef.current = style;
+
+		if (!styleChanged) {
+			return;
+		};
+
+		const isRtl = U.String.checkRtl(text);
+
+		if (fields.isRtlDetected && !isRtl && text) {
+			U.Data.setRtl(rootId, block, false);
+		} else
+		if ((fields.isRtlDetected || isRtl) && (block.hAlign !== I.BlockHAlign.Right)) {
+			C.BlockListSetAlign(rootId, [ id ], I.BlockHAlign.Right);
+		};
+	}, [ style ]);
 
 	const setValue = (v: string, restoreRange?: I.TextRange) => {
 		const { focused } = focus.state;
@@ -868,7 +892,7 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			U.Data.blockSetText(rootId, block.id, value, marks, update, callBack);
 		};
 
-		if (isRtl != checkRtl) {
+		if (value && (isRtl != checkRtl)) {
 			U.Data.setRtl(rootId, block, isRtl, cb);
 		} else {
 			cb();

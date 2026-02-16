@@ -76,6 +76,17 @@
 	.block.align1 > .wrapContent { text-align: center; }
 	.block.align2 > .wrapContent { text-align: right; }
 	.block.align3 > .wrapContent { text-align: justify; }
+
+	.block.blockText.align2 { flex-direction: row-reverse; }
+	.block.blockText.align2 {
+		> .wrapMenu { text-align: left; }
+		> .wrapMenu {
+			.icon.dnd { right: auto; left: 6px; }
+		}
+	}
+
+	.block.blockText.align2.isAdding.top::before { right: auto; left: 0px; }
+	.block.blockText.align2.isAdding.bottom::after { right: auto; left: 0px; }
 	
 	.block.isResizing { user-select: none; }
 	.block.isResizing {
