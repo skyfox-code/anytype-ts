@@ -1314,6 +1314,11 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	const onMarkBlock = (e: any, type: I.MarkType, text: string, marks: I.Mark[], param: string, range: I.TextRange) => {
 		e.preventDefault();
 
+		range = Mark.trimRange(text, range);
+		if (range.from == range.to) {
+			return;
+		};
+
 		const { focused } = focus.state;
 		const block = S.Block.getLeaf(rootId, focused);
 
