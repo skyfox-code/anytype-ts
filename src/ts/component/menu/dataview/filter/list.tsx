@@ -201,7 +201,6 @@ const MenuFilterList = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		};
 
 		const view = getView();
-		const filter: I.Filter = view.getFilter(item.id);
 
 		S.Menu.open('dataviewFilterValues', {
 			element: `#${getId()} #item-${item.id}`,
@@ -218,9 +217,12 @@ const MenuFilterList = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 				getTarget,
 				readonly: isReadonly,
 				save: () => {
-					C.BlockDataviewFilterReplace(rootId, blockId, view.id, item.id, filter, () => {
-						loadData(view.id, 0, false);
-					});
+					const currentFilter = view.getFilter(item.id);
+					if (currentFilter) {
+						C.BlockDataviewFilterReplace(rootId, blockId, view.id, item.id, currentFilter, () => {
+							loadData(view.id, 0, false);
+						});
+					};
 				},
 				itemId: item.id,
 			}
