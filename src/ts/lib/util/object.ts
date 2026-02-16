@@ -682,7 +682,13 @@ class UtilObject {
 
 		C.ObjectDateByTimestamp(S.Common.space, t, (message: any) => {
 			if (!message.error.code) {
-				this[fn]({ ...message.details, _routeParam_: { relationKey } });
+				const object = { ...message.details, _routeParam_: { relationKey } };
+
+				if (fn == 'openConfig') {
+					this.openConfig(null, object);
+				} else {
+					this[fn](object);
+				};
 			};
 		});
 	};
