@@ -234,14 +234,14 @@
 
     .menu.menuSyncStatus {
         .icons {
-            .iconWrapper.connected::before { background: #294b0e; }
-            .iconWrapper.error::before { background: #581f0c; }
+            .iconWrapper.c-connected::before { background: #294b0e; }
+            .iconWrapper.c-error::before { background: #581f0c; }
         }
 
 		.items {
             .sides {
                 .side.right {
-                    .icon.syncing { background-image: url('#{$themePath}/icon/menu/syncStatus/loading.svg'); }
+                    .icon.c-syncing { background-image: url('#{$themePath}/icon/menu/syncStatus/loading.svg'); }
 					.icon.more:hover { background-image: url('#{$themePath}/icon/menu/action/more1.svg'); }
                 }
             }

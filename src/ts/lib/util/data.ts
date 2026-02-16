@@ -218,17 +218,9 @@ class UtilData {
 		return c;
 	};
 
-	/**
-	 * Returns the class for a sync status object.
-	 * @param {I.SyncStatusObject} v - The sync status object.
-	 * @returns {string} The class name.
-	 */
-	syncStatusClass(v: I.SyncStatusObject): string {
-		const s = I.SyncStatusObject[v];
-		if ('undefined' == typeof (s)) {
-			return '';
-		};
-		return String(s || '').toLowerCase();
+	syncStatusClass (v: I.SyncStatusObject): string {
+		const s = String(I.SyncStatusObject[v] || '').toLowerCase();
+		return s ? ('c-' + s) : '';
 	};
 
 	/**
