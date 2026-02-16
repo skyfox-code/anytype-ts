@@ -476,7 +476,7 @@ class Sidebar {
 		const { hideSidebar, windowIsFocused } = S.Common;
 		const { x } = keyboard.mouse.page;
 
-		if (!x || keyboard.isDragging || keyboard.isResizing) {
+		if ((x == null) || keyboard.isDragging || keyboard.isResizing) {
 			return;
 		};
 

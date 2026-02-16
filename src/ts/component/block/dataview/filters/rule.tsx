@@ -210,19 +210,24 @@ const DataviewFilterRule = observer(forwardRef<{}, Props>((props, ref) => {
 
 			case I.RelationType.Object:
 			case I.RelationType.File: {
-				const items = Relation.getArrayValue(value)
+				const isObject = Relation.isObject(relation.format);
+				const isFile = Relation.isFile(relation.format);
+
+				let items = Relation.getArrayValue(value)
 					.map(id => S.Detail.get(subId, id, []))
 					.filter(it => !it._empty_ && !it.isArchived && !it.isDeleted);
+
+				if (isObject) {
+					items = Relation.getFilterTemplateOptions().map(it => ({ ...it, isSystem: true })).concat(items);
+				};
 
 				if (!items.length) {
 					const key = relation.format == I.RelationType.File ? 'filterPlaceholderFile' : 'filterPlaceholderObject';
 					return <Label className="placeholder" text={translate(key)} />;
 				};
 
-				const isFile = relation.format == I.RelationType.File;
 				const visible = items.slice(0, 1);
 				const rest = items.slice(1);
-
 				const restId = `${nodeId}-rest`;
 
 				return (
