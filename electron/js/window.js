@@ -533,6 +533,14 @@ class WindowManager {
 		};
 	};
 
+	closeOtherWindows (win) {
+		this.list.forEach(it => {
+			if ((it !== win) && !it.isDestroyed()) {
+				it.close();
+			};
+		});
+	};
+
 	closeOtherTabs (win, id, forced) {
 		id = String(id || '');
 
