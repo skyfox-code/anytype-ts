@@ -1935,8 +1935,9 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			e.preventDefault();
 			onPaste(data);
 		} else {
-			const clipboardItems = (e.clipboardData || e.originalEvent.clipboardData).items;
-			const files = U.Common.getDataTransferFiles(clipboardItems);
+			const cb = e.clipboardData || e.originalEvent?.clipboardData;
+			const clipboardItems = cb?.items;
+			const files = clipboardItems ? U.Common.getDataTransferFiles(clipboardItems) : [];
 
 			if (files.length && !data.files.length) {
 				U.Common.saveClipboardFiles(files, data, data => onPasteEvent(e, props, data));
