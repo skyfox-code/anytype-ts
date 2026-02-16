@@ -220,7 +220,7 @@ class UtilData {
 
 	syncStatusClass (v: I.SyncStatusObject): string {
 		const s = String(I.SyncStatusObject[v] || '').toLowerCase();
-		return s ? ('c-' + s) : '';
+		return s ? `c-${s}` : '';
 	};
 
 	/**
