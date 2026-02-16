@@ -421,6 +421,7 @@ const MenuDataviewFilterValues = observer(forwardRef<I.MenuRef, I.Menu>((props, 
 	const textInput = (key?: string, placeholder?: string): any => (
 		<div className="textInputWrapper">
 			<Input
+				className="round c36"
 				key={key ? key : 'value-text'}
 				ref={inputRef}
 				value={item.value}
@@ -504,10 +505,6 @@ const MenuDataviewFilterValues = observer(forwardRef<I.MenuRef, I.Menu>((props, 
 							if (!participantType || !types.includes(participantType.id)) {
 								templates = templates.filter(it => it.templateType != I.FilterValueTemplate.Participant);
 							};
-						};
-
-						if (items.length && templates.length) {
-							templates.push({ isDiv: true });
 						};
 
 						return templates.concat(items);

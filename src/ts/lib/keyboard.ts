@@ -86,6 +86,7 @@ class Keyboard {
 	};
 
 	onResize () {
+		const { hideSidebar } = S.Common;
 		const isPopup = this.isPopup();
 		const container = U.Common.getPageContainer(isPopup);
 		const cw = container.width();
@@ -95,7 +96,7 @@ class Keyboard {
 		if (!data.isClosed && (cw <= threshold)) {
 			sidebar.leftPanelClose(false, false);
 		} else
-		if (data.isClosed && !data.savedClosed && (cw > threshold + data.width)) {
+		if (!hideSidebar && data.isClosed && !data.savedClosed && (cw > threshold + data.width)) {
 			sidebar.leftPanelOpen(data.width, false, false);
 		};
 	};
@@ -1368,7 +1369,7 @@ class Keyboard {
 
 		if (title) {
 			U.Data.setWindowTitleText(title);
-			U.Data.setTabTitleText(title);
+			U.Data.setTabTitleText(title, action);
 		} else {
 			U.Data.setWindowTitle(rootId, rootId);
 			U.Data.setTabTitle(rootId, rootId);

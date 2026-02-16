@@ -205,6 +205,9 @@ const App: FC = () => {
 		Renderer.on('power-event', (e: any, state: string) => {
 			C.AppSetDeviceState(state == 'suspend' ? I.AppDeviceState.Background : I.AppDeviceState.Foreground);
 		});
+
+		Renderer.on('tab-show-tooltip', (e: any, data: any) => U.Common.tabTooltipShow(data));
+		Renderer.on('tab-hide-tooltip', () => U.Common.tabTooltipHide());
 	};
 	
 	const unregisterIpcEvents = () => {
@@ -231,6 +234,8 @@ const App: FC = () => {
 		Renderer.remove('pin-check');
 		Renderer.remove('reload');
 		Renderer.remove('power-event');
+		Renderer.remove('tab-show-tooltip');
+		Renderer.remove('tab-hide-tooltip');
 	};
 
 	const onInit = (data: any) => {

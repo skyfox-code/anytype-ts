@@ -287,6 +287,7 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 	};
 
 	const onKeyUpInput = (e: any) => {
+		const prevRange = { ...range.current };
 		range.current = getRange();
 
 		const { to } = range.current;
@@ -298,7 +299,22 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 		const menuOpenMention = S.Menu.isOpen('blockMention');
 		const canOpenMenuMention = !spaceview.isOneToOne && !menuOpenMention && (oneSymbolBefore == '@') && (!twoSymbolBefore || [ ' ', '\n', '(', '[', '"', '\'' ].includes(twoSymbolBefore));
 
-		const cleanedMarks = Mark.checkRanges(parsed.text, parsed.marks);
+		let cleanedMarks = Mark.checkRanges(parsed.text, parsed.marks);
+
+		// If user typed a character over a selection, remove link/object marks inherited from the replaced text
+		const hadSelection = (prevRange.from !== prevRange.to);
+		const isCharInput = e.key && (e.key.length === 1) && !e.ctrlKey && !e.metaKey && !e.altKey;
+
+		if (hadSelection && isCharInput) {
+			cleanedMarks = cleanedMarks.filter(it => {
+				if (!Mark.needsBreak(it.type)) {
+					return true;
+				};
+
+				return (it.range.to <= prevRange.from) || (it.range.from >= range.current.from);
+			});
+		};
+
 		setMarks(cleanedMarks);
 
 		let adjustMarks = false;

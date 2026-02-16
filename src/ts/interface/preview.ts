@@ -5,6 +5,7 @@ export enum PreviewType {
 	Default	 = 1,
 	Link	 = 2,
 	Object	 = 3,
+	Tab 	 = 4,
 };
 
 export enum PreviewSize {
@@ -24,6 +25,7 @@ export interface PreviewLink {
 export interface Preview {
 	type?: PreviewType,
 	markType?: I.MarkType;
+	classNameWrap?: string;
 	target?: string; /** object ID or URL */
 	object?: any;
 	element?: JQuery<HTMLElement>;
@@ -35,6 +37,9 @@ export interface Preview {
 	passThrough?: boolean;
 	noAnimation?: boolean;
 	withPlural?: boolean;
+	typeX?: I.MenuDirection.Left | I.MenuDirection.Center | I.MenuDirection.Right;
+	noOffset?: boolean;
+	relatedData?: any;
 	delay?: number;
 	x?: number;
 	y?: number;

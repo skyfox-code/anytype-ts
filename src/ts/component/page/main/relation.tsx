@@ -95,7 +95,7 @@ const PageMainRelation = observer(forwardRef<I.PageRef, I.PageComponent>((props,
 
 			case I.RelationType.Select:
 			case I.RelationType.MultiSelect: {
-				const relationsOptions = Relation.getOptions(S.Record.getRecordIds(J.Constant.subId.option, ''))
+				const relationsOptions = Relation.getOptions(S.Record.getRecordIds(U.Subscription.spaceSubId(J.Constant.subId.option), ''))
 					.filter(it => (it.relationKey == object.relationKey) && !it.isArchived && !it.isDeleted)
 					.sort((c1, c2) => {
 						if (c1.createdDate > c2.createdDate) return -1;

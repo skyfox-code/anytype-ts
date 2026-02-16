@@ -38,9 +38,14 @@ const BlockBookmark = observer(forwardRef<I.BlockRef, I.BlockComponent>((props, 
 		const selection = S.Common.getRef('selectionProvider');
 		const ids = selection?.get(I.SelectType.Block) || [];
 
-		if (((e.ctrlKey || e.metaKey) && (ids.length > 1)) || keyboard.isSelectionClearDisabled) {
-			open();
+		if (
+			((e.ctrlKey || e.metaKey) && (ids.length > 1)) || 
+			keyboard.isSelectionClearDisabled
+		) {
+			return;
 		};
+
+		open();
 	};
 
 	const onMouseEnter = (e: MouseEvent) => {
@@ -65,17 +70,14 @@ const BlockBookmark = observer(forwardRef<I.BlockRef, I.BlockComponent>((props, 
 	const onMouseDown = (e: any) => {
 		e.persist();
 
-		if (keyboard.withCommand(e)) {
+		if (keyboard.withCommand(e) || (e.button != 1)) {
 			return;
 		};
 
-		// middle mouse click
-		if (e.button == 1) {
-			e.preventDefault();
-			e.stopPropagation();
+		e.preventDefault();
+		e.stopPropagation();
 
-			open();
-		};
+		open();
 	};
 
 	const open = () => {

@@ -52,8 +52,6 @@ const BlockDataviewFilters = observer(forwardRef<{}, Props>((props, ref) => {
 	};
 
 	const onClick = (e: any, item: any) => {
-		const filter: I.Filter = view.getFilter(item.id);
-
 		S.Menu.open('dataviewFilterValues', {
 			element: `#block-${blockId} #dataviewFilters #item-${item.id}`,
 			classNameWrap: 'fromBlock',
@@ -68,9 +66,12 @@ const BlockDataviewFilters = observer(forwardRef<{}, Props>((props, ref) => {
 				getTarget,
 				readonly: isReadonly,
 				save: () => {
-					C.BlockDataviewFilterReplace(rootId, blockId, view.id, item.id, filter, () => {
-						loadData(view.id, 0, false);
-					});
+					const currentFilter = view.getFilter(item.id);
+					if (currentFilter) {
+						C.BlockDataviewFilterReplace(rootId, blockId, view.id, item.id, currentFilter, () => {
+							loadData(view.id, 0, false);
+						});
+					};
 				},
 				itemId: item.id,
 			}
@@ -84,6 +85,7 @@ const BlockDataviewFilters = observer(forwardRef<{}, Props>((props, ref) => {
 			vertical: I.MenuDirection.Bottom,
 			horizontal: I.MenuDirection.Left,
 			offsetY: 4,
+			noFlipX: true,
 		};
 
 		onFilterAddClick(menuParam);
@@ -267,7 +269,11 @@ const BlockDataviewFilters = observer(forwardRef<{}, Props>((props, ref) => {
 							/>
 						);
 					})}
-					<Icon id="item-add" className="plus" onClick={onAdd} />
+					<div id="item-add" className="itemAdd" onClick={onAdd}>
+						<Icon className="plus" />
+						<Label text={translate('commonFilter')} />
+					</div>
+
 				</div>
 
 				<div id="sideRight" className="side right">

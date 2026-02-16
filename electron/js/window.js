@@ -434,7 +434,7 @@ class WindowManager {
 		win.contentView.addChildView(view);
 
 		// Lazy load: if the tab hasn't been loaded yet, load it now
-		if (!view.isLoaded && view.webContents && !view.webContents.isDestroyed()) {
+		if (!view.isLoaded && view.webContents && !view.webContents.isDestroyed() && !view.webContents.isLoading()) {
 			view.webContents.loadURL(this.getUrlForNewTab());
 		};
 

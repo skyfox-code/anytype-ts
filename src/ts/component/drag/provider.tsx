@@ -27,6 +27,7 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 	const timeoutDragOver = useRef(0);
 	const prevTargetKey = useRef<string | null>(null);
 	const lastKnownCoords = useRef({ x: 0, y: 0 });
+	const lastValidTarget = useRef<{ data: any, position: I.BlockPosition } | null>(null);
 	const dragData = useRef<any>(null);
 
 	const getContainer = () => {
@@ -137,10 +138,18 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 
 		if (hoverData.current && (position.current != I.BlockPosition.None)) {
 			data = hoverData.current;
-		} else 
+		} else
+		if (lastValidTarget.current) {
+			data = lastValidTarget.current.data;
+			position.current = lastValidTarget.current.position;
+		} else
 		if (last && isFileDrop) {
 			data = objectData.current.get([ I.DropType.Block, last.id ].join('-'));
 			position.current = I.BlockPosition.Bottom;
+		};
+
+		if (!data && !isFileDrop) {
+			console.log('[DragProvider].onDropCommon no valid drop target');
 		};
 
 		if (data) {
@@ -176,7 +185,7 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 			console.log('[DragProvider].onDrop paths', paths);
 
 			C.FileDrop(rootId, targetId, position.current, paths, () => {
-				if (target && target.isTextToggle() && (position.current == I.BlockPosition.InnerFirst)) {
+				if (target && (target.isTextToggle() || target.isTextToggleHeader()) && (position.current == I.BlockPosition.InnerFirst)) {
 					S.Block.toggle(rootId, targetId, true);
 				};
 			});
@@ -250,15 +259,19 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 		e.preventDefault();
 		e.stopPropagation();
 
-		const x = e.pageX;
-		const y = e.pageY;
+		let x = e.pageX;
+		let y = e.pageY;
 
 		// Save last known good coordinates for Linux fallback
 		if (x || y) {
 			lastKnownCoords.current = { x, y };
+		} else
+		if (lastKnownCoords.current.x || lastKnownCoords.current.y) {
+			x = lastKnownCoords.current.x;
+			y = lastKnownCoords.current.y;
 		};
 
-		scrollOnMove.onMouseMove(e.clientX, e.clientY);
+		scrollOnMove.onMouseMove(e.clientX || x, e.clientY || y);
 		initData();
 		checkNodes(e, x, y);
 
@@ -318,8 +331,12 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 	const onDragEnd = (e: any) => {
 		// On Linux, the drop event may not fire. If hoverData is still set,
 		// it means onDropCommon never ran - perform the drop using saved drag data.
-		if (hoverData.current && (position.current != I.BlockPosition.None) && canDrop.current && dragData.current) {
-			let targetId = String(hoverData.current.id || '');
+		// Fall back to lastValidTarget if hoverData was cleared by a late event.
+		const target = hoverData.current || lastValidTarget.current?.data;
+		const pos = (position.current != I.BlockPosition.None) ? position.current : (lastValidTarget.current?.position ?? I.BlockPosition.None);
+
+		if (target && (pos != I.BlockPosition.None) && canDrop.current && dragData.current) {
+			let targetId = String(target.id || '');
 
 			if (targetId == 'blockLast') {
 				targetId = '';
@@ -332,7 +349,7 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 				},
 			};
 
-			onDrop(fakeEvent, hoverData.current.dropType, targetId, position.current);
+			onDrop(fakeEvent, target.dropType, targetId, pos);
 		};
 
 		dragData.current = null;
@@ -439,7 +456,7 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 				};
 				
 				if (target) {
-					isToggle = target.isTextToggle();
+					isToggle = target.isTextToggle() || target.isTextToggleHeader();
 		
 					if ((target.isLink() || target.isBookmark()) && (position == I.BlockPosition.InnerFirst)) {
 						targetContextId = target.getTargetObjectId();
@@ -829,6 +846,10 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 			};
 		};
 
+		if (hd && (position.current != I.BlockPosition.None) && canDrop.current) {
+			lastValidTarget.current = { data: hd, position: position.current };
+		};
+
 		if (frame.current) {
 			raf.cancel(frame.current);
 		};
@@ -942,6 +963,7 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 		objectData.current.clear();
 		prevTargetKey.current = null;
 		lastKnownCoords.current = { x: 0, y: 0 };
+		lastValidTarget.current = null;
 	};
 
 	const setHoverData = (v: any) => {

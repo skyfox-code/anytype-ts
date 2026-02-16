@@ -1,6 +1,6 @@
 {
 	"name": "anytype",
-	"version": "0.53.45-beta",
+	"version": "0.53.51-alpha",
 	"description": "Anytype",
 	"main": "electron.js",
 	"scripts": {
@@ -217,6 +217,7 @@
 			"dist/workers/**/*",
 			"dist/*.node",
 			"dist/cmaps/**/*",
+			"dist/wasm/**/*",
 			"dist/embed/**/*",
 			"dist/challenge/**/*",
 			"dist/img/**/*",
@@ -271,6 +272,7 @@
 			"dist/nativeMessagingHost",
 			"dist/*.node",
 			"dist/cmaps/**/*",
+			"dist/wasm/**/*",
 			"dist/font/**/*",
 			"dist/workers/**/*",
 			"!node_modules/**/*",

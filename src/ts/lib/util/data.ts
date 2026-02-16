@@ -218,17 +218,9 @@ class UtilData {
 		return c;
 	};
 
-	/**
-	 * Returns the class for a sync status object.
-	 * @param {I.SyncStatusObject} v - The sync status object.
-	 * @returns {string} The class name.
-	 */
-	syncStatusClass(v: I.SyncStatusObject): string {
-		const s = I.SyncStatusObject[v];
-		if ('undefined' == typeof (s)) {
-			return '';
-		};
-		return String(s || '').toLowerCase();
+	syncStatusClass (v: I.SyncStatusObject): string {
+		const s = String(I.SyncStatusObject[v] || '').toLowerCase();
+		return s ? `c-${s}` : '';
 	};
 
 	/**
@@ -678,13 +670,13 @@ class UtilData {
 	 * @param {I.SortType} dir - The sort direction.
 	 * @returns {number} The sort order.
 	 */
-	sortByNumericKey(key: string, c1: any, c2: any, dir: I.SortType) {
+	sortByNumericKey (key: string, c1: any, c2: any, dir: I.SortType) {
 		const k1 = Number(c1[key]) || 0;
 		const k2 = Number(c2[key]) || 0;
 
 		if (k1 > k2) return dir == I.SortType.Asc ? 1 : -1;
 		if (k1 < k2) return dir == I.SortType.Asc ? -1 : 1;
-		return this.sortByName(c1, c2);
+		return 0;
 	};
 
 	/**
@@ -693,7 +685,7 @@ class UtilData {
 	 * @param {any} c2 - The second object.
 	 * @returns {number} The sort order.
 	 */
-	sortByWeight(c1: any, c2: any) {
+	sortByWeight (c1: any, c2: any) {
 		return this.sortByNumericKey('_sortWeight_', c1, c2, I.SortType.Desc);
 	};
 
@@ -703,7 +695,7 @@ class UtilData {
 	 * @param {any} c2 - The second object.
 	 * @returns {number} The sort order.
 	 */
-	sortByFormat(c1: any, c2: any) {
+	sortByFormat (c1: any, c2: any) {
 		return this.sortByNumericKey('format', c1, c2, I.SortType.Asc);
 	};
 
@@ -713,11 +705,11 @@ class UtilData {
 	 * @param {any} c2 - The second object.
 	 * @returns {number} The sort order.
 	 */
-	sortByLastUsedDate(c1: any, c2: any) {
+	sortByLastUsedDate (c1: any, c2: any) {
 		return this.sortByNumericKey('lastUsedDate', c1, c2, I.SortType.Desc);
 	};
 
-	typeSortKeys(isChat: boolean) {
+	typeSortKeys (isChat: boolean) {
 		return isChat ? TYPE_KEYS.chat : TYPE_KEYS.default;
 	};
 
@@ -727,7 +719,7 @@ class UtilData {
 	 * @param {any} c2 - The second object.
 	 * @returns {number} The sort order.
 	 */
-	sortByTypeKey(c1: any, c2: any, isChat: boolean) {
+	sortByTypeKey (c1: any, c2: any, isChat: boolean) {
 		const keys = this.typeSortKeys(isChat);
 		const i1 = keys.indexOf(c1.uniqueKey);
 		const i2 = keys.indexOf(c2.uniqueKey);
@@ -866,16 +858,18 @@ class UtilData {
 	/**
 	 * Sets the tab title text.
 	 * @param {string} text - The text to set as the tab title.
+	 * @param {string} action - Optional layout of the current object, useful for tab tooltips.
 	 */
-	setTabTitleText(text: string) {
+	setTabTitleText(text: string, action?: string) {
 		const spaceview = U.Space.getSpaceview();
 
 		Renderer.send('updateTab', S.Common.tabId, {
 			title: text,
 			icon: '',
 			spaceIcon: U.Graph.imageSrc(spaceview) || U.Object.defaultIcon(spaceview?.layout, spaceview?.type, 100),
-			spaceId: S.Common.space || '',
+			spaceId: spaceview.targetSpaceId || '',
 			layout: I.ObjectLayout.Page,
+			action,
 		});
 	};
 
@@ -1287,11 +1281,11 @@ class UtilData {
 	};
 
 	checkIsArchived(id: string): boolean {
-		return S.Record.getRecordIds(J.Constant.subId.archived, '').includes(id);
+		return S.Record.getRecordIds(U.Subscription.spaceSubId(J.Constant.subId.archived), '').includes(id);
 	};
 
 	checkIsDeleted(id: string): boolean {
-		return S.Record.getRecordIds(J.Constant.subId.deleted, '').includes(id);
+		return S.Record.getRecordIds(U.Subscription.spaceSubId(J.Constant.subId.deleted), '').includes(id);
 	};
 
 	checkPageClose(isPopup: boolean, rootId: string): boolean {
@@ -1313,7 +1307,7 @@ class UtilData {
 	getWidgetChats(): any[] {
 		const spaceview = U.Space.getSpaceview();
 
-		return S.Record.getRecords(J.Constant.subId.chat).filter(it => {
+		return S.Record.getRecords(U.Subscription.spaceSubId(J.Constant.subId.chat)).filter(it => {
 			const counters = S.Chat.getChatCounters(S.Common.space, it.id);
 			const mode = U.Object.getChatNotificationMode(spaceview, it.id);
 

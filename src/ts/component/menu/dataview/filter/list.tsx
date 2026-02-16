@@ -4,15 +4,15 @@ import { observer } from 'mobx-react';
 import { AutoSizer, CellMeasurer, InfiniteLoader, List, CellMeasurerCache } from 'react-virtualized';
 import { I, C, S, U, Relation, keyboard, translate, analytics, Dataview } from 'Lib';
 import { MenuItemVertical, Icon, Label } from 'Component';
-import relation from 'json/relation';
 
 const HEIGHT_ITEM = 28;
+const HEIGHT_FILTER = 32;
 const HEIGHT_DIV = 16;
 const LIMIT = 20;
 
 const MenuFilterList = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 
-	const { param, getId, position, onKeyDown, setActive } = props;
+	const { param, getId, onKeyDown, setActive } = props;
 	const { data } = param;
 	const { rootId, blockId, getView, loadData, isInline, getTarget, readonly, closeFilters } = data;
 	const nodeRef = useRef(null);
@@ -54,6 +54,7 @@ const MenuFilterList = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 			return {
 				...it,
 				relation: S.Record.getRelationByKey(it.relationKey),
+				isFilter: true,
 			};
 		}).filter(it => it.relation || Dataview.isAdvancedFilter(it)).sort((a, b) => {
 			const aAdvanced = Dataview.isAdvancedFilter(a);
@@ -89,6 +90,7 @@ const MenuFilterList = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 
 	const getRowHeight = (item: any) => {
 		if (item.isDiv) return HEIGHT_DIV;
+		if (item.isFilter) return HEIGHT_FILTER;
 		return HEIGHT_ITEM;
 	};
 
@@ -116,24 +118,6 @@ const MenuFilterList = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		};
 
 		return item.relation?.name || '';
-	};
-
-	const getFilterRelationIcon = (format: I.RelationType): string => {
-		switch (format) {
-			case I.RelationType.LongText:
-			case I.RelationType.ShortText:	return 'isText';
-			case I.RelationType.Number:		return 'isNumber';
-			case I.RelationType.Select:		return 'isSelect';
-			case I.RelationType.Date:		return 'isDate';
-			case I.RelationType.File:		return 'isAttachment';
-			case I.RelationType.Checkbox:	return 'isCheckbox';
-			case I.RelationType.Url:		return 'isUrl';
-			case I.RelationType.Email:		return 'isEmail';
-			case I.RelationType.Phone:		return 'isPhone';
-			case I.RelationType.MultiSelect:return 'isMultiselect';
-			case I.RelationType.Object:		return 'isObject';
-			default:						return 'isObject';
-		};
 	};
 
 	const getValueText = (item: any): string => {
@@ -217,7 +201,6 @@ const MenuFilterList = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		};
 
 		const view = getView();
-		const filter: I.Filter = view.getFilter(item.id);
 
 		S.Menu.open('dataviewFilterValues', {
 			element: `#${getId()} #item-${item.id}`,
@@ -234,9 +217,12 @@ const MenuFilterList = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 				getTarget,
 				readonly: isReadonly,
 				save: () => {
-					C.BlockDataviewFilterReplace(rootId, blockId, view.id, item.id, filter, () => {
-						loadData(view.id, 0, false);
-					});
+					const currentFilter = view.getFilter(item.id);
+					if (currentFilter) {
+						C.BlockDataviewFilterReplace(rootId, blockId, view.id, item.id, currentFilter, () => {
+							loadData(view.id, 0, false);
+						});
+					};
 				},
 				itemId: item.id,
 			}
@@ -408,7 +394,7 @@ const MenuFilterList = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 							</>
 						) : (
 							<>
-								<Icon className={`filterIcon ${getFilterRelationIcon(item.relation.format)}`} />
+								<Icon className={`relation ${Relation.className(item.relation.format)}`} />
 								<div className="filterContent">
 									<Label className="relationName" text={item.relation.name} />
 									{Relation.isFilterActive(item) ? (
@@ -443,7 +429,7 @@ const MenuFilterList = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		const obj = $(`#${getId()} .content`);
 		const items = getItems();
 		const itemsHeight = items.reduce((res: number, current: any) => res + getRowHeight(current), 0);
-		const height = Math.max(HEIGHT_ITEM + 24, Math.min(400, itemsHeight + 24));
+		const height = Math.max(HEIGHT_ITEM + 16, Math.min(400, itemsHeight + 16));
 
 		obj.css({ height });
 	};

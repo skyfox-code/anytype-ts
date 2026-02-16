@@ -8,7 +8,7 @@
 	.iconImage, .iconCheckbox { background-size: cover; object-fit: cover; }
 	.iconImage { border-radius: inherit; }
 
-	.iconCommon, .smileImage, .iconImage, .iconFile, .iconCheckbox, .iconError {
+	.iconCommon, .iconRelation, .smileImage, .iconImage, .iconFile, .iconCheckbox, .iconError {
 		&.c14 { @include pos-abs-mid; width: 14px; height: 14px; margin: -7px 0px 0px -7px; }
 		&.c16 { @include pos-abs-mid; width: 16px; height: 16px; margin: -8px 0px 0px -8px; }
 		&.c18 { @include pos-abs-mid; width: 18px; height: 18px; margin: -9px 0px 0px -9px; }
@@ -26,6 +26,8 @@
 		&.c64 { @include pos-abs-mid; width: 64px; height: 64px; margin: -32px 0px 0px -32px; }
 		&.c80 { @include pos-abs-mid; width: 80px; height: 80px; margin: -40px 0px 0px -40px; }
 	}
+
+	.iconRelation { mask-size: contain; mask-repeat: no-repeat; mask-position: center; background-color: var(--color-icon); }
 
 	.iconEmoji { display: inline-block; vertical-align: top; text-align: center; position: relative; border-radius: inherit; }
 }

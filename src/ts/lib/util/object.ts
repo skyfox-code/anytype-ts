@@ -111,11 +111,13 @@ class UtilObject {
 			title: U.Object.name(object, true),
 			icon: U.Graph.imageSrc(object) || this.defaultIcon(object.layout, object.type, 100),
 			spaceIcon: U.Graph.imageSrc(spaceview) || this.defaultIcon(spaceview?.layout, spaceview?.type, 100),
-			spaceId: object.spaceId || S.Common.space || '',
+			spaceId: String(spaceview?.targetSpaceId || ''),
 			layout: object.layout,
 			isImage: object.iconImage,
 			uxType: spaceview?.uxType,
+			objectData: { id: object.id, type: object.type, layout: object.layout },
 			route,
+			action: '',
 		};
 	};
 
@@ -826,7 +828,7 @@ class UtilObject {
 				return;
 			};
 
-			S.Detail.update(J.Constant.subId.type, { id: typeId, details: { [key]: value } }, false);
+			S.Detail.update(U.Subscription.spaceSubId(J.Constant.subId.type), { id: typeId, details: { [key]: value } }, false);
 			C.BlockDataviewRelationSet(typeId, J.Constant.blockId.dataview, [ 'name', 'description' ].concat(U.Object.getTypeRelationKeys(typeId)), onChange);
 		});
 	};
@@ -956,7 +958,7 @@ class UtilObject {
 
 	defaultIcon (layout: I.ObjectLayout, typeId: string, size: number): string {
 		const theme = S.Common.getThemeClass();
-		const type = S.Detail.get(J.Constant.subId.type, typeId, [ 'name', 'iconName' ], true);
+		const type = S.Detail.get(U.Subscription.spaceSubId(J.Constant.subId.type), typeId, [ 'name', 'iconName' ], true);
 
 		let src = '';
 		if (type.iconName) {
@@ -972,6 +974,10 @@ class UtilObject {
 				case I.ObjectLayout.Date: id = 'date'; break;
 				case I.ObjectLayout.Type: id = 'type'; break;
 				case I.ObjectLayout.Bookmark: id = 'page'; break;
+				case I.ObjectLayout.Settings: id = 'settings'; break;
+				case I.ObjectLayout.Graph: id = 'graph'; break;
+				case I.ObjectLayout.Navigation: id = 'graph'; break;
+				case I.ObjectLayout.Archive: id = 'archive'; break;
 			};
 			src = U.Common.updateSvg(require(`img/icon/default/${id}.svg`), { id, size, fill: J.Theme[theme].iconDefault });
 		};

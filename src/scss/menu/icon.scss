@@ -3,18 +3,18 @@
 .menus {
 	.menu {
 		.icon.textParagraph { background-image: url('~img/icon/menu/action/block/text/paragraph.svg'); }
-		.icon.textHeader1 { background-image: url('~img/icon/menu/action/block/text/header1.svg'); }
-		.icon.textHeader2 { background-image: url('~img/icon/menu/action/block/text/header2.svg'); }
-		.icon.textHeader3 { background-image: url('~img/icon/menu/action/block/text/header3.svg'); }
+		.icon.textHeader1,
+		.icon.textHeader2,
+		.icon.textHeader3 { background-image: url('~img/icon/menu/action/block/text/header.svg'); }
 		.icon.textQuote { background-image: url('~img/icon/menu/action/block/text/quote.svg'); }
 		.icon.textCallout { background-image: url('~img/icon/menu/action/block/text/callout.svg'); }
 		.icon.textBulleted { background-image: url('~img/icon/menu/action/block/text/bulleted.svg'); }
 		.icon.textCheckbox { background-image: url('~img/icon/menu/action/block/text/checkbox.svg'); }
 		.icon.textNumbered { background-image: url('~img/icon/menu/action/block/text/numbered.svg'); }
 		.icon.textToggle { background-image: url('~img/icon/menu/action/block/text/toggle.svg'); }
-		.icon.textToggleHeader1 { background-image: url('~img/icon/menu/action/block/text/toggleHeader1.svg'); }
-		.icon.textToggleHeader2 { background-image: url('~img/icon/menu/action/block/text/toggleHeader2.svg'); }
-		.icon.textToggleHeader3 { background-image: url('~img/icon/menu/action/block/text/toggleHeader3.svg'); }
+		.icon.textToggleHeader1,
+		.icon.textToggleHeader2,
+		.icon.textToggleHeader3 { background-image: url('~img/icon/menu/action/block/text/toggleHeader.svg'); }
 
 		.icon.divLine { background-image: url('~img/icon/menu/action/block/div/line.svg'); }
 		.icon.divDot { background-image: url('~img/icon/menu/action/block/div/dot.svg'); }
@@ -180,8 +180,9 @@
 		.icon.chat-link { background-image: url('~img/icon/chat/buttons/link0.svg'); }
 		.icon.chat-pencil { background-image: url('~img/icon/chat/buttons/pencil0.svg'); }
 
-		.icon.filterTemplate-object { background-image: url('~img/icon/settings/spaces.svg'); }
-		.icon.filterTemplate-participant { background-image: url('~img/icon/widget/button/member.svg'); }
+		.icon.filterTemplate-object { background-image: url('~img/icon/filterTemplate/object.svg'); }
+		.icon.filterTemplate-participant { background-image: url('~img/icon/filterTemplate/user.svg'); }
+
 		.icon.advancedFilter { background-image: url('~img/icon/dataview/filters/advanced0.svg'); }
 		
 		.icon.clipboard-copy { background-image: url('~img/icon/menu/action/clipboard/copy.svg'); }
