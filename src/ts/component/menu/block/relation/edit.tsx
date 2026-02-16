@@ -15,6 +15,7 @@ const MenuBlockRelationEdit = observer(forwardRef<I.MenuRef, I.Menu>((props, ref
 	} = data;
 	const filterRef = useRef(null);
 	const buttonRef = useRef(null);
+	const keyHandlerRef = useRef<(e: any) => void>(() => {});
 	const [ format, setFormat ] = useState<I.RelationType>(null);
 	const [ objectTypes, setObjectTypes ] = useState<string[]>([]);
 	const [ includeTime, setIncludeTime ] = useState(false);
@@ -51,9 +52,9 @@ const MenuBlockRelationEdit = observer(forwardRef<I.MenuRef, I.Menu>((props, ref
 
 	const rebind = () => {
 		unbind();
-		$(window).on('keydown.menu', e => onKeyDown(e));
+		$(window).on('keydown.menu', e => keyHandlerRef.current(e));
 	};
-	
+
 	const unbind = () => {
 		$(window).off('keydown.menu');
 	};
@@ -145,6 +146,8 @@ const MenuBlockRelationEdit = observer(forwardRef<I.MenuRef, I.Menu>((props, ref
 	const onKeyDown = (e: any) => {
 		keyboard.shortcut('enter', e, () => onSubmit(e));
 	};
+
+	keyHandlerRef.current = (e: any) => onKeyDown(e);
 
 	const onChangeTime = (v: boolean) => {
 		const relation = getRelation();
