@@ -558,17 +558,21 @@ const MenuDataviewRelationEdit = observer(forwardRef<I.MenuRef, I.Menu>((props, 
 	const save = () => {
 		const name = String(filterRef.current?.getValue() || '');
 		const relation = getRelation();
-		const item: any = { 
-			relationFormat: format,
+		const isExisting = relation && relation.id;
+		const item: any = {
 			relationFormatObjectTypes: Relation.isObject(format) ? Relation.getArrayValue(objectTypes) : [],
 			relationFormatIncludeTime: includeTime,
+		};
+
+		if (!isExisting) {
+			item.relationFormat = format;
 		};
 
 		if (name) {
 			item.name = name;
 		};
 
-		relation && relation.id ? update(item) : add(item);
+		isExisting ? update(item) : add(item);
 	};
 
 	const add = (item: any) => {
