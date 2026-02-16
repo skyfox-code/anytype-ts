@@ -673,13 +673,6 @@ class UtilMenu {
 					c._sortWeight_ += getWeight(c.name);
 				};
 
-				/*
-				if (!ret && c.description && (c.description.match(regC) || c.description.match(regS))) {
-					ret = true;
-					c._sortWeight_ += getWeight(c.description);
-				};
-				*/
-
 				return ret; 
 			});
 
@@ -1833,6 +1826,8 @@ class UtilMenu {
 
 							widgetSections[idx].isHidden = true;
 							S.Common.widgetSectionsSet([ ...widgetSections ]);
+
+							analytics.event('HideSection');
 							break;
 						};
 

@@ -337,7 +337,7 @@ const MenuSearchChat = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 			</div>
 
 			{!items.length && filter.current && isDropdownOpen ? (
-				<EmptySearch filter={filter.current} />
+				<EmptySearch filter={filter.current} text={translate('menuSearchChatEmptySearch')} />
 			) : ''}
 
 			{items.length && isDropdownOpen ? (

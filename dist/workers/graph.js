@@ -903,6 +903,7 @@ updateNodeSprites = () => {
 					fill: parseColor(data.colors?.text || '#000000'),
 					align: 'center',
 				}),
+				resolution: density,
 			});
 			label.anchor.set(0.5, 0);
 			label.visible = false;
@@ -1108,6 +1109,7 @@ drawEdge = (d, arrowWidth, arrowHeight, arrowStart, arrowEnd) => {
 				fill: colorText,
 				align: 'center',
 			}),
+			resolution: density,
 		});
 		label.anchor.set(0.5);
 
@@ -1321,6 +1323,7 @@ drawNode = (d) => {
 					fill: parseColor(data.colors.text),
 					align: 'center',
 				},
+				resolution: density,
 			});
 			label.anchor.set(0.5, 0);
 			labelsContainer.addChild(label);
@@ -1693,12 +1696,29 @@ restart = (alpha) => {
  * @param {Object} data - Resize data.
  */
 resize = (data) => {
+	const oldDensity = density;
+
 	width = data.width;
 	height = data.height;
 	density = data.density;
 
 	if (app && app.renderer) {
 		app.renderer.resize(width * density, height * density);
+	};
+
+	// Recreate text labels if density changed (e.g. moved to a different DPI monitor)
+	if (oldDensity !== density) {
+		for (const [id, label] of nodeLabels) {
+			labelsContainer.removeChild(label);
+			label.destroy();
+			nodeLabels.delete(id);
+		};
+		for (const [id, label] of edgeLabels) {
+			edgeLabelsContainer.removeChild(label);
+			label.destroy();
+			edgeLabels.delete(id);
+		};
+		updateNodeSprites();
 	};
 
 	redraw();

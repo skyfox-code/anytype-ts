@@ -22,13 +22,13 @@
 			.name { text-transform: uppercase; @include text-very-small; }
 		}
 
+		&.withFilter {
+			.content { padding: 12px 0px 0px 0px; }
+		}
+
 		&.withMaxHeight {
 			.content { max-height: unset; }
 		}
-	}
-
-	.menu.menuSelect.withFilter {
-		.content { padding: 8px 0px 0px 0px; }
 	}
 
 	.menu.menuSelect.skip { width: var(--menu-width-value); }

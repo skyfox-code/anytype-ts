@@ -1,6 +1,6 @@
 import React, { forwardRef, useState, useRef, useImperativeHandle, useEffect, MouseEvent } from 'react';
 import { observer } from 'mobx-react';
-import { Title, Label, Icon, ObjectName, IconObject } from 'Component';
+import { Title, Label, Icon, ObjectName } from 'Component';
 import { I, S, U, Relation, translate, keyboard, analytics } from 'Lib';
 import { DndContext, closestCenter, useSensors, useSensor, PointerSensor, KeyboardSensor, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, sortableKeyboardCoordinates, arrayMove, useSortable } from '@dnd-kit/sortable';
@@ -276,7 +276,7 @@ const SidebarSectionTypeRelation = observer(forwardRef<I.SidebarSectionRef, I.Si
 				{!item.isEmpty ? (
 					<>
 						{canDrag ? <Icon className="dnd" /> : ''}
-						<IconObject object={item} />
+						<Icon className={`relation ${Relation.className(item.format)}`} />
 					</>
 				) : ''}
 				<ObjectName object={item} />

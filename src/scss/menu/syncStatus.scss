@@ -27,27 +27,27 @@
 				.icon.p2p,
 				.icon.localOnly { background: url('~img/icon/sync/p2p/default.svg'); }
 			}
-			.iconWrapper.connected {
+			.iconWrapper.c-connected {
 				.iconBg { background: rgba(55, 122, 255, 0.15); }
 				.label { color: var(--color-system-accent-100); }
 				.icon.network,
 				.icon.self { background: url('~img/icon/sync/synced-accent.svg'); }
 				.icon.p2p { background: url('~img/icon/sync/p2p/connected.svg'); }
 			}
-			.iconWrapper.connectedSlow {
+			.iconWrapper.c-connectedSlow {
 				.iconBg { background: var(--color-very-light-orange); }
 				.label { color: var(--color-orange); }
 				.icon.network,
 				.icon.self { background: url('~img/icon/sync/upgrade.svg'); }
 			}
-			.iconWrapper.error {
+			.iconWrapper.c-error {
 				.iconBg { background: var(--color-very-light-red); }
 				.label { color: var(--color-red); }
 				.icon.network,
 				.icon.self { background: url('~img/icon/sync/error.svg'); }
 				.icon.p2p { background: url('~img/icon/sync/p2p/error.svg'); }
 			}
-			.iconWrapper.offline {
+			.iconWrapper.c-offline {
 				.icon.network,
 				.icon.self { background: url('~img/icon/sync/offline.svg'); }
 			}
@@ -67,10 +67,10 @@
 				.side.right { flex-shrink: 0; display: flex; align-items: center;}
 				.side.right {
 					.icon { width: 20px; height: 20px; margin: 0px; }
-					.icon.queued { background-image: url('~img/icon/menu/syncStatus/queued.svg'); }
-					.icon.syncing { background-image: url('~img/icon/menu/syncStatus/loading.svg'); transform: translateZ(0); animation: rotate 0.8s infinite steps(8); }
-					.icon.synced { background-image: url('~img/icon/menu/syncStatus/ok.svg'); }
-					.icon.error { background-image: url('~img/icon/menu/syncStatus/failed.svg'); display: block; }
+					.icon.c-queued { background-image: url('~img/icon/menu/syncStatus/queued.svg'); }
+					.icon.c-syncing { background-image: url('~img/icon/menu/syncStatus/loading.svg'); transform: translateZ(0); animation: rotate 0.8s infinite steps(8); }
+					.icon.c-synced { background-image: url('~img/icon/menu/syncStatus/ok.svg'); }
+					.icon.c-error { background-image: url('~img/icon/menu/syncStatus/failed.svg'); display: block; }
 					.icon.more { background-image: url('~img/icon/menu/action/more0.svg'); display: none; position: static; width: 20px !important; height: 20px !important; }
 					.icon.more:hover { background-color: unset !important; background-image: url('~img/icon/menu/action/more1.svg'); }
 				}

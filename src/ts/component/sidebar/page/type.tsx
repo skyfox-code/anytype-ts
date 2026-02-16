@@ -104,7 +104,7 @@ const SidebarPageType = observer(forwardRef<{}, I.SidebarPageComponent>((props, 
 
 		const { recommendedLayout, layoutAlign } = updateRef.current;
 
-		S.Detail.update(J.Constant.subId.type, { id: objectRef.current.id, details: updateRef.current }, false);
+		S.Detail.update(U.Subscription.spaceSubId(J.Constant.subId.type), { id: objectRef.current.id, details: updateRef.current }, false);
 
 		if ((undefined !== recommendedLayout) && !U.Object.isTypeLayout(objectRef.current.layout)) {
 			updateLayout(recommendedLayout);
@@ -216,7 +216,7 @@ const SidebarPageType = observer(forwardRef<{}, I.SidebarPageComponent>((props, 
 
 		const rootId = keyboard.getRootId();
 
-		S.Detail.update(J.Constant.subId.type, { id: backupRef.current.id, details: backupRef.current }, false);
+		S.Detail.update(U.Subscription.spaceSubId(J.Constant.subId.type), { id: backupRef.current.id, details: backupRef.current }, false);
 
 		if ((rootId != backupRef.current.id) && !U.Object.isTypeLayout(backupRef.current.layout)) {
 			updateLayout(backupRef.current.recommendedLayout);

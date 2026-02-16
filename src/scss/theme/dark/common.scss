@@ -183,7 +183,7 @@ html.themeDark {
 	.textarea { background: none; }
 	.textareaWrap { background-color: var(--color-bg-secondary); }
 
-	.select {
+	.select:not(.round) {
 		.icon.arrow { background-image: url('#{$themePath}/arrow/select/dark.svg') !important; }
 	}
 

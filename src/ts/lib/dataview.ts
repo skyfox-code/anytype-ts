@@ -192,7 +192,7 @@ class Dataview {
 			U.Subscription.subscribe({
 				...param,
 				subId,
-				filters: filters.map(it => this.filterMapper(it, { rootId })),
+				filters: filters.map(it => this.filterMapper({ ...it, includeTime: false }, { rootId })),
 				sorts: sorts.map(it => this.sortMapper(it)),
 				keys,
 				limit,
@@ -225,23 +225,30 @@ class Dataview {
 	 * @returns {any} The mapped object.
 	 */
 	filterMapper (it: any, param?: any) {
-		const relation = S.Record.getRelationByKey(it.relationKey);
+		if (it.relationKey) {
+			const relation = S.Record.getRelationByKey(it.relationKey);
+			if (!relation) {
+				return it;
+			};
 
-		if (!relation) {
-			return it;
+			it.format = relation.format;
+			if (undefined === it.includeTime) {
+				it.includeTime = relation.includeTime;
+			};
+
+			if (Relation.isArrayType(relation.format)) {
+				it.value = Relation.formatValue(relation, it.value, false);
+
+				if (Array.isArray(it.value)) {
+					it.value = it.value.map(it => this.valueTemplateMapper(it, param));
+				} else {
+					it.value = this.valueTemplateMapper(it.value, param);
+				};
+			};
 		};
 
-		it.format = relation.format;
-		it.includeTime = relation.includeTime;
-
-		if (Relation.isArrayType(relation.format)) {
-			it.value = Relation.formatValue(relation, it.value, false);
-
-			if (Array.isArray(it.value)) {
-				it.value = it.value.map(it => this.valueTemplateMapper(it, param));
-			} else {
-				it.value = this.valueTemplateMapper(it.value, param);
-			};
+		if (it.nestedFilters && it.nestedFilters.length) {
+			it.nestedFilters = it.nestedFilters.map((child: any) => this.filterMapper(child, param));
 		};
 
 		return it;
@@ -403,13 +410,13 @@ class Dataview {
 					case I.RelationType.MultiSelect:
 						value = Relation.getArrayValue(value);
 						if (value.length) {
-							option = S.Detail.get(J.Constant.subId.option, value[0]);
+							option = S.Detail.get(U.Subscription.spaceSubId(J.Constant.subId.option), value[0]);
 							bgColor = option?.color;
 						};
 						break;
 
 					case I.RelationType.Select:
-						option = S.Detail.get(J.Constant.subId.option, value);
+						option = S.Detail.get(U.Subscription.spaceSubId(J.Constant.subId.option), value);
 						bgColor = option?.color;
 						break;
 				};
@@ -439,16 +446,13 @@ class Dataview {
 				break;
 			};
 
+			case I.RelationType.MultiSelect:
 			case I.RelationType.Select: {
-				filter.condition = value ? I.FilterCondition.ExactIn : I.FilterCondition.Empty;
-				filter.value = value ? value : null;
-				break;
-			};
-
-			case I.RelationType.MultiSelect: {
 				value = Relation.getArrayValue(value);
-				filter.condition = value.length ? I.FilterCondition.ExactIn : I.FilterCondition.Empty;
-				filter.value = value.length ? value : null;
+				const length = value.length;
+
+				filter.condition = length ? I.FilterCondition.ExactIn : I.FilterCondition.Empty;
+				filter.value = length ? value : null;
 				break;
 			};
 		};
@@ -1062,17 +1066,17 @@ class Dataview {
 
 	/**
 	 * Creates default filter values from a relation item.
-	 * @param {any} item - The relation item (must have format).
+	 * @param {any} relation - The relation item (must have format).
 	 * @returns {object} The default filter values with condition, value, and quickOption.
 	 */
-	getDefaultFilterValues (item: any): { condition: I.FilterCondition; value: any; quickOption: I.FilterQuickOption } {
-		const conditions = Relation.filterConditionsByType(item.format);
+	getDefaultFilterValues (relation: any): { condition: I.FilterCondition; value: any; quickOption: I.FilterQuickOption } {
+		const conditions = Relation.filterConditionsByType(relation.format);
 		const condition = conditions.length ? conditions[0].id : I.FilterCondition.None;
-		const quickOption = this.getDefaultQuickOption(item);
+		const quickOption = this.getDefaultQuickOption(relation);
 
 		return {
 			condition: condition as I.FilterCondition,
-			value: Relation.formatValue(item, null, false),
+			value: Relation.formatValue(relation, null, false),
 			quickOption,
 		};
 	};
@@ -1116,7 +1120,7 @@ class Dataview {
 			nestedFilters: [
 				{
 					relationKey: 'name',
-					condition: I.FilterCondition.In,
+					condition: I.FilterCondition.Like,
 					value: '',
 				}
 			],
@@ -1213,7 +1217,7 @@ class Dataview {
 					return;
 				};
 
-				S.Detail.update(J.Constant.subId.type, { id: rootId, details: { recommendedRelations: value } }, false);
+				S.Detail.update(U.Subscription.spaceSubId(J.Constant.subId.type), { id: rootId, details: { recommendedRelations: value } }, false);
 				C.BlockDataviewRelationSet(rootId, J.Constant.blockId.dataview, [ 'name', 'description' ].concat(U.Object.getTypeRelationKeys(rootId)), () => {
 					this.viewRelationAdd(rootId, blockId, relation.relationKey, index, view, callBack);
 				});
