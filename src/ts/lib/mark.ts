@@ -76,6 +76,9 @@ const Order = [
  * They can overlap and are processed in a specific priority order
  * to produce correct nested HTML output.
  */
+const ZWS = '\u200B';
+const ZWS_TYPES = [ I.MarkType.Mention, I.MarkType.Emoji, I.MarkType.Link ];
+
 class Mark {
 
 	/**
@@ -422,8 +425,12 @@ class Mark {
 			};
 
 			if (r[mark.range.from] && r[mark.range.to - 1]) {
-				r[mark.range.from] = `<${tag} ${attr} ${data.join(' ')}>${prefix}${r[mark.range.from]}`;
-				r[mark.range.to - 1] += `${suffix}</${tag}>`;
+				const needsZws = ZWS_TYPES.includes(mark.type);
+				const zwsBefore = needsZws ? ZWS : '';
+				const zwsAfter = needsZws ? ZWS : '';
+
+				r[mark.range.from] = `${zwsBefore}<${tag} ${attr} ${data.join(' ')}>${prefix}${r[mark.range.from]}`;
+				r[mark.range.to - 1] += `${suffix}</${tag}>${zwsAfter}`;
 			};
 		};
 
@@ -476,6 +483,7 @@ class Mark {
 	 */
 	cleanHtml(html: string) {
 		html = String(html || '');
+		html = html.replace(/\u200B/g, '');
 		html = html.replace(/&nbsp;/g, ' ');
 		html = html.replace(/<br\/?>/g, '\n');
 
@@ -984,6 +992,50 @@ class Mark {
 		};
 
 		return { text, marks: rM, range: r, save };
+	};
+
+	/**
+	 * Convert a DOM text offset (with ZWS) to model text offset (without ZWS).
+	 * Scans the element's textContent for ZWS characters and subtracts them.
+	 */
+	domToModel (domOffset: number, el: HTMLElement): number {
+		const text = el.textContent || '';
+		let model = 0;
+
+		for (let i = 0; i < domOffset && i < text.length; i++) {
+			if (text[i] !== ZWS) {
+				model++;
+			};
+		};
+
+		return model;
+	};
+
+	/**
+	 * Convert a model text offset (without ZWS) to DOM text offset (with ZWS).
+	 * Scans the element's textContent for ZWS characters and adds them.
+	 */
+	modelToDom (modelOffset: number, el: HTMLElement): number {
+		const text = el.textContent || '';
+		let model = 0;
+		let dom = 0;
+
+		while ((model < modelOffset) && (dom < text.length)) {
+			if (text[dom] !== ZWS) {
+				model++;
+			};
+			dom++;
+		};
+
+		return dom;
+	};
+
+	/**
+	 * Check if the element contains any ZWS characters (i.e. has atomic marks).
+	 */
+	hasZws (el: HTMLElement): boolean {
+		const text = el.textContent || '';
+		return text.includes(ZWS);
 	};
 
 };

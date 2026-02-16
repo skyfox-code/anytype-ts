@@ -909,8 +909,14 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				const editable = editableRef.current?.getNode()?.find('.editable').get(0);
 
 				if (editable && editable.contains(selRange.startContainer)) {
-					const from = U.Common.getSelectionOffsetWithLatex(editable, selRange.startContainer, selRange.startOffset);
-					const to = selRange.collapsed ? from : U.Common.getSelectionOffsetWithLatex(editable, selRange.endContainer, selRange.endOffset);
+					let from = U.Common.getSelectionOffsetWithLatex(editable, selRange.startContainer, selRange.startOffset);
+					let to = selRange.collapsed ? from : U.Common.getSelectionOffsetWithLatex(editable, selRange.endContainer, selRange.endOffset);
+
+					// Convert DOM offsets to model offsets (strip ZWS cursor anchors)
+					if (Mark.hasZws(editable)) {
+						from = Mark.domToModel(from, editable);
+						to = Mark.domToModel(to, editable);
+					};
 
 					range = { from, to };
 				};
