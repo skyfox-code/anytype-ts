@@ -1,5 +1,5 @@
 import { I } from 'Lib';
-import { observable,  makeObservable } from 'mobx';
+import { observable, makeObservable } from 'mobx';
 
 class BlockContentTableRow implements I.ContentTableRow {
 	

@@ -161,6 +161,7 @@ const App: FC = () => {
 		Renderer.on('logout', () => S.Auth.logout(false, false));
 		Renderer.on('data-path', (e: any, p: string) => S.Common.dataPathSet(p));
 		Renderer.on('close-session', onCloseSession);
+		Renderer.on('set-pinned', (e: any, v: boolean) => S.Common.isPinnedSet(v));
 		Renderer.on('set-single-tab', (e: any, v: boolean) => {
 			S.Common.singleTabSet(v);
 			keyboard.setBodyClass();
@@ -204,6 +205,9 @@ const App: FC = () => {
 		Renderer.on('power-event', (e: any, state: string) => {
 			C.AppSetDeviceState(state == 'suspend' ? I.AppDeviceState.Background : I.AppDeviceState.Foreground);
 		});
+
+		Renderer.on('tab-show-tooltip', (e: any, data: any) => U.Common.tabTooltipShow(data));
+		Renderer.on('tab-hide-tooltip', () => U.Common.tabTooltipHide());
 	};
 	
 	const unregisterIpcEvents = () => {
@@ -226,15 +230,18 @@ const App: FC = () => {
 		Renderer.remove('shutdownStart');
 		Renderer.remove('zoom');
 		Renderer.remove('native-theme');
+		Renderer.remove('set-pinned');
 		Renderer.remove('pin-check');
 		Renderer.remove('reload');
 		Renderer.remove('power-event');
+		Renderer.remove('tab-show-tooltip');
+		Renderer.remove('tab-hide-tooltip');
 	};
 
 	const onInit = (data: any) => {
 		data = data || {};
 
-		const { id, dataPath, config, isDark, languages, isPinChecked, css, isSingleTab } = data;
+		const { id, dataPath, config, isDark, languages, isPinChecked, isPinned, css, isSingleTab } = data;
 		const body = $('body');
 		const node = $(nodeRef.current);
 		const bubbleLoader = $('#bubble-loader');
@@ -256,6 +263,7 @@ const App: FC = () => {
 		S.Common.windowIdSet(id);
 		S.Common.tabIdSet(tabId);
 		S.Common.setLeftSidebarState('vault', '');
+		S.Common.isPinnedSet(isPinned || false);
 		S.Common.singleTabSet(isSingleTab);
 
 		U.Data.updateTabsDimmer();

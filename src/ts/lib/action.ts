@@ -287,7 +287,7 @@ class Action {
 
 		const ext = String(object.fileExt || '').toLowerCase();
 		const cb = () => {
-			C.FileDownload(object.id, U.Common.getElectron().tmpPath(), (message: any) => {
+			C.FileDownload(object.id, U.Common.getElectron().downloadPath(), (message: any) => {
 				if (message.path) {
 					this.openPath(message.path);
 					analytics.event('OpenMedia', { route });

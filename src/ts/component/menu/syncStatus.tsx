@@ -19,6 +19,7 @@ const MenuSyncStatus = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 	const n = useRef(0);
 	const cache = useRef(new CellMeasurerCache({ fixedWidth: true, defaultHeight: HEIGHT }));
 	const emptyText = U.Data.isLocalNetwork() ? translate('menuSyncStatusEmptyLocal') : translate('menuSyncStatusEmpty');
+	const isOwner = U.Space.isMyOwner();
 
 	useEffect(() => {
 		load();
@@ -129,6 +130,13 @@ const MenuSyncStatus = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		const filters: any[] = [
 			{ relationKey: 'resolvedLayout', condition: I.FilterCondition.NotIn, value: U.Object.getSystemLayouts().concat(I.ObjectLayout.Participant) },
 		];
+
+		if (!isOwner) {
+			const participant = U.Space.getMyParticipant();
+			
+			filters.push({ relationKey: 'creator', condition: I.FilterCondition.Equal, value: participant?.id });
+		};
+
 		const sorts = [
 			{ relationKey: 'syncStatus', type: I.SortType.Custom, customOrder: [ I.SyncStatusObject.Error, I.SyncStatusObject.Syncing, I.SyncStatusObject.Queued, I.SyncStatusObject.Synced ] },
 			{ relationKey: 'syncDate', type: I.SortType.Desc, includeTime: true },
@@ -187,12 +195,12 @@ const MenuSyncStatus = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 
 		switch (p2p) {
 			case I.P2PStatus.Connected: {
-				className = 'connected';
+				className = 'c-connected';
 				break;
 			};
 			case I.P2PStatus.NotPossible: {
 				message = translate('menuSyncStatusP2PRestricted');
-				className = 'error';
+				className = 'c-error';
 				break;
 			};
 		};
@@ -224,25 +232,25 @@ const MenuSyncStatus = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 			case I.SyncStatusSpace.Syncing:
 			case I.SyncStatusSpace.Synced: {
 				isConnected = true;
-				className = 'connected';
+				className = 'c-connected';
 				break;
 			};
 
 			case I.SyncStatusSpace.Upgrade: {
 				isConnected = true;
 				isSlow = true;
-				className = 'connectedSlow';
+				className = 'c-connectedSlow';
 				break;
 			};
 
 			case I.SyncStatusSpace.Error: {
 				isError = true;
-				className = 'error';
+				className = 'c-error';
 				break;
 			};
 
 			case I.SyncStatusSpace.Offline: {
-				className = 'offline';
+				className = 'c-offline';
 			};
 		};
 

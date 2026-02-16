@@ -387,7 +387,7 @@ const PopupShortcut = forwardRef<{}, I.Popup>((props, ref) => {
 			const key = keyboard.eventKey(e);
 			const which = e.which;
 			const code = String(e.code || '').toLowerCase();
-			const skip = [ Key.meta, Key.ctrl ];
+			const skip = [ Key.meta, Key.ctrl, Key.alt, Key.shift ];
 			const special = [ 'comma' ];
 
 			if (key == Key.escape) {

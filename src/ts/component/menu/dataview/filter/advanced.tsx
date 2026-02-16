@@ -4,10 +4,11 @@ import { observer } from 'mobx-react';
 import { I, C, S, J, analytics, translate } from 'Lib';
 import { MenuItemVertical } from 'Component';
 import Group from 'Component/block/dataview/filters/group';
+import relation from 'json/relation';
 
 const MenuFilterAdvanced = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 
-	const { param, getId, getSize, onKeyDown, setActive } = props;
+	const { param, getId, getSize, onKeyDown, setActive, position } = props;
 	const { data, className, classNameWrap } = param;
 	const { rootId, blockId, getView, loadData, isInline, getTarget, readonly } = data;
 	const nodeRef = useRef(null);
@@ -47,6 +48,7 @@ const MenuFilterAdvanced = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =
 		};
 
 		const object = getTarget();
+		const rel = S.Record.getRelationByKey(filter.relationKey);
 
 		C.BlockDataviewFilterRemove(rootId, blockId, view.id, [ filter.id ], () => {
 			loadData(view.id, 0);
@@ -56,8 +58,13 @@ const MenuFilterAdvanced = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =
 
 		analytics.event('RemoveFilter', {
 			objectType: object.type,
+			relationKey: filter.relationKey, 
+			format: rel?.format,
 			embedType: analytics.embedType(isInline)
 		});
+	};
+
+	const beforePosition = () => {
 	};
 
 	const filter = getAdvancedFilter();
@@ -72,6 +79,7 @@ const MenuFilterAdvanced = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =
 	}, []);
 
 	useEffect(() => {
+		beforePosition();
 		setActive();
 	});
 
@@ -81,6 +89,7 @@ const MenuFilterAdvanced = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =
 		getItems: () => [],
 		getIndex: () => n.current,
 		setIndex: (i: number) => n.current = i,
+		beforePosition,
 	}), []);
 
 	if (!filter) {
@@ -108,6 +117,7 @@ const MenuFilterAdvanced = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =
 				loadData={loadData}
 				readonly={isReadonly}
 				onDelete={onDelete}
+				position={position}
 			/>
 			<div className="bottom">
 				<MenuItemVertical id="delete" name={translate('menuDataviewFilterDeleteFilter')} icon="remove" onClick={onDelete} />

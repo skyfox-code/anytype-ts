@@ -65,7 +65,6 @@ const HeaderMainChat = observer(forwardRef<{}, I.HeaderComponent>((props, ref) =
 				offsetY: 4,
 			}, { 
 				noManage: true,
-				withSearch: true,
 				route: analytics.route.header,
 			});
 		} else {
@@ -113,7 +112,7 @@ const HeaderMainChat = observer(forwardRef<{}, I.HeaderComponent>((props, ref) =
 					id="button-header-search"
 					tooltipParam={{ text: translate('commonSearch'), caption: keyboard.getCaption('searchText'), typeY: I.MenuDirection.Bottom }}
 					className="search withBackground"
-					onClick={() => keyboard.onSearchText('',  analytics.route.header)}
+					onClick={() => keyboard.onSearchText('', analytics.route.header)}
 					onDoubleClick={e => e.stopPropagation()}
 				/>
 

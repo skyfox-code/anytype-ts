@@ -7,10 +7,13 @@
 		.wrap { height: 100%; display: flex; flex-direction: column; }
 		.items { flex-grow: 1; }
 
-		.item { padding: 4px 10px; white-space: nowrap; display: flex; align-items: center; gap: 0px 4px; }
+		.item { white-space: nowrap; display: flex; align-items: center; gap: 0px 4px; }
 		.item {
 			&.add, &.deleteSort { padding: 4px 16px; }
 			&.sortItem:before { display: none; }
+
+			.icon { margin-right: 2px; }
+			.icon.dnd { margin-right: 4px; }
 
 			.sides { display: flex; justify-content: space-between; align-items: center; flex-grow: 1; }
 			.side { display: flex; gap: 8px; }

@@ -21,6 +21,10 @@ interface GraphRefProps {
 	resize: () => void;
 	addNewNode: (id: string, sourceId?: string, param?: any, callBack?: (object: any) => void) => void;
 	forceUpdate: () => void;
+	timelineStart: (speed: number) => void;
+	timelinePause: () => void;
+	timelineSeek: (position: number) => void;
+	timelineReset: () => void;
 };
 
 const Graph = observer(forwardRef<GraphRefProps, Props>(({
@@ -144,7 +148,7 @@ const Graph = observer(forwardRef<GraphRefProps, Props>(({
 
 		const transfer = canvas.current.transferControlToOffscreen();
 
-		worker.current = new Worker('workers/graph.pixi.js');
+		worker.current = new Worker('workers/graph.js');
 		worker.current.onerror = (e: any) => console.log(e);
 		worker.current.addEventListener('message', onMessage);
 
@@ -452,7 +456,7 @@ const Graph = observer(forwardRef<GraphRefProps, Props>(({
 
 	const onMessage = (e) => {
 		const settings = S.Common.getGraph(storageKey);
-		const { id, data } = e.data;
+		const { id: msgId, data } = e.data;
 		const node = $(nodeRef.current);
 
 		if (!node || !node.length) {
@@ -472,7 +476,7 @@ const Graph = observer(forwardRef<GraphRefProps, Props>(({
 			}),
 		};
 
-		switch (id) {
+		switch (msgId) {
 			case 'onClick': {
 				if (data.node){
 					onClickObject(data.node);
@@ -553,6 +557,21 @@ const Graph = observer(forwardRef<GraphRefProps, Props>(({
 					setSelected(ids.current.concat([id]));
 					nodesSelectedByDragToSelect.current = nodesSelectedByDragToSelect.current.concat([id]);
 				});
+				break;
+			};
+
+			case 'onTimelineUpdate': {
+				$(window).trigger(`timelineUpdate.${id}`, {
+					position: data.position,
+					cutoffDate: data.cutoffDate,
+					isPlaying: data.isPlaying,
+				});
+				break;
+			};
+
+			case 'onTimelineComplete': {
+				$(window).trigger(`timelineComplete.${id}`);
+				break;
 			};
 		};
 	};
@@ -730,6 +749,10 @@ const Graph = observer(forwardRef<GraphRefProps, Props>(({
 		resize,
 		addNewNode,
 		forceUpdate: () => setDummy(dummy + 1),
+		timelineStart: (speed: number) => send('timelineStart', { speed }),
+		timelinePause: () => send('timelinePause', {}),
+		timelineSeek: (position: number) => send('timelineSeek', { position }),
+		timelineReset: () => send('timelineReset', {}),
 	}));
 
 	return (

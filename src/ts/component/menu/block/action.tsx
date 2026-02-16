@@ -112,7 +112,7 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		let hasColor = true;
 		let hasBg = true;
 		let hasCommon = true;
-		let hasClipboard = true;
+		const hasClipboard = true;
 		let hasQuote = false;
 		
 		for (const id of blockIds) {
@@ -291,10 +291,21 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 				menuParam.data = Object.assign(menuParam.data, {
 					onSelect: (item: any) => {
 						if (item.type == I.BlockType.Text) {
+							const isToggle = [ 
+								I.TextStyle.Toggle, 
+								I.TextStyle.ToggleHeader1, 
+								I.TextStyle.ToggleHeader2, 
+								I.TextStyle.ToggleHeader3,
+							].includes(item.itemId);
+
+							if (isToggle) {
+								ids = selection?.getForClick(blockId, false, false);
+							};
+
 							C.BlockListTurnInto(rootId, ids, item.itemId, () => {
 								setFocus(ids[0]);
 
-								if ([ I.TextStyle.Toggle, I.TextStyle.ToggleHeader1, I.TextStyle.ToggleHeader2, I.TextStyle.ToggleHeader3 ].includes(item.itemId)) {
+								if (isToggle) {
 									ids.forEach(id => S.Block.toggle(rootId, id, true));
 								};
 							});
@@ -693,7 +704,7 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		<div>
 			<Filter 
 				ref={filterRef}
-				className="outlined"
+				className="outlined round"
 				placeholder={translate('menuBlockActionsFilterActions')}
 				value={filter}
 				onFocus={onFilterFocus} 

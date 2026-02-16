@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import raf from 'raf';
 import { analytics, I, J, keyboard, S, Storage, U } from 'Lib';
+import { t } from '@excalidraw/excalidraw/types/i18n';
 
 interface SidebarData {
 	width: number;
@@ -36,6 +37,9 @@ class Sidebar {
 
 	isAnimating = false;
 	timeoutAnim = 0;
+	timeoutHover = 0;
+	timeoutSubPage = 0;
+	subPageOpId = 0;
 
 	/**
 	 * Initializes sidebar objects and state from storage.
@@ -125,12 +129,12 @@ class Sidebar {
 	toggle (panel: I.SidebarPanel, subPage?: string): void {
 		switch (panel) {
 			case I.SidebarPanel.Left: {
-				this.leftPanelToggle();
+				this.leftPanelToggle(true, true);
 				break;
 			};
 
 			case I.SidebarPanel.SubLeft: {
-				this.leftPanelSubPageToggle(subPage);
+				this.leftPanelSubPageToggle(subPage, true, true);
 				break;
 			};
 		};
@@ -198,14 +202,14 @@ class Sidebar {
 	/**
 	 * Toggles the sidebar open/close state.
 	 */
-	leftPanelToggle () {
+	leftPanelToggle (animate: boolean, save: boolean) {
 		if (this.isAnimating) {
 			return;
 		};
 		
 		const { width, isClosed } = this.getData(I.SidebarPanel.Left);
 
-		isClosed ? this.leftPanelOpen(width, true, true) : this.leftPanelClose(true, true);
+		isClosed ? this.leftPanelOpen(width, animate, save) : this.leftPanelClose(animate, save);
 		S.Menu.closeAll();
 		analytics.event(isClosed ? 'ExpandSidebar' : 'CollapseSidebar');
 	};
@@ -315,6 +319,9 @@ class Sidebar {
 			return;
 		};
 
+		this.subPageOpId++;
+		window.clearTimeout(this.timeoutSubPage);
+
 		const width = dataLeft.isClosed ? 0 : dataLeft.width;
 		const objLeft = this.leftPanelGetNode();
 		const subPageWrapperLeft = objLeft.find('#subPageWrapper');
@@ -327,7 +334,7 @@ class Sidebar {
 
 		this.resizePage(false, width, null, animate);
 
-		window.setTimeout(() => {
+		this.timeoutSubPage = window.setTimeout(() => {
 			this.setData(I.SidebarPanel.SubLeft, false, { isClosed: true }, save);
 			this.setStyle(I.SidebarPanel.SubLeft, false, { isClosed: true });
 
@@ -361,24 +368,39 @@ class Sidebar {
 			return;
 		};
 
+		this.subPageOpId++;
+		window.clearTimeout(this.timeoutSubPage);
+
+		const opId = this.subPageOpId;
 		const width = dataLeft.isClosed ? 0 : dataLeft.width;
 		const newWidth = width + dataSubLeft.width;
 
+		subPageWrapperLeft.removeClass('sidebarAnimation isOpening isClosing');
 		subPageWrapperLeft.css({ transform: 'translate3d(-100%,0px,0px)' });
 		objLeft.css({ width });
 		dummyLeft.css({ width });
+
+		void subPageWrapperLeft[0]?.offsetHeight;
 
 		this.resizePage(false, newWidth, null, animate);
 		this.setData(I.SidebarPanel.SubLeft, false, { isClosed: false }, save);
 		this.setStyle(I.SidebarPanel.SubLeft, false, { width: dataSubLeft.width, isClosed: false });
 
 		raf(() => {
+			if (opId !== this.subPageOpId) {
+				return;
+			};
+
 			subPageWrapperLeft.addClass('sidebarAnimation isOpening').css({ transform: 'translate3d(0px,0px,0px)' });
 
 			objLeft.addClass('sidebarAnimation').css({ width: newWidth });
 			dummyLeft.addClass('sidebarAnimation').css({ width: newWidth});
 
-			window.setTimeout(() => {
+			this.timeoutSubPage = window.setTimeout(() => {
+				if (opId !== this.subPageOpId) {
+					return;
+				};
+
 				subPageWrapperLeft.removeClass('sidebarAnimation isOpening').css({ transform: '' });
 				objLeft.removeClass('sidebarAnimation').css({ width: '' });
 				dummyLeft.removeClass('sidebarAnimation');
@@ -390,13 +412,43 @@ class Sidebar {
 		analytics.event('ExpandWidgetPanel');
 	};
 
-	leftPanelSubPageToggle (id: string) {
+	leftPanelSubPageToggle (id: string, animate: boolean, save: boolean) {
 		const { isClosed } = this.getData(I.SidebarPanel.SubLeft);
 
-		if (isClosed) {
-			this.leftPanelSubPageOpen(id, true, true);
+		isClosed ? this.leftPanelSubPageOpen(id, animate, save) : this.leftPanelSubPageClose(animate, save);
+	};
+
+	toggleBothPanels () {
+		if (this.isAnimating) {
+			return;
+		};
+
+		const dataLeft = this.getData(I.SidebarPanel.Left);
+		const dataSubLeft = this.getData(I.SidebarPanel.SubLeft);
+		const shouldOpen = dataLeft.isClosed || dataSubLeft.isClosed;
+		const delay = J.Constant.delay.sidebar;
+
+		S.Menu.closeAll();
+
+		if (shouldOpen) {
+			if (dataLeft.isClosed && dataSubLeft.isClosed) {
+				this.leftPanelSubPageOpen('widget', true, true);
+				window.setTimeout(() => {
+					this.setAnimating(false);
+					this.leftPanelOpen(dataLeft.width, true, true);
+				}, delay);
+			} else
+			if (dataLeft.isClosed) {
+				this.leftPanelOpen(dataLeft.width, true, true);
+			} else {
+				this.leftPanelSubPageOpen('widget', true, true);
+			};
 		} else {
-			this.leftPanelSubPageClose(true, true);
+			this.leftPanelClose(true, true);
+			window.setTimeout(() => {
+				this.setAnimating(false);
+				this.leftPanelSubPageClose(true, true);
+			}, delay);
 		};
 	};
 
@@ -422,8 +474,9 @@ class Sidebar {
 	 */
 	onMouseMove (): void {
 		const { hideSidebar, windowIsFocused } = S.Common;
+		const { x } = keyboard.mouse.page;
 
-		if (keyboard.isDragging || keyboard.isResizing) {
+		if (!x || keyboard.isDragging || keyboard.isResizing) {
 			return;
 		};
 
@@ -433,14 +486,8 @@ class Sidebar {
 			!keyboard.isMain() ||
 			!windowIsFocused
 		) {
-			return;
-		};
-
-		const { x } = keyboard.mouse.page;
-
-		// Skip if mouse position is at origin - indicates uninitialized state
-		// This can happen when switching tabs before any mouse movement
-		if (!x) {
+			window.clearTimeout(this.timeoutHover);
+			this.timeoutHover = 0;
 			return;
 		};
 
@@ -472,17 +519,59 @@ class Sidebar {
 		};
 
 		if (show) {
-			this.leftPanelOpen(dataLeft.width, false, false);
-			this.leftPanelSubPageOpen(leftState.subPage, false, false);
-		} else 
-		if (hide) {
-			if (!dataLeft.isClosed) {
-				this.leftPanelClose(false, false);
+			if (!this.timeoutHover && dataLeft.isClosed) {
+				this.timeoutHover = window.setTimeout(() => {
+					this.timeoutHover = 0;
+					this.leftPanelOpen(dataLeft.width, false, false);
+					this.leftPanelSubPageOpen(leftState.subPage, false, false);
+				}, J.Constant.delay.sidebarHover);
 			};
-			if (!dataSubLeft.isClosed) {
-				this.leftPanelSubPageClose(false, false);
+		} else {
+			window.clearTimeout(this.timeoutHover);
+			this.timeoutHover = 0;
+
+			if (hide) {
+				this.autoHidePanels(dataLeft, dataSubLeft);
 			};
 		};
+	};
+
+	/**
+	 * Directly closes both left panels without animation for auto-hide.
+	 * Bypasses animation methods to avoid async race conditions with page width.
+	 */
+	private autoHidePanels (dataLeft: SidebarData, dataSubLeft: SidebarData): void {
+		const needCloseLeft = !dataLeft.isClosed;
+		const needCloseSubLeft = !dataSubLeft.isClosed;
+
+		if (!needCloseLeft && !needCloseSubLeft) {
+			return;
+		};
+
+		this.subPageOpId++;
+		window.clearTimeout(this.timeoutSubPage);
+
+		const objLeft = this.leftPanelGetNode();
+		const pageWrapperLeft = objLeft.find('#pageWrapper');
+		const subPageWrapperLeft = objLeft.find('#subPageWrapper');
+		const dummyLeft = $('#sidebarDummyLeft');
+
+		if (needCloseLeft) {
+			this.setData(I.SidebarPanel.Left, false, { isClosed: true }, false);
+			this.setStyle(I.SidebarPanel.Left, false, { width: 0, isClosed: true });
+		};
+
+		if (needCloseSubLeft) {
+			this.setData(I.SidebarPanel.SubLeft, false, { isClosed: true }, false);
+			this.setStyle(I.SidebarPanel.SubLeft, false, { isClosed: true });
+		};
+
+		pageWrapperLeft.removeClass('sidebarAnimation');
+		subPageWrapperLeft.removeClass('sidebarAnimation isClosing isOpening').css({ transform: '' });
+		objLeft.removeClass('sidebarAnimation').css({ width: '' });
+		dummyLeft.removeClass('sidebarAnimation');
+
+		this.resizePage(false, 0, null, false);
 	};
 
 	/**

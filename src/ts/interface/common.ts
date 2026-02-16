@@ -270,6 +270,7 @@ export interface GraphSettings {
 	depth: number;
 	filterTypes: string[];
 	typeEdges: boolean;
+	timeline: boolean;
 };
 
 export interface FocusState {

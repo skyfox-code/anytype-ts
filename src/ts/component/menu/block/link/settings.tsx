@@ -169,7 +169,7 @@ const MenuBlockLinkSettings = observer(forwardRef<I.MenuRef, I.Menu>((props, ref
 		const itemIconSwitch = canIconSwitch ? { id: 'iconSwitch', name: translate('commonIcon'), withSwitch: true, switchValue: (icon.id != I.LinkIconSize.None) } : null;
 		const itemCover = canCover ? { id: 'cover', name: translate('menuBlockLinkSettingsCover'), withSwitch: true, switchValue: hasRelationKey('cover') } : null;
 		const itemName = { id: 'name', name: translate('menuBlockLinkSettingsName'), icon: `relation ${Relation.className(I.RelationType.ShortText)}` };
-		const itemDescription = canDescription ? { 
+		const itemDescription = canDescription ? {
 			id: 'description', name: translate('menuBlockLinkSettingsDescription'), icon: `relation ${Relation.className(I.RelationType.LongText)}`,
 			caption: description.name, arrow: true
 		} : null;

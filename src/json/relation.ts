@@ -137,6 +137,7 @@ export default {
 		'isArchived',
 		'restrictions',
 		'timestamp',
+		'createdDate',
 	],
 
 	template: [

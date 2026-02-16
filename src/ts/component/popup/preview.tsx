@@ -49,7 +49,10 @@ const PopupPreview = observer(forwardRef<{}, I.Popup>((props, ref) => {
 
 	const onDimmer = (e: MouseEvent) => {
 		const target = $(e.target);
-		if (!target.hasClass('mediaContainer') && !target.parents('.mediaContainer').length) {
+		const isMedia = target.hasClass('mediaContainer') || target.parents('.mediaContainer').length;
+		const isArrow = target.hasClass('swiper-button-prev') || target.hasClass('swiper-button-next');
+
+		if (!isMedia && !isArrow) {
 			close();
 		};
 	};
@@ -321,7 +324,6 @@ const PopupPreview = observer(forwardRef<{}, I.Popup>((props, ref) => {
 				{gallery.length > 1 ? (
 					<Swiper
 						onSwiper={swiper => thumbsRef.current = swiper}
-						initialSlide={initial}
 						spaceBetween={8}
 						slidesPerView="auto"
 						mousewheel={true}

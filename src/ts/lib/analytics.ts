@@ -438,7 +438,10 @@ class Analytics {
 			};
 
 			case 'AddFilter':
+			case 'RemoveFilter':
 			case 'ChangeFilterValue': {
+				data.format = Number(data.format) || 0;
+				data.format = I.RelationType[data.format];
 				data.condition = Number(data.condition) || 0;
 				data.condition = I.FilterCondition[data.condition];
 				break;

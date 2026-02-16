@@ -382,12 +382,25 @@ class ChatStore {
 			return ret;
 		};
 
-		const chats = S.Record.getRecords(J.Constant.subId.chatGlobal);
-		const chatIds = chats.map(it => it.id);
+		const spaceview = U.Space.getSpaceviewBySpaceId(spaceId);
 
 		for (const [ chatId, state ] of spaceMap) {
-			if (chatId && chatIds.includes(chatId)) {
+			if (!chatId) {
+				continue;
+			};
+
+			const chat = S.Detail.get(J.Constant.subId.chatGlobal, chatId, []);
+			if (chat._empty_ || chat.isArchived) {
+				continue;
+			};
+
+			const chatMode = U.Object.getChatNotificationMode(spaceview, chatId);
+
+			if (state.mentionCounter && [ I.NotificationMode.All, I.NotificationMode.Mentions ].includes(chatMode)) {
 				ret.mentionCounter += Number(state.mentionCounter) || 0;
+			};
+
+			if (state.messageCounter && [ I.NotificationMode.All ].includes(chatMode)) {
 				ret.messageCounter += Number(state.messageCounter) || 0;
 			};
 		};

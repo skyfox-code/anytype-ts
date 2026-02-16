@@ -12,7 +12,6 @@ interface SpaceContextParam {
 	withPin?: boolean;
 	withDelete?: boolean;
 	withOpenNewTab?: boolean;
-	withSearch?: boolean;
 	noShare?: boolean;
 	route: string;
 };
@@ -674,13 +673,6 @@ class UtilMenu {
 					c._sortWeight_ += getWeight(c.name);
 				};
 
-				/*
-				if (!ret && c.description && (c.description.match(regC) || c.description.match(regS))) {
-					ret = true;
-					c._sortWeight_ += getWeight(c.description);
-				};
-				*/
-
 				return ret; 
 			});
 
@@ -909,7 +901,7 @@ class UtilMenu {
 		param = param || {};
 
 		const { targetSpaceId, uxType } = space;
-		const { isSharePage, noManage, noMembers, withPin, withDelete, withOpenNewTab, withSearch, noShare, route } = param;
+		const { isSharePage, noManage, noMembers, withPin, withDelete, withOpenNewTab, noShare, route } = param;
 		const isLoading = space.isAccountLoading || space.isLocalLoading;
 		const isOwner = U.Space.isMyOwner(targetSpaceId);
 		const participants = U.Space.getParticipantsList([ I.ParticipantStatus.Active ]);
@@ -1053,10 +1045,6 @@ class UtilMenu {
 				delete: [],
 			};
 
-			if (withSearch) {
-				sections.search.push({ id: 'searchChat', icon: 'search', name: translate('menuObjectSearchInChat'), caption: keyboard.getCaption('searchText') });
-			};
-
 			if (!noShare && inviteLink) {
 				sections.share = [
 					{ id: 'link', icon: 'copyLink', name: translate('menuSpaceContextCopyInviteLink') },
@@ -1125,6 +1113,11 @@ class UtilMenu {
 				};
 				options = options.concat(section);
 			});
+
+			const optionsWithoutDiv = options.filter(it => !it.isDiv);
+			if (optionsWithoutDiv.length <= 2) {
+				options = optionsWithoutDiv;
+			};
 
 			return options;
 		};
@@ -1207,7 +1200,7 @@ class UtilMenu {
 		const options = Relation.getFilterOptions(rootId, blockId, view);
 
 		const hasAdvancedFilter = view?.filters?.some(f => f.operator === I.FilterOperator.And);
-		const bottomItems = (!onAdvancedFilterAdd || hasAdvancedFilter) ? [] : [
+		const buttons = (!onAdvancedFilterAdd || hasAdvancedFilter) ? [] : [
 			{ id: 'advancedFilter', name: translate('menuDataviewFilterAdvancedAdd'), icon: 'advancedFilter' }
 		];
 
@@ -1222,10 +1215,7 @@ class UtilMenu {
 
 		const onOpen = context => {
 			this.setContext(context);
-
-			if (menuParam.onOpen) {
-				menuParam.onOpen(context);
-			};
+			menuParam.onOpen?.(context);
 		};
 
 		delete(menuParam.onOpen);
@@ -1239,11 +1229,10 @@ class UtilMenu {
 			...menuParam,
 			data: {
 				options,
-				bottomItems,
+				buttons,
 				withFilter: true,
-				maxHeight: 378,
 				noClose: true,
-				withAdd: true,
+				useMaxWindowHeight: true,
 				onSelect: (e: any, item: any) => {
 					if (item.id == 'add') {
 						this.sortOrFilterRelationAdd(this.menuContext, param, menuParam, relation => callBack(relation));
@@ -1837,6 +1826,8 @@ class UtilMenu {
 
 							widgetSections[idx].isHidden = true;
 							S.Common.widgetSectionsSet([ ...widgetSections ]);
+
+							analytics.event('HideSection');
 							break;
 						};
 

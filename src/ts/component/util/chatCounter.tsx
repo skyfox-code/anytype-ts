@@ -38,12 +38,13 @@ const ChatCounter = observer(forwardRef<HTMLDivElement, Props>((props, ref) => {
 
 				const chatMode = U.Object.getChatNotificationMode(spaceview, chatId);
 
-				if (state.messageCounter && [ I.NotificationMode.All ].includes(chatMode)) {
-					modeMessage = chatMode;
-				};
-
-				if (state.mentionCounter && [ I.NotificationMode.All, I.NotificationMode.Mentions ].includes(chatMode)) {
-					modeMention = chatMode;
+				if (state.messageCounter && [ I.NotificationMode.All, I.NotificationMode.Mentions ].includes(chatMode)) {
+					if (state.messageCounter) {
+						modeMessage = chatMode;
+					};
+					if (state.mentionCounter) {
+						modeMention = chatMode;
+					};
 				};
 
 				counters.messageCounter += Number(state.messageCounter) || 0;

@@ -125,7 +125,7 @@ const HeaderMainSettings = observer(forwardRef<{}, I.HeaderComponent>((props, re
 				{!isPopup ? (
 					<Icon 
 						className="widgetPanel withBackground" 
-						onClick={() => sidebar.leftPanelSubPageToggle('widget')}
+						onClick={() => sidebar.leftPanelSubPageToggle('widget', true, true)}
 						tooltipParam={{ 
 							text: translate('commonWidgets'), 
 							caption: keyboard.getCaption('widget'), 

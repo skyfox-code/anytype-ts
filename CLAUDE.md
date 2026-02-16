@@ -110,9 +110,8 @@ The graph view uses a Web Worker with PixiJS WebGL rendering for performance:
 
 **Files:**
 - `src/ts/component/graph/provider.tsx` - React component, D3 zoom/drag, image loading
-- `dist/workers/graph.pixi.js` - Web Worker with D3 force simulation + PixiJS WebGL rendering
+- `dist/workers/graph.js` - Web Worker with D3 force simulation + PixiJS WebGL rendering
 - `dist/workers/lib/pixi.min.js` - Bundled PixiJS for worker (built from `rspack.pixi.config.js`)
-- `dist/workers/lib/util.js` - Canvas drawing utilities (legacy, still used for some helpers)
 
 **Architecture:**
 - OffscreenCanvas transferred to worker for off-main-thread rendering
@@ -303,3 +302,18 @@ After completing any task that edits SCSS files (`src/scss/`), SVG/image files (
 - Missing dark icon variants in `src/img/theme/dark/`
 - Inline `html.themeDark` overrides that belong in `src/scss/theme/dark/`
 - Dynamic icon paths missing `S.Common.getThemePath()`
+
+## QA Engineer
+
+After completing any task that modifies user-facing behavior — especially in the editor (`component/editor/`, `component/block/`), menus (`component/menu/`), popups (`component/popup/`), sidebar (`component/sidebar/`), or widgets (`component/widget/`) — run the `/qa-engineer` skill to generate E2E test coverage.
+
+The QA Engineer skill:
+1. Analyzes the git diff to identify user-facing changes
+2. Checks existing test coverage in `../anytype-desktop-suite/`
+3. Creates a test plan in `../anytype-desktop-suite/specs/`
+4. Generates Playwright test files in `../anytype-desktop-suite/tests/`
+5. Creates page objects if needed in `../anytype-desktop-suite/src/pages/`
+
+**Skip** for changes that have no user-facing impact (type refactors, internal utilities, CSS-only tweaks, build config).
+
+**Test suite repo:** `../anytype-desktop-suite` — Playwright E2E tests with Page Object Model, translation-aware selectors, and gRPC server lifecycle management. See its `CLAUDE.md` for test architecture details.

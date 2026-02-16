@@ -8,6 +8,7 @@ import { I, C, S, U, J, Key, Preview, Mark, keyboard, Storage, Action, translate
 import PageHeadEditor from 'Component/page/elements/head/editor';
 import Children from 'Component/page/elements/children';
 import TableOfContents from 'Component/page/elements/tableOfContents';
+import { link } from 'fs';
 
 interface Props extends I.PageComponent {
 	onOpen?(): void;
@@ -37,6 +38,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	const buttonAdd = useRef<any>(null);
 	const blockFeatured = useRef<any>(null);
 	const container = useRef<any>(null);
+	const scrollTopRef = useRef(0);
 
 	useEffect(() => {
 		open();
@@ -67,17 +69,18 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			return;
 		};
 
-		const top = Storage.getScroll('editor', rootId, isPopup);
-
 		checkDeleted();
 		initNodes();
 		rebind();
-		resizePage();
-		onScroll();
+		resizePage(() => {
+			if (scrollTopRef.current) {
+				U.Common.getScrollContainer(isPopup).scrollTop(scrollTopRef.current);
+				scrollTopRef.current = 0;
+			};
+		});
 
-		if (top) {
-			window.setTimeout(() => U.Common.getScrollContainer(isPopup).scrollTop(top), 40);
-		};
+		tocRef.current?.onScroll();
+		Preview.previewHide(false);
 
 		focus.apply();
 		S.Block.updateNumbers(rootId);
@@ -108,6 +111,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	};
 
 	const open = () => {
+		scrollTopRef.current = Storage.getScroll('editor', rootId, isPopup);
 		setIsDeleted(false);
 		idRef.current = rootId;
 
@@ -803,7 +807,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				keyboard.onSearchText(text.substring(range.from, range.to), 'editor');
 			});
 
-			if (block.isTextToggle()) {
+			if (block.isTextToggle() || block.isTextToggleHeader()) {
 				keyboard.shortcut(`${cmd}+shift+t`, e, () => {
 					S.Block.toggle(rootId, block.id, !Storage.checkToggle(rootId, block.id));
 				});
@@ -893,7 +897,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			};
 
 			keyboard.shortcut('alt+arrowdown, alt+arrowup', e, (pressed: string) => {
-				if (block.isTextToggle()) {
+				if (block.isTextToggle() || block.isTextToggleHeader()) {
 					e.preventDefault();
 					S.Block.toggle(rootId, block.id, pressed.match('arrowdown') ? true : false);
 				};
@@ -1004,7 +1008,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		
 		if (canTab) {
 			Action.move(rootId, rootId, obj.id, ids, (shift ? I.BlockPosition.Bottom : I.BlockPosition.Inner), () => {
-				if (next && next.isTextToggle()) {
+				if (next && (next.isTextToggle() || next.isTextToggleHeader())) {
 					S.Block.toggle(rootId, next.id, true);
 				};
 			});
@@ -1070,15 +1074,15 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		};
 
 		Action.move(rootId, rootId, next.id, ids, position, () => { 
-			if (nextParent && nextParent.isTextToggle()) {
+			if (nextParent && (nextParent.isTextToggle() || nextParent.isTextToggleHeader())) {
 				S.Block.toggle(rootId, nextParent.id, true);
 			};
 
-			if (next && next.isTextToggle()) {
+			if (next && (next.isTextToggle() || next.isTextToggleHeader())) {
 				S.Block.toggle(rootId, next.id, true);
 			};
 
-			selection.renderSelection(); 
+			selection.renderSelection();
 			focus.scroll(isPopup, ids[0]);
 		});
 	};
@@ -1087,7 +1091,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	const onCtrlShiftArrowBlock = (e: any, pressed: string) => {
 		e.preventDefault();
 
-		const { focused } = focus.state;
+		const { focused, range } = focus.state;
 		const block = S.Block.getLeaf(rootId, focused);
 
 		if (!block) {
@@ -1145,16 +1149,22 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		};
 
 		Action.move(rootId, rootId, next.id, [ block.id ], position, () => {
-			if (nextParent && nextParent.isTextToggle()) {
+			if (nextParent && (nextParent.isTextToggle() || nextParent.isTextToggleHeader())) {
 				S.Block.toggle(rootId, nextParent.id, true);
 			};
 
-			if (next && next.isTextToggle()) {
+			if (next && (next.isTextToggle() || next.isTextToggleHeader())) {
 				S.Block.toggle(rootId, next.id, true);
 			};
 
-			focus.apply(); 
-			focus.scroll(isPopup, block.id);
+			// Defer focus restore to after React commits DOM changes.
+			// Without this, React's unmount/remount of the block triggers
+			// a blur event that clears focus.state before the new element mounts.
+			window.setTimeout(() => {
+				focus.set(block.id, range);
+				focus.apply();
+				focus.scroll(isPopup, block.id);
+			}, 0);
 		});
 	};
 
@@ -1439,7 +1449,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 						C.BlockListTurnInto(rootId, [ block.id ], I.TextStyle.Paragraph);
 					};
 				} else
-				if (block.isTextQuote() || block.isTextCallout()) {
+				if (block.isTextQuote() || block.isTextCallout() || block.isTextHeader()) {
 					C.BlockListTurnInto(rootId, [ block.id ], I.TextStyle.Paragraph);
 				} else {
 					ids.length ? blockRemove(block) : blockMerge(block, -1, length);
@@ -1494,7 +1504,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 
 			focus.setWithTimeout(block.id, { from: range.from, to: range.to }, 50);
 
-			if (next && next.isTextToggle()) {
+			if (next && (next.isTextToggle() || next.isTextToggleHeader())) {
 				S.Block.toggle(rootId, next.id, true);
 			};
 		});
@@ -1549,13 +1559,13 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		} else
 		if (block.isTextToggleHeader() && (range.from == length)) {
 			S.Block.toggle(rootId, block.id, true);
-			blockCreate(block.id, I.BlockPosition.Inner, {
+			blockCreate(block.id, I.BlockPosition.InnerFirst, {
 				type: I.BlockType.Text,
 				style: I.TextStyle.Paragraph,
 			});
 			return;
 		} else
-		if (block.isTextToggle() && !Storage.checkToggle(rootId, block.id) && S.Block.getChildrenIds(rootId, block.id).length && !range.to) {
+		if ((block.isTextToggle() || block.isTextToggleHeader()) && !Storage.checkToggle(rootId, block.id) && S.Block.getChildrenIds(rootId, block.id).length && !range.to) {
 			blockCreate(block.id, I.BlockPosition.Top, {
 				type: I.BlockType.Text,
 				style: I.TextStyle.Paragraph,
@@ -1600,7 +1610,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		const cb = () => {
 			if (!next) {
 				// If block is closed toggle - find next block on the same level
-				if (block && block.isTextToggle() && !Storage.checkToggle(rootId, block.id)) {
+				if (block && (block.isTextToggle() || block.isTextToggleHeader()) && !Storage.checkToggle(rootId, block.id)) {
 					next = S.Block.getNextBlock(rootId, focused, dir, it => (it.parentId != block.id) && it.isFocusable());
 				} else {
 					next = S.Block.getNextBlock(rootId, focused, dir, it => it.isFocusable());
@@ -1616,7 +1626,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			const parent = S.Block.getHighestParent(rootId, next.id);
 
 			// If highest parent is closed toggle, next is parent
-			if (parent && parent.isTextToggle() && !Storage.checkToggle(rootId, parent.id)) {
+			if (parent && (parent.isTextToggle() || parent.isTextToggleHeader()) && !Storage.checkToggle(rootId, parent.id)) {
 				next = parent;
 			};
 
@@ -1762,7 +1772,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				cb();
 			};
 		} else {
-			if (block.isTextToggle()) {
+			if (block.isTextToggle() || block.isTextToggleHeader()) {
 				if ((dir < 0) && (range.to == 0)) {
 					S.Block.toggle(rootId, block.id, false);
 				};
@@ -1975,7 +1985,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				message.blockIds.forEach((id: string) => {
 					const block = S.Block.getLeaf(rootId, id);
 
-					if (block && block.isTextToggle()) {
+					if (block && (block.isTextToggle() || block.isTextToggleHeader())) {
 						S.Block.toggle(rootId, block.id, true);
 					};
 				});
@@ -2014,6 +2024,8 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			return;
 		};
 
+		const route = U.Common.getRouteFromUrl(url);
+
 		const marks = U.Common.objectCopy(block.content.marks || []);
 		const currentMark = Mark.getInRange(marks, I.MarkType.Link, range, [ I.MarkOverlap.Left, I.MarkOverlap.Right ]);
 
@@ -2027,15 +2039,18 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			return;
 		};
 
+		let linkParamUrl = url;
+		if (route) {
+			linkParamUrl = `${J.Constant.protocol}://${route}`;
+		};
+
 		const isInsideTable = S.Block.checkIsInsideTable(rootId, block.id);
 		const win = $(window);
 		const length = block.getLength();
 		const position = length ? I.BlockPosition.Bottom : I.BlockPosition.Replace;
 		const processor = U.Embed.getProcessorByUrl(url);
 		const canBookmark = !isInsideTable && !isLocal;
-
-		// Check if URL is an Anytype object link in the same space (but not the current page)
-		const linkParam = U.Common.getLinkParamFromUrl(url);
+		const linkParam = U.Common.getLinkParamFromUrl(linkParamUrl);
 		const isAnytypeObject = linkParam.isInside && linkParam.target;
 		const isSameSpace = !linkParam.spaceId || (linkParam.spaceId == S.Common.space);
 		const isSameObject = linkParam.target == rootId;
@@ -2065,6 +2080,22 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 
 		options.push({ id: 'cancel', name: translate('editorPagePasteText') });
 
+		const pasteOrder = Storage.get('pasteOptionOrder') || [];
+		if (pasteOrder.length) {
+			const section = options[0];
+			const cancel = options[options.length - 1];
+			const sortable = options.slice(1, -1);
+
+			sortable.sort((a: any, b: any) => {
+				const ai = pasteOrder.indexOf(a.id);
+				const bi = pasteOrder.indexOf(b.id);
+				return (ai == -1 ? sortable.length : ai) - (bi == -1 ? sortable.length : bi);
+			});
+
+			options.length = 0;
+			options.push(section, ...sortable, cancel);
+		};
+
 		S.Common.clearTimeout('blockContext');
 
 		const menuParam = {
@@ -2091,6 +2122,10 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				options,
 				noFilter: true,
 				onSelect: (event: any, item: any) => {
+					const order = (Storage.get('pasteOptionOrder') || []).filter((it: string) => it != item.id);
+					order.unshift(item.id);
+					Storage.set('pasteOptionOrder', order);
+
 					let marks = U.Common.objectCopy(block.content.marks || []);
 					let value = block.content.text;
 					let to = 0;
@@ -2288,7 +2323,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	const blockSplit = (focused: I.Block, range: I.TextRange, isShift: boolean) => {
 		const { content } = focused;
 		const isTitle = focused.isTextTitle();
-		const isToggle = focused.isTextToggle();
+		const isToggle = focused.isTextToggle() || focused.isTextToggleHeader();
 		const isCallout = focused.isTextCallout();
 		const isQuote = focused.isTextQuote();
 		const isList = focused.isTextList();
@@ -2307,6 +2342,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			} else {
 				style = range.to ? content.style : I.TextStyle.Paragraph;
 			};
+
 			mode = range.to ? I.BlockSplitMode.Bottom : I.BlockSplitMode.Top;
 		};
 
@@ -2386,7 +2422,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			const parent = S.Block.getHighestParent(rootId, next.id);
 
 			// If highest parent is closed toggle, next is parent
-			if (parent && parent.isTextToggle() && !Storage.checkToggle(rootId, parent.id)) {
+			if (parent && (parent.isTextToggle() || parent.isTextToggleHeader()) && !Storage.checkToggle(rootId, parent.id)) {
 				next = parent;
 			};
 
@@ -2563,7 +2599,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 
 					<PageHeadEditor 
 						{...props} 
-						ref={ref => headerRef.current = ref}
+						ref={headerRef}
 						onKeyDown={onKeyDownBlock}
 						onKeyUp={onKeyUpBlock}  
 						onMenuAdd={onMenuAdd}

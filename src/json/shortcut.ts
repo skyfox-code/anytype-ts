@@ -44,7 +44,6 @@ const getSections = () => {
 						{ id: 'moveToBin', name: translate('popupShortcutMainBasics25'), keys: [] },
 						{ id: 'addFavorite', name: translate('popupShortcutMainBasics26'), keys: [] },
 						{ id: 'tableOfContents', name: translate('sidebarToc'), keys: [] },
-						{ id: 'widget', name: translate('popupShortcutMainBasics28'), keys: [] },
 						{ id: 'createSpace', name: translate('commonCreateSpace'), keys: [] },
 						{ id: 'logout', name: translate('commonLogout'), keys: [] },
 					]
@@ -53,7 +52,8 @@ const getSections = () => {
 				{
 					name: translate('popupShortcutInterface'), children: [
 						{ id: 'toggleSidebar', name: translate('popupShortcutMainBasics15'), keys: [ cmdKey, '.' ] },
-					{ id: 'toggleSidebarAndWidgets', name: translate('popupShortcutMainBasics32'), keys: [] },
+						{ id: 'widget', name: translate('popupShortcutMainBasics28'), keys: [] },
+						{ id: 'toggleSidebarAndWidgets', name: translate('popupShortcutMainBasics32'), keys: [] },
 						{ id: 'toggleFullScreen', name: translate('popupShortcutMainBasics5'), keys: [ cmdKey, 'shift', 'f' ] },
 						{ id: 'zoomIn', name: translate('popupShortcutMainBasics16'), keys: [ cmdKey, '=' ] },
 						{ id: 'zoomOut', name: translate('popupShortcutMainBasics17'), keys: [ cmdKey, '-' ] },
@@ -208,6 +208,9 @@ const getSections = () => {
 						{ name: translate('popupShortcutMarkdownBeginningOfLine1'), text: U.String.sprintf(translate('popupShortcutMarkdownBeginningOfLineKey'), '#') },
 						{ name: translate('popupShortcutMarkdownBeginningOfLine2'), text: U.String.sprintf(translate('popupShortcutMarkdownBeginningOfLineKey'), '##') },
 						{ name: translate('popupShortcutMarkdownBeginningOfLine3'), text: U.String.sprintf(translate('popupShortcutMarkdownBeginningOfLineKey'), '###') },
+						{ name: translate('popupShortcutMarkdownBeginningOfLine12'), text: U.String.sprintf(translate('popupShortcutMarkdownBeginningOfLineKey'), '#>') },
+						{ name: translate('popupShortcutMarkdownBeginningOfLine13'), text: U.String.sprintf(translate('popupShortcutMarkdownBeginningOfLineKey'), '##>') },
+						{ name: translate('popupShortcutMarkdownBeginningOfLine14'), text: U.String.sprintf(translate('popupShortcutMarkdownBeginningOfLineKey'), '###>') },
 						{ name: translate('popupShortcutMarkdownBeginningOfLine4'), text: U.String.sprintf(translate('popupShortcutMarkdownBeginningOfLineKey'), '"') },
 						{ name: translate('popupShortcutMarkdownBeginningOfLine5'), text: U.String.sprintf(translate('popupShortcutMarkdownBeginningOfLineKey'), `* ${or} + ${or} -`) },
 						{ name: translate('popupShortcutMarkdownBeginningOfLine6'), text: U.String.sprintf(translate('popupShortcutMarkdownBeginningOfLineKey'), '[]') },

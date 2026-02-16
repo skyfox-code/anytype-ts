@@ -80,7 +80,7 @@ const Header = observer(forwardRef<{}, Props>((props, ref) => {
 			<>
 				<Icon
 					className="vaultToggle withBackground"
-					onClick={() => sidebar.leftPanelToggle()}
+					onClick={() => sidebar.leftPanelToggle(true, true)}
 					tooltipParam={{
 						text: translate('commonVault'),
 						typeY: I.MenuDirection.Bottom,
@@ -88,7 +88,7 @@ const Header = observer(forwardRef<{}, Props>((props, ref) => {
 				/>
 				<Icon
 					className="widgetPanel withBackground"
-					onClick={() => sidebar.leftPanelSubPageToggle('widget')}
+					onClick={() => sidebar.leftPanelSubPageToggle('widget', true, true)}
 					inner={bullet}
 					tooltipParam={{
 						text: translate('commonWidgets'),

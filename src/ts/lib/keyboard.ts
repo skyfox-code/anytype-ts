@@ -86,6 +86,7 @@ class Keyboard {
 	};
 
 	onResize () {
+		const { hideSidebar } = S.Common;
 		const isPopup = this.isPopup();
 		const container = U.Common.getPageContainer(isPopup);
 		const cw = container.width();
@@ -95,7 +96,7 @@ class Keyboard {
 		if (!data.isClosed && (cw <= threshold)) {
 			sidebar.leftPanelClose(false, false);
 		} else
-		if (data.isClosed && !data.savedClosed && (cw > threshold + data.width)) {
+		if (!hideSidebar && data.isClosed && !data.savedClosed && (cw > threshold + data.width)) {
 			sidebar.leftPanelOpen(data.width, false, false);
 		};
 	};
@@ -194,19 +195,6 @@ class Keyboard {
 		const data = sidebar.getData(I.SidebarPanel.Right, isPopup);
 		const route = analytics.route.shortcut;
 		const electron = U.Common.getElectron();
-
-		this.shortcut('toggleSidebar', e, () => {
-			e.preventDefault();
-
-			sidebar.leftPanelToggle();
-		});
-
-		this.shortcut('toggleSidebarAndWidgets', e, () => {
-			e.preventDefault();
-
-			sidebar.leftPanelToggle();
-			sidebar.leftPanelSubPageToggle('widget');
-		});
 
 		if (this.isMainEditor()) {
 			this.shortcut('tableOfContents', e, () => {
@@ -383,9 +371,24 @@ class Keyboard {
 				S.Popup.open('logout', {});
 			});
 
+			// Left panel
+			this.shortcut('toggleSidebar', e, () => {
+				e.preventDefault();
+				sidebar.leftPanelToggle(true, true);
+			});
+
 			// Widget panel
 			this.shortcut('widget', e, () => {
-				sidebar.leftPanelSubPageToggle('widget');
+				e.preventDefault();
+
+				sidebar.leftPanelSubPageToggle('widget', true, true);
+			});
+
+			// Both panels
+			this.shortcut('toggleSidebarAndWidgets', e, () => {
+				e.preventDefault();
+
+				sidebar.toggleBothPanels();
 			});
 
 			if (canWrite) {
@@ -427,11 +430,14 @@ class Keyboard {
 				this.shortcut(`space${i}`, e, () => {
 					const spaces = U.Menu.getVaultItems();
 					const item = spaces[id];
-	
+
 					if (!item) {
 						return;
 					};
 
+					if (S.Common.isPinned) {
+						Renderer.send('openSpaceInTab', item.targetSpaceId, item.uxType);
+					} else
 					if (item.targetSpaceId != S.Common.space) {
 						U.Router.switchSpace(item.targetSpaceId, '', true, {}, false);
 					} else {
@@ -908,26 +914,6 @@ class Keyboard {
 				break;
 			};
 
-			case 'systemInfo': {
-				const props: any = {};
-				const { cpu, graphics, memLayout, diskLayout } = arg;
-				const { manufacturer, brand, speed, cores } = cpu;
-				const { controllers, displays } = graphics;
-
-				props.systemCpu = [ manufacturer, brand ].join(', ');
-				props.systemCpuSpeed = [ `${speed}GHz`, `${cores} cores` ].join(', ');
-				props.systemVideo = (controllers || []).map(it => it.model).join(', ');
-				props.systemDisplay = (displays || []).map(it => it.model).join(', ');
-				props.systemResolution = `${window.screen.width}x${window.screen.height}`;
-				props.systemMemory = (memLayout || []).map(it => U.File.size(it.size)).join(', ');
-				props.systemMemoryType = (memLayout || []).map(it => it.type).join(', ');
-				props.systemDisk = (diskLayout || []).map(it => U.File.size(it.size)).join(', ');
-				props.systemDiskName = (diskLayout || []).map(it => it.name).join(', ');
-
-				analytics.setProperty(props);
-				break;
-			};
-
 			case 'releaseChannel': {
 				const cb = () => Renderer.send('setChannel', arg);
 
@@ -1383,7 +1369,7 @@ class Keyboard {
 
 		if (title) {
 			U.Data.setWindowTitleText(title);
-			U.Data.setTabTitleText(title);
+			U.Data.setTabTitleText(title, action);
 		} else {
 			U.Data.setWindowTitle(rootId, rootId);
 			U.Data.setTabTitle(rootId, rootId);

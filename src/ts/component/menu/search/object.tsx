@@ -449,7 +449,7 @@ const MenuSearchObject = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => 
 			{!noFilter ? (
 				<Filter 
 					ref={filterRef}
-					className="outlined"
+					className="outlined round"
 					placeholder={placeholder} 
 					value={filter}
 					onChange={onFilterChange} 

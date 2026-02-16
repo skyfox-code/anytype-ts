@@ -25,7 +25,7 @@ class UtilGraph {
 
 		switch (d.layout) {
 			case I.ObjectLayout.Relation: {
-				src = `img/icon/relation/${Relation.iconName(d.relationKey, d.relationFormat)}.svg`;
+				src = Relation.icon(d.relationKey, d.relationFormat, '#9B9B9B');
 				break;
 			};
 
@@ -35,7 +35,7 @@ class UtilGraph {
 			};
 
 			case I.ObjectLayout.Date: {
-				src = `img/icon/relation/date.svg`;
+				src = Relation.icon('', I.RelationType.Date, '#9B9B9B');
 				break;
 			};
 
