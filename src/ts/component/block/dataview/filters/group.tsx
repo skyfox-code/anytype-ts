@@ -20,11 +20,12 @@ interface Props {
 	index?: number;
 	parentOperator?: I.FilterOperator;
 	onParentOperatorChange?: (operator: I.FilterOperator) => void;
+	position?: () => void;
 };
 
 const DataviewFilterGroup = observer(forwardRef<{}, Props>((props, ref) => {
 
-	const { rootId, blockId, filter, depth, parentPath, getView, getTarget, isInline, loadData, readonly, onDelete, onUpdate } = props;
+	const { rootId, blockId, filter, depth, parentPath, getView, getTarget, isInline, loadData, readonly, onDelete, onUpdate, position } = props;
 	const { index, parentOperator, onParentOperatorChange } = props;
 	const operatorRef = useRef(null);
 	const path = parentPath ? `${parentPath}-${index ?? 0}` : String(index ?? 0);
@@ -78,6 +79,7 @@ const DataviewFilterGroup = observer(forwardRef<{}, Props>((props, ref) => {
 		};
 
 		persist(updated);
+		position?.();
 	};
 
 	const onRuleRemove = (idx: number) => {
@@ -90,6 +92,7 @@ const DataviewFilterGroup = observer(forwardRef<{}, Props>((props, ref) => {
 
 		nestedFilters.splice(idx, 1);
 		persist({ ...filter, nestedFilters });
+		position?.();
 	};
 
 	const onRuleUpdate = (idx: number, data: Partial<I.Filter>) => {
@@ -97,6 +100,7 @@ const DataviewFilterGroup = observer(forwardRef<{}, Props>((props, ref) => {
 
 		nestedFilters[idx] = { ...nestedFilters[idx], ...data };
 		persist({ ...filter, nestedFilters });
+		position?.();
 	};
 
 	const onOperatorChange = (operator: I.FilterOperator) => {

@@ -395,7 +395,7 @@ class Block implements I.Block {
 	};
 	
 	isTextToggle (): boolean {
-		return this.isText() && ((this.content.style == I.TextStyle.Toggle) || this.isTextToggleHeader());
+		return this.isText() && (this.content.style == I.TextStyle.Toggle);
 	};
 
 	isTextToggleHeader (): boolean {

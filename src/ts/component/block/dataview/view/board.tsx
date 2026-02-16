@@ -29,6 +29,7 @@ const ViewBoard = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref) =
 	const isDraggingCard = useRef(false);
 	const ox = useRef(0);
 	const columnRefs = useRef(new Map());
+	const selectedRecordIds = useRef<string[]>([]);
 	const [ dummy, setDummy ] = useState(0);
 
 	useEffect(() => {
@@ -311,8 +312,18 @@ const ViewBoard = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref) =
 			e.stopPropagation();
 			return;
 		};
-
+		
 		const win = $(window);
+		const selection = S.Common.getRef('selectionProvider');
+		const selectedIds = selection?.get(I.SelectType.Record) || [];
+
+		// Store selected record IDs before they get cleared in onDragStartCommon
+		// Include the dragged record if it's not already in the selection
+		if (selectedIds.length > 0 && selectedIds.includes(record.id)) {
+			selectedRecordIds.current = selectedIds;
+		} else {
+			selectedRecordIds.current = [record.id];
+		};
 
 		onDragStartCommon(e, $(e.currentTarget));
 		initCacheCard();
@@ -376,11 +387,12 @@ const ViewBoard = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref) =
 		isDraggingCard.current = false;
 
 		if (
-			!hoverId.current || 
-			!current.groupId || 
-			!newGroupId.current || 
+			!hoverId.current ||
+			!current.groupId ||
+			!newGroupId.current ||
 			((current.index == newIndex.current) && (current.groupId == newGroupId.current))
 		) {
+			selectedRecordIds.current = [];
 			return;
 		};
 
@@ -393,23 +405,88 @@ const ViewBoard = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref) =
 		let records: any[] = [];
 		let orders: any[] = [];
 
+		const recordsBySourceGroup = new Map<string, string[]>();
+		const allGroupIds = getGroups(true).map((g: any) => g.id);
+
+		selectedRecordIds.current.forEach(id => {
+			// Find which group this record belongs to by checking each group
+			for (const groupId of allGroupIds) {
+				const groupSubId = S.Record.getGroupSubId(rootId, block.id, groupId);
+				const groupRecordIds = S.Record.getRecordIds(groupSubId, '');
+				if (groupRecordIds.includes(id)) {
+					if (!recordsBySourceGroup.has(groupId)) {
+						recordsBySourceGroup.set(groupId, []);
+					}
+					recordsBySourceGroup.get(groupId).push(id);
+					break;
+				};
+			};
+		});
+
+		// Ensure the dragged record is included (in case it wasn't in selection)
+		if (!selectedRecordIds.current.includes(record.id)) {
+			if (!recordsBySourceGroup.has(current.groupId)) {
+				recordsBySourceGroup.set(current.groupId, []);
+			}
+			const groupRecords = recordsBySourceGroup.get(current.groupId);
+			if (!groupRecords.includes(record.id)) {
+				groupRecords.push(record.id);
+			};
+		};
+
 		if (change) {
-			S.Detail.update(newSubId, { id: record.id, details: record }, true);
-			S.Detail.delete(oldSubId, record.id, Object.keys(record));
+			// Move all selected records to the new group
+			const allRecordIds: string[] = [];
+			const recordDetails: any[] = [];
+			const targetIndex = newIndex.current;
 
-			S.Record.recordDelete(oldSubId, '', record.id);
-			S.Record.recordAdd(newSubId, '', record.id, newIndex.current);
+			// Process each source group
+			recordsBySourceGroup.forEach((ids, sourceGroupId) => {
+				if (sourceGroupId === newGroupId.current) {
+					// Records already in target group, don't move them
+					return;
+				};
 
-			C.ObjectListSetDetails([ record.id ], [ { key: view.groupRelationKey, value: newGroup.value } ], () => {
-				orders = [
-					{ viewId: view.id, groupId: current.groupId, objectIds: S.Record.getRecordIds(oldSubId, '') },
-					{ viewId: view.id, groupId: newGroupId.current, objectIds: S.Record.getRecordIds(newSubId, '') }
-				];
+				const sourceSubId = S.Record.getGroupSubId(rootId, block.id, sourceGroupId);
 
-				objectOrderUpdate(orders, records);
+				ids.forEach((id, idx) => {
+					const relations = view.relations;
+					const r = S.Detail.get(sourceSubId, id, relations.map(it => it.relationKey));
+
+					S.Detail.update(newSubId, { id, details: r }, true);
+					S.Detail.delete(sourceSubId, id, Object.keys(r));
+					S.Record.recordDelete(sourceSubId, '', id);
+					// Add at targetIndex to maintain order
+					S.Record.recordAdd(newSubId, '', id, targetIndex + idx);
+
+					recordDetails.push(r);
+					allRecordIds.push(id);
+				});
+
+				// Update order for this source group
+				orders.push({
+					viewId: view.id,
+					groupId: sourceGroupId,
+					objectIds: S.Record.getRecordIds(sourceSubId, '')
+				});
 			});
+
+			// Update order for target group
+			orders.push({
+				viewId: view.id,
+				groupId: newGroupId.current,
+				objectIds: S.Record.getRecordIds(newSubId, '')
+			});
+
+			if (allRecordIds.length > 0) {
+				C.ObjectListSetDetails(allRecordIds, [ { key: view.groupRelationKey, value: newGroup.value } ], () => {
+					objectOrderUpdate(orders, allRecordIds);
+				});
+			};
 		} else {
+			// Moving within the same group - only move the dragged record for simplicity
 			if (current.index + 1 == newIndex.current) {
+				selectedRecordIds.current = [];
 				return;
 			};
 
@@ -422,6 +499,8 @@ const ViewBoard = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref) =
 
 			objectOrderUpdate(orders, records, () => S.Record.recordsSet(oldSubId, '', records));
 		};
+
+		selectedRecordIds.current = [];
 	};
 
 	const onScrollView = () => {

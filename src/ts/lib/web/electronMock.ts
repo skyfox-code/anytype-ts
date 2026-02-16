@@ -320,7 +320,7 @@ class ElectronMock {
 		handlers.set('payloadBroadcast', noopTrue);
 
 		// No-op handlers that return empty object
-		['systemInfo', 'linuxDistro', 'shortcutExport', 'shortcutImport'].forEach(cmd => {
+		['linuxDistro', 'shortcutExport', 'shortcutImport'].forEach(cmd => {
 			handlers.set(cmd, () => ({}));
 		});
 

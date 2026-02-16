@@ -50,15 +50,13 @@ const BlockLink = observer(forwardRef<I.BlockRef, I.BlockComponent>((props, ref)
 		const selection = S.Common.getRef('selectionProvider');
 		const ids = selection?.get(I.SelectType.Block) || [];
 
-		if (object._empty_ || (targetBlockId == rootId) || (keyboard.withCommand(e) && (ids.length > 1))) {
-			return;
-		};
-
 		if (
 			object._empty_ || 
 			(targetBlockId == rootId) || 
-			((e.ctrlKey || e.metaKey) && (ids.length > 1)) || 
-			keyboard.isSelectionClearDisabled
+			(
+				((e.ctrlKey || e.metaKey) && (ids.length > 1)) || 
+				keyboard.isSelectionClearDisabled
+			)
 		) {
 			return;
 		};

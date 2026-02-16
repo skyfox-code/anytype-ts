@@ -34,6 +34,7 @@ const MediaPdf = forwardRef<MediaPdfRefProps, Props>(({
 	const options = useMemo(() => ({
 		isEvalSupported: false,
 		cMapUrl: U.Common.fixAsarPath('./cmaps/'),
+		wasmUrl: U.Common.fixAsarPath('./wasm/'),
 	}), []);
 
 	const resize = () => {

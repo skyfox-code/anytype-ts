@@ -1,7 +1,7 @@
 import React, { forwardRef, useState, useEffect, useRef, MouseEvent } from 'react';
 import $ from 'jquery';
 import { observer } from 'mobx-react';
-import { PreviewLink, PreviewObject, PreviewDefault } from 'Component';
+import { PreviewLink, PreviewObject, PreviewDefault, PreviewTab } from 'Component';
 import { I, S, U, Preview, Mark, translate, Action } from 'Lib';
 
 const OFFSET_Y = 8;
@@ -12,10 +12,14 @@ const PreviewIndex = observer(forwardRef(() => {
 	const nodeRef = useRef(null);
 	const polygonRef = useRef(null);
 	const { preview } = S.Common;
-	const { type, markType, target, object: initialObject, marks, range, noUnlink, noEdit, x, y, width, height, onChange, withPlural } = preview;
+	const { type, markType, target, object: initialObject, marks, range, noUnlink, noEdit, x, y, width, height, onChange, withPlural, classNameWrap } = preview;
 	const [ object, setObject ] = useState(null);
 	const cn = [ 'previewWrapper' ];
 	const win = $(window);
+
+	if (classNameWrap) {
+		cn.push(classNameWrap);
+	};
 
 	const onClick = (e: MouseEvent) => {
 		if (e.button) {
@@ -97,8 +101,9 @@ const PreviewIndex = observer(forwardRef(() => {
 		const st = win.scrollTop();
 		const ow = node.outerWidth();
 		const oh = node.outerHeight();
+		const offsetY = preview.noOffset ? 0 : OFFSET_Y;
 		const css: any = { opacity: 0, left: 0, top: 0 };
-		const pcss: any = { top: 'auto', bottom: 'auto', width: '', left: '', height: height + OFFSET_Y, clipPath: '' };
+		const pcss: any = { top: 'auto', bottom: 'auto', width: '', left: '', height: height + offsetY, clipPath: '' };
 		const vsTop = (1 - height / oh) / 2 * 100;
 		const vsBot = (1 + height / oh) / 2 * 100;
 
@@ -124,22 +129,39 @@ const PreviewIndex = observer(forwardRef(() => {
 		};
 
 		if (typeY == I.MenuDirection.Top) {
-			css.top = y - oh - OFFSET_Y;
+			css.top = y - oh - offsetY;
 			css.transform = 'translateY(-5%)';
 
-			pcss.bottom = -height - OFFSET_Y;
+			pcss.bottom = -height - offsetY;
 			pcss.clipPath = cpTop;
 		};
 
 		if (typeY == I.MenuDirection.Bottom) {
-			css.top = y + height + OFFSET_Y;
+			css.top = y + height + offsetY;
 			css.transform = 'translateY(5%)';
 
-			pcss.top = -height - OFFSET_Y;
+			pcss.top = -height - offsetY;
 			pcss.clipPath = cpBot;
 		};
 			
-		css.left = x - ow / 2 + width / 2;
+		switch (preview.typeX) {
+			default:
+			case I.MenuDirection.Center: {
+				css.left = x - ow / 2 + width / 2;
+				break;
+			};
+
+			case I.MenuDirection.Left: {
+				css.left = x;
+				break;
+			};
+
+			case I.MenuDirection.Right: {
+				css.left = x + width - ow;
+				break;
+			};
+		};
+
 		css.left = Math.max(BORDER, css.left);
 		css.left = Math.min(ww - ow - BORDER, css.left);
 
@@ -196,6 +218,11 @@ const PreviewIndex = observer(forwardRef(() => {
 			};
 
 			content = <PreviewDefault {...props} />;
+			break;
+		};
+
+		case I.PreviewType.Tab: {
+			content = <PreviewTab spaceview={initialObject} data={preview.relatedData} position={position} />;
 			break;
 		};
 	};

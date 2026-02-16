@@ -7,6 +7,7 @@ const { RsdoctorRspackPlugin } = require('@rsdoctor/rspack-plugin');
 
 const pdfjsDistPath = path.dirname(require.resolve('pdfjs-dist/package.json'));
 const cMapsDir = path.join(pdfjsDistPath, 'cmaps');
+const wasmDir = path.join(pdfjsDistPath, 'wasm');
 
 module.exports = (env, argv) => {
 	const port = process.env.SERVER_PORT || 8080;
@@ -139,6 +140,7 @@ module.exports = (env, argv) => {
 			new rspack.CopyRspackPlugin({
 				patterns: [
 					{ from: cMapsDir, to: './cmaps/' },
+					{ from: wasmDir, to: './wasm/' },
 				],
 			}),
 

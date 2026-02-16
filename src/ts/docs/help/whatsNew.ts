@@ -30,23 +30,27 @@ export default () => {
 		title(`Focus & Flow`),
 		h4(`<span>Release 0.54.0</span>`),
 		text(''),
-		text('This release brings Tabs for working with multiple objects, updated Filters with a simplified interface and advanced logic, and Search inside chats, alongside toggle Headings, Channel ownership transfer, and a range of Quality of Life improvements and fixes.'),
+		text('This release brings several highly requested additions. Tabs let you work with multiple objects in the same window, Filters have been redesigned with cleaner controls and more advanced logic, and you can now search through chats to find past messages.'),
+		text('Also included are toggled headings, dynamic filter values, channel ownership transfer, and a range of refinements across the app.'),
 		text(''),
 
 		h2(`Tabs`),
 		text(`One of the most requested features is here. You can now open multiple Objects side by side in a tab bar, just like in a browser. Open any Object in a new tab from the context menu, with ${hl('Cmd+Click')} / ${hl('Ctrl+Click')}, or from Widgets.`),
 		text(`Choose between two modes in Settings > Preferences: <b>Contextual</b>, where the tab bar appears only when you have more than one tab open, or <b>Always visible</b>.`),
-		text(`Drag tabs to reorder them, drag a tab out of the window to open it in a new window, and your open tabs are restored when you relaunch the app.`),
+		text(`Drag tabs to reorder them, pin important tabs to keep them in place, drag a tab out to open it in a new window, and return to your open tabs when you relaunch the app.`),
+		img('54/1.png'),
 		text(``),
 
-		h2(`Filters and Sorts Update`),
+		h2(`New Filters and Sorts`),
 		text(`Filters and Sorts in Queries and Collections got a fresh look. Active filters now appear in a dedicated bar above your View, showing the property name, condition, and value at a glance. Sort indicators sit alongside filters, so you always know how your data is organized.`),
 		text(`Adding new filters is faster with the ${hl('+')} button, and clearing everything takes just one click.`),
+		img('54/2.png'),
 		text(``),
 
 		h2(`Advanced Filters`),
 		text(`Filters now support complex logic. You can combine multiple conditions using AND / OR, and group related rules together to build precise queries – like finding all tasks that are either high priority or due this week.`),
-		text(`Add an advanced filter from the filter menu and define your conditions in the dedicated panel.`),
+		text(`Add an advanced filter from the filter menu and define your conditions in the dedicated bar.`),
+		img('54/3.png'),
 		text(``),
 
 		h2(`Chat Messages Search`),
@@ -61,8 +65,15 @@ export default () => {
 		h2(`Quality of Life Improvements`),
 		text(``),
 
-		text(`<b>Toggle Headings</b>`),
-		text(`Heading 1, Heading 2 and Heading 3 can now be collapsible toggles. Create them from the ${hl('/')} menu or with Markdown shortcuts (${hl('#>')}, ${hl('##>')}, ${hl('###>')}). Select multiple toggles and open or close them all at once. Converting a regular heading to a toggle automatically captures everything beneath it as children.`),
+		text(`<b>Dynamic Filter Values</b>`),
+		text(`Filters now support dynamic values such as <b>Current User</b> and <b>This Object</b>. For example, a Tasks view can be filtered by <i>Assignee = Current User</i>, so each member sees their own tasks. Inline Queries and Collections can use <i>This Object</i> in the Object-related properties, to automatically scope results to the object they belong to.`),
+		img('54/4.png'),
+		text(``),
+
+		text(`<b>Toggled Headings</b>`),
+		text(`Title, Heading and Subheading can now be collapsible toggles. Create them from the ${hl('/')} menu or with Markdown shortcuts (${hl('#>')}, ${hl('##>')}, ${hl('###>')}). You can also create a toggle with ${hl('>')} + ${hl('Space')} and then use your heading markdown shortcut (${hl('#')}, ${hl('##')}, ${hl('###')}) to convert it into a toggled heading.`),
+		text(`Multiple toggle headings can be opened or closed at once, and converting a regular heading to a toggle automatically captures everything beneath it as children.`),
+		img('54/5.png'),
 		text(``),
 
 		text(`<b>Spell Checking in Chat</b>`),
@@ -70,7 +81,7 @@ export default () => {
 		text(``),
 
 		text(`<b>Updated Sync Status</b>`),
-		text(`Sync status moved to the navigation panel with a refreshed look: a new globe icon shows your network name, a device counter shows connected peers, and a red dot appears in the sidebar when there's a notice to review.`),
+		text(`Sync status moved to the widget panel header with a refreshed look: a new globe icon shows your network name, a device counter shows connected peers, and a red dot appears in the sidebar when there's a notice to review.`),
 		text(``),
 
 		text(`<b>Automatic File Download</b>`),
@@ -90,7 +101,11 @@ export default () => {
 		text(``),
 
 		text(`<b>Template Name Pre-fill</b>`),
-		text(`When editing a template, a new toggle lets you choose whether the template's name is pre-filled when creating Objects from it – so you no longer need to manually clear inherited names.`),
+		text(`Templates now include a setting that lets you choose whether new objects inherit the template name. You can find it in the Template editor header and switch between <b>Pre-fill name</b> and <b>Empty name</b>.`),
+		text(``),
+
+		text(`<b>Toggle Sidebar and Widgets Together</b>`),
+		text(`You can now assign a keyboard shortcut to toggle both the Sidebar and Widget panel at the same time. This lets you quickly switch to a more focused view of the current object.`),
 		text(``),
 
 		text(`<b>Full-Text Search in Collections</b>`),
