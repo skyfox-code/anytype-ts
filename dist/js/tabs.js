@@ -331,8 +331,9 @@ $(() => {
 
 		tab.off('click').on('click', () => {
 			const activeTab = tabsData.find(it => it.id == activeId);
+			const { isPinned, ...data } = activeTab?.data || {};
 
-			electron.Api(winId, 'openTab', activeTab?.data, { setActive: true });
+			electron.Api(winId, 'openTab', data, { setActive: true });
 		});
 
 		return tab;

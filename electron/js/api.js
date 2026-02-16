@@ -367,7 +367,9 @@ class Api {
 	};
 
 	openTab (win, data, options) {
-		WindowManager.createTab(win, data, options);
+		const { isPinned, ...rest } = data || {};
+
+		WindowManager.createTab(win, rest, options);
 	};
 
 	openTabs (win, tabs) {
