@@ -1444,7 +1444,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 						C.BlockListTurnInto(rootId, [ block.id ], I.TextStyle.Paragraph);
 					};
 				} else
-				if (block.isTextQuote() || block.isTextCallout()) {
+				if (block.isTextQuote() || block.isTextCallout() || block.isTextHeader()) {
 					C.BlockListTurnInto(rootId, [ block.id ], I.TextStyle.Paragraph);
 				} else {
 					ids.length ? blockRemove(block) : blockMerge(block, -1, length);
