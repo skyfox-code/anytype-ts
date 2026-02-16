@@ -260,14 +260,10 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			{ key: 'indent', preventDefault: true },
 			{ key: 'outdent', preventDefault: true },
 			{ key: 'pageLock' },
-			{ key: `${cmd}+shift+arrowleft` },
-			{ key: `${cmd}+shift+arrowright` },
 			{ key: `${cmd}+v` },
 			{ key: `${cmd}+c`, preventDefault: true },
 			{ key: `${cmd}+x`, preventDefault: true },
 			{ key: `shift+space` },
-			{ key: `shift+arrowleft` },
-			{ key: `shift+arrowright` },
 			{ key: `ctrl+shift+/` },
 			{ key: 'theme' },
 		];
@@ -617,7 +613,7 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		// Parse markdown commands
 		if (block.canHaveMarks() && (!isInsideTable && !block.isTextCode())) {
 			for (const k in Markdown) {
-				const newStyle = Markdown[k];
+				let newStyle = Markdown[k];
 
 				if (newStyle == content.style) {
 					continue;
@@ -632,6 +628,31 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 
 				if (!match) {
 					continue;
+				};
+
+				// If current block is a toggle, heading markdown should create toggle headings
+				if (block.isTextToggle()) {
+					const toggleMap = {
+						[I.TextStyle.Header1]: I.TextStyle.ToggleHeader1,
+						[I.TextStyle.Header2]: I.TextStyle.ToggleHeader2,
+						[I.TextStyle.Header3]: I.TextStyle.ToggleHeader3,
+					};
+
+					if (toggleMap[newStyle]) {
+						newStyle = toggleMap[newStyle];
+					};
+				};
+
+				if (block.isTextHeader() && (newStyle == I.TextStyle.Toggle)) {
+					const toggleMap = {
+						[I.TextStyle.Header1]: I.TextStyle.ToggleHeader1,
+						[I.TextStyle.Header2]: I.TextStyle.ToggleHeader2,
+						[I.TextStyle.Header3]: I.TextStyle.ToggleHeader3,
+					};
+
+					if (toggleMap[block.content.style]) {
+						newStyle = toggleMap[block.content.style];
+					};
 				};
 
 				// If emoji markup is first do not count one space character in mark adjustment
@@ -1051,7 +1072,7 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				return;
 			};
 
-			setText(marksRef.current, true, () => {
+			setText(marksRef.current, false, () => {
 				S.Menu.open('blockContext', {
 					classNameWrap: 'fromBlock',
 					element: el,

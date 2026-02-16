@@ -225,8 +225,6 @@ html {
 
 
 	&.platformWindows {
-		body { overflow-y: overlay; }
-
 		&.isSingleTab:not(.isFullScreen) {
 			.sidebar {
 				.pageWrapper { padding-top: 8px; }

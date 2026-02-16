@@ -9,11 +9,14 @@
 
 .select {
 	.icon { transition: none; }
-	.icon.arrow {
-		margin: -10px 0px 0px 0px !important; right: 0px !important; width: 20px !important; height: 20px !important; position: absolute !important; top: 50%;
-		background-image: url('~img/arrow/select/dark.svg') !important; 
+
+	&:not(.round) {
+		.icon.arrow {
+			margin: -10px 0px 0px 0px !important; right: 0px !important; width: 20px !important; height: 20px !important; position: absolute !important; top: 50%;
+			background-image: url('~img/arrow/select/dark.svg') !important;
+		}
+		.icon.arrow.light { background-image: url('~img/arrow/select/light.svg') !important; }
 	}
-	.icon.arrow.light { background-image: url('~img/arrow/select/light.svg') !important; }
 
 	.item { display: flex; background: none !important; padding: 0px !important; overflow: hidden; }
 	.item {
@@ -33,6 +36,17 @@
 	.item {
 		.name { line-height: 22px; font-weight: 600; }
 	}
+}
+
+.select.round {
+	display: flex; align-items: center; gap: 0px 6px; border-radius: 14px; border: 0px;
+	background: var(--color-shape-highlight-light-solid);  padding: 6px 10px;
+}
+.select.round {
+	&.hover, &:hover { background: var(--color-shape-highlight-medium); }
+	&.c36 { height: 36px; border-radius: 12px; }
+
+	.icon.arrow { width: 8px; height: 8px; background-image: url('~img/arrow/select/round.svg'); }
 }
 
 .select.isReadonly { cursor: default; padding-right: 6px; }

@@ -165,7 +165,7 @@ class WindowManager {
 		win.on('enter-full-screen', () => MenuManager.initMenu());
 		win.on('leave-full-screen', () => MenuManager.initMenu());
 		win.on('resize', () => {
-			const { width, height } = is.linux ? win.getContentBounds() : win.getBounds();
+			const { width, height } = this.getBounds(win);
 
 			const activeView = Util.getActiveView(win);
 			if (activeView) {
@@ -405,7 +405,7 @@ class WindowManager {
 			return null;
 		};
 
-		return is.linux ? win.getContentBounds() : win.getBounds();
+		return win.getContentBounds();
 	};
 
 	setActiveTab (win, id) {
@@ -434,7 +434,7 @@ class WindowManager {
 		win.contentView.addChildView(view);
 
 		// Lazy load: if the tab hasn't been loaded yet, load it now
-		if (!view.isLoaded && view.webContents && !view.webContents.isDestroyed()) {
+		if (!view.isLoaded && view.webContents && !view.webContents.isDestroyed() && !view.webContents.isLoading()) {
 			view.webContents.loadURL(this.getUrlForNewTab());
 		};
 
@@ -559,6 +559,32 @@ class WindowManager {
 		this.setActiveTab(win, id);
 	};
 
+	openRouteInTab (win, route, data) {
+		if (!win || !win.views || !route) {
+			return;
+		};
+
+		const existing = win.views.find(it => it.data && (it.data.route === route));
+		if (existing) {
+			this.setActiveTab(win, existing.id);
+		} else {
+			this.createTab(win, { ...data, route }, { setActive: true });
+		};
+	};
+
+	openSpaceInTab (win, spaceId, uxType) {
+		if (!win || !win.views || !spaceId) {
+			return;
+		};
+
+		const existing = win.views.find(it => it.data && (it.data.spaceId === spaceId));
+		if (existing) {
+			this.setActiveTab(win, existing.id);
+		} else {
+			this.createTab(win, { spaceId, uxType }, { setActive: true });
+		};
+	};
+
 	pinTab (win, id) {
 		id = String(id || '');
 
@@ -581,6 +607,7 @@ class WindowManager {
 		const lastPinnedIndex = win.views.reduce((acc, v, i) => (v.data && v.data.isPinned) ? i : acc, -1);
 		win.views.splice(lastPinnedIndex + 1, 0, view);
 
+		Util.sendToTab(win, id, 'set-pinned', true);
 		this.sendUpdateTabs(win);
 		this.updateTabBarVisibility(win);
 	};
@@ -607,6 +634,7 @@ class WindowManager {
 		const lastPinnedIndex = win.views.reduce((acc, v, i) => (v.data && v.data.isPinned) ? i : acc, -1);
 		win.views.splice(lastPinnedIndex + 1, 0, view);
 
+		Util.sendToTab(win, id, 'set-pinned', false);
 		this.sendUpdateTabs(win);
 		this.updateTabBarVisibility(win);
 	};

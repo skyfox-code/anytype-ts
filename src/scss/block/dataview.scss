@@ -227,43 +227,24 @@
 				.separator.vertical { width: 1px; height: 20px; background-color: var(--color-shape-secondary); align-self: center; flex-shrink: 0; }
 
 				.filterItem {
-					position: relative; display: flex; flex-direction: row; gap: 0px 6px; height: 28px; align-items: center; padding: 0px 8px;
-					border-radius: 16px; color: var(--color-text-secondary); font-weight: 500;
+					position: relative; display: flex; flex-direction: row; gap: 0px 4px; height: 28px; align-items: center; padding: 0px 10px 0px 8px;
+					border-radius: 16px; color: var(--color-text-secondary);
 				}
 				.filterItem {
-					.icon.filterIcon { width: 20px; height: 20px; }
 					.icon.sortArrow { width: 20px; height: 20px; margin: 0px; background-image: url('~img/icon/dataview/filters/sort.svg'); }
 					.icon.sortArrow.c1 { transform: rotateZ(180deg); }
-					.icon.advanced { background-image: url('~img/icon/dataview/filters/advanced0.svg'); }
-					.icon.isText { background-image: url('~img/icon/dataview/filters/relation/text0.svg'); }
-					.icon.isNumber { background-image: url('~img/icon/dataview/filters/relation/number0.svg'); }
-					.icon.isSelect { background-image: url('~img/icon/dataview/filters/relation/select0.svg'); }
-					.icon.isDate { background-image: url('~img/icon/dataview/filters/relation/date0.svg'); }
-					.icon.isAttachment { background-image: url('~img/icon/dataview/filters/relation/attachment0.svg'); }
-					.icon.isCheckbox { background-image: url('~img/icon/dataview/filters/relation/checkbox0.svg'); }
-					.icon.isUrl { background-image: url('~img/icon/dataview/filters/relation/url0.svg'); }
-					.icon.isEmail { background-image: url('~img/icon/dataview/filters/relation/email0.svg'); }
-					.icon.isPhone { background-image: url('~img/icon/dataview/filters/relation/phone0.svg'); }
-					.icon.isMultiselect { background-image: url('~img/icon/dataview/filters/relation/multiselect0.svg'); }
-					.icon.isObject { background-image: url('~img/icon/dataview/filters/relation/object0.svg'); }
+					.icon.advanced { width: 20px; height: 20px; background-image: url('~img/icon/dataview/filters/advanced0.svg'); }
+					.icon.relation { width: 20px; height: 20px; flex-shrink: 0; }
+					.icon.arrow { width: 8px; height: 8px; background-image: url('~img/arrow/filterValue0.svg'); }
 
 					&.isActive { color: var(--color-system-accent-100); background-color: var(--color-system-selection); }
 					&.isActive {
 						&:hover, &.hover { background-color: var(--color-system-drop-zone); }
-						.name { font-weight: 600; }
+						.name { font-weight: 500; }
 
 						.icon.advanced { background-image: url('~img/icon/dataview/filters/advanced1.svg'); }
-						.icon.isText { background-image: url('~img/icon/dataview/filters/relation/text1.svg'); }
-						.icon.isNumber { background-image: url('~img/icon/dataview/filters/relation/number1.svg'); }
-						.icon.isSelect { background-image: url('~img/icon/dataview/filters/relation/select1.svg'); }
-						.icon.isDate { background-image: url('~img/icon/dataview/filters/relation/date1.svg'); }
-						.icon.isAttachment { background-image: url('~img/icon/dataview/filters/relation/attachment1.svg'); }
-						.icon.isCheckbox { background-image: url('~img/icon/dataview/filters/relation/checkbox1.svg'); }
-						.icon.isUrl { background-image: url('~img/icon/dataview/filters/relation/url1.svg'); }
-						.icon.isEmail { background-image: url('~img/icon/dataview/filters/relation/email1.svg'); }
-						.icon.isPhone { background-image: url('~img/icon/dataview/filters/relation/phone1.svg'); }
-						.icon.isMultiselect { background-image: url('~img/icon/dataview/filters/relation/multiselect1.svg'); }
-						.icon.isObject { background-image: url('~img/icon/dataview/filters/relation/object1.svg'); }
+						.icon.relation { background-color: var(--color-system-accent-100); }
+						.icon.arrow { background-image: url('~img/arrow/filterValue1.svg'); }
 					}
 					&:hover, &.hover { background-color: var(--color-shape-highlight-medium); border-color: transparent; }
 
@@ -282,9 +263,12 @@
 					}
 				}
 
-				.icon.plus { width: 28px; height: 28px; border-radius: 14px; background-size: 20px; background-position: 50% 50%; background-repeat: no-repeat;  }
-				.icon.plus {
+				.itemAdd { display: flex; align-items: center; height: 28px; gap: 4px; flex-wrap: nowrap; padding: 0px 8px 0px 6px; border-radius: 14px; }
+				.itemAdd {
 					&:hover, &.hover { background-color: var(--color-shape-highlight-medium); }
+
+					.icon.plus { width: 20px; height: 20px; background: url('~img/icon/dataview/filters/plus.svg'); }
+					.label { color: var(--color-text-secondary); }
 				}
 
 				.buttons {

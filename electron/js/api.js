@@ -1,10 +1,9 @@
-const { app, shell, BrowserWindow, Menu, Notification, ipcMain, nativeTheme } = require('electron');
+const { app, shell, BrowserWindow, Menu, Notification, ipcMain } = require('electron');
 const { is } = require('electron-util');
 const fs = require('fs');
 const path = require('path');
 const keytar = require('keytar');
 const { download } = require('electron-dl');
-const si = require('systeminformation');
 const { exec, execFile } = require('child_process');
 const checkDiskSpace = require('check-disk-space').default;
 
@@ -27,6 +26,12 @@ class Api {
 	pinTimer = null;
 	pinTimeValue = 0;
 
+	// Commands that should only be processed from the active tab.
+	// Each tab has its own gRPC session/stream, so events like PayloadBroadcast
+	// and notifications arrive in every tab independently. Without this guard,
+	// the active tab would receive duplicate IPC messages (once per tab).
+	activeTabOnly = new Set([ 'payloadBroadcast', 'notification' ]);
+
 	getInitData (win, tabId) {
 		let route = win.route || '';
 
@@ -39,6 +44,8 @@ class Api {
 			route = tab?.data?.route || '';
 		};
 
+		const tab = tabId ? (win.views || []).find(it => it.id == tabId) : null;
+
 		return {
 			id: win.id,
 			dataPath: Util.dataPath(),
@@ -47,6 +54,7 @@ class Api {
 			isChild: win.isChild,
 			route,
 			isPinChecked: this.isPinChecked,
+			isPinned: tab?.data?.isPinned || false,
 			languages: win.webContents.session.availableSpellCheckerLanguages,
 			css: Util.getCss(),
 			activeTabId: win.activeTabId,
@@ -365,7 +373,9 @@ class Api {
 	};
 
 	openTab (win, data, options) {
-		WindowManager.createTab(win, data, options);
+		const { isPinned, ...rest } = data || {};
+
+		WindowManager.createTab(win, rest, options);
 	};
 
 	openTabs (win, tabs) {
@@ -557,20 +567,6 @@ class Api {
 		};
 	};
 
-	systemInfo (win) {
-		const { config } = ConfigManager;
-
-		if (config.systemInfo) {
-			return;
-		};
-
-		ConfigManager.set({ systemInfo: true }, () => {
-			si.getStaticData().then(data => {
-				Util.send(win, 'commandGlobal', 'systemInfo', data);
-			});
-		});
-	};
-
 	moveNetworkConfig (win, src) {
 		if (!path.extname(src).match(/yml|yaml/i)) {
 			return { error: `Invalid file extension: ${path.extname(src)}. Required YAML` };
@@ -675,6 +671,14 @@ class Api {
 		WindowManager.closeOtherTabs(win, id, forced);
 	};
 
+	openRouteInTab (win, route, data) {
+		WindowManager.openRouteInTab(win, route, data);
+	};
+
+	openSpaceInTab (win, spaceId, uxType) {
+		WindowManager.openSpaceInTab(win, spaceId, uxType);
+	};
+
 	pinTab (win, id) {
 		WindowManager.pinTab(win, id);
 	};
@@ -704,26 +708,41 @@ class Api {
 			});
 		};
 
-		items.push({ type: 'separator' });
+		const isLastPinned = isPinned && (win.views.length <= 1);
 
-		if (!isPinned) {
+		if (!isLastPinned) {
+			items.push({ type: 'separator' });
+
 			items.push({
 				label: Util.translate('electronMenuTabClose'),
 				click: () => WindowManager.removeTab(win, tabId, true),
 			});
+
+			items.push({
+				label: Util.translate('electronMenuTabCloseOtherTabs'),
+				click: () => WindowManager.closeOtherTabs(win, tabId),
+			});
 		};
 
-		items.push({
-			label: Util.translate('electronMenuTabCloseOtherTabs'),
-			click: () => WindowManager.closeOtherTabs(win, tabId),
-		});
-
 		const menu = Menu.buildFromTemplate(items);
-		menu.popup({ window: win });
+		menu.popup({
+			window: win,
+			callback: () => {
+				Util.send(win, 'tab-context-menu-closed');
+			},
+		});
 	};
 
 	reorderTabs (win, tabIds) {
 		WindowManager.reorderTabs(win, tabIds);
+	};
+
+	tabShowTooltip (win, data) {
+		Util.sendToActiveTab(win, 'tab-show-tooltip', data);
+	};
+
+	tabHideTooltip (win) {
+		Util.sendToActiveTab(win, 'tab-hide-tooltip');
 	};
 
 	setTabsDimmer (win, show) {

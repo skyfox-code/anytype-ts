@@ -1,7 +1,7 @@
 import React, { forwardRef, useRef, MouseEvent } from 'react';
 import { observer } from 'mobx-react';
 import { Icon, Label } from 'Component';
-import { I, U, translate, S, Relation, C, Dataview } from 'Lib';
+import { I, U, translate, S, Relation, C, Dataview, analytics } from 'Lib';
 import Item from './filters/item';
 import AdvancedItem from './filters/advanced';
 
@@ -11,7 +11,7 @@ interface Props extends I.ViewComponent {
 
 const BlockDataviewFilters = observer(forwardRef<{}, Props>((props, ref) => {
 
-	const { rootId, block, className, isInline, isCollection, getView, onFilterAddClick, onSortAdd, loadData, readonly, getTarget, closeFilters } = props;
+	const { rootId, block, className, isInline, getView, onFilterAddClick, onSortAdd, loadData, readonly, getTarget, closeFilters } = props;
 	const blockId = block.id;
 	const view = getView();
 	const filters = view?.filters;
@@ -52,8 +52,6 @@ const BlockDataviewFilters = observer(forwardRef<{}, Props>((props, ref) => {
 	};
 
 	const onClick = (e: any, item: any) => {
-		const filter: I.Filter = view.getFilter(item.id);
-
 		S.Menu.open('dataviewFilterValues', {
 			element: `#block-${blockId} #dataviewFilters #item-${item.id}`,
 			classNameWrap: 'fromBlock',
@@ -68,9 +66,12 @@ const BlockDataviewFilters = observer(forwardRef<{}, Props>((props, ref) => {
 				getTarget,
 				readonly: isReadonly,
 				save: () => {
-					C.BlockDataviewFilterReplace(rootId, blockId, view.id, item.id, filter, () => {
-						loadData(view.id, 0, false);
-					});
+					const currentFilter = view.getFilter(item.id);
+					if (currentFilter) {
+						C.BlockDataviewFilterReplace(rootId, blockId, view.id, item.id, currentFilter, () => {
+							loadData(view.id, 0, false);
+						});
+					};
 				},
 				itemId: item.id,
 			}
@@ -84,6 +85,7 @@ const BlockDataviewFilters = observer(forwardRef<{}, Props>((props, ref) => {
 			vertical: I.MenuDirection.Bottom,
 			horizontal: I.MenuDirection.Left,
 			offsetY: 4,
+			noFlipX: true,
 		};
 
 		onFilterAddClick(menuParam);
@@ -93,10 +95,21 @@ const BlockDataviewFilters = observer(forwardRef<{}, Props>((props, ref) => {
 		e.preventDefault();
 		e.stopPropagation();
 
+		const object = getTarget();
+		const rel = S.Record.getRelationByKey(item.relationKey);
+
 		if (items.length === 1) {
 			props.onClear?.();
 		};
+
 		C.BlockDataviewFilterRemove(rootId, blockId, view.id, [ item.id ], () => loadData(view.id, 0, false));
+
+		analytics.event('RemoveFilter', {
+			objectType: object.type,
+			relationKey: item.relationKey,
+			format: rel?.format,
+			embedType: analytics.embedType(isInline)
+		});
 	};
 
 	const onClear = () => {
@@ -221,6 +234,7 @@ const BlockDataviewFilters = observer(forwardRef<{}, Props>((props, ref) => {
 								<div className="content">
 									<Label className="name" text={sortTitle} />
 								</div>
+								<Icon className="arrow" />
 								{config.experimental ? <Icon className="delete" onClick={onSortRemove} /> : ''}
 							</div>
 							<div className="separator vertical" />
@@ -240,7 +254,7 @@ const BlockDataviewFilters = observer(forwardRef<{}, Props>((props, ref) => {
 									readonly={isReadonly}
 								/>
 							);
-						}
+						};
 
 						return (
 							<Item
@@ -255,7 +269,11 @@ const BlockDataviewFilters = observer(forwardRef<{}, Props>((props, ref) => {
 							/>
 						);
 					})}
-					<Icon id="item-add" className="plus" onClick={onAdd} />
+					<div id="item-add" className="itemAdd" onClick={onAdd}>
+						<Icon className="plus" />
+						<Label text={translate('commonFilter')} />
+					</div>
+
 				</div>
 
 				<div id="sideRight" className="side right">

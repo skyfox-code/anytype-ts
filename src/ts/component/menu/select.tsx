@@ -14,11 +14,12 @@ const LIMIT = 10;
 
 const MenuSelect = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 
-	const { param, setActive, onKeyDown, position, getId, close } = props;
+	const { param, setActive, onKeyDown, position, getId, close, setHover, getMaxHeight } = props;
 	const { data } = param;
 	const { 
-		filter, value, disabled, placeholder, noVirtualisation, menuLabel, noKeys, preventFilter, withAdd, 
-		canSelectInitial, onSelect, onContext, noClose, noScroll, maxHeight, noFilter, onSwitch,
+		filter, value, disabled, placeholder, noVirtualisation, noKeys, preventFilter, withAdd, 
+		canSelectInitial, onSelect, onContext, noClose, noScroll, maxHeight, noFilter, onSwitch, buttons = [],
+		useMaxWindowHeight,
 	} = data;
 	const cache = useRef(new CellMeasurerCache({ fixedWidth: true, defaultHeight: HEIGHT_ITEM }));
 	const filterRef = useRef(null);
@@ -44,7 +45,7 @@ const MenuSelect = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 			window.setTimeout(() => setActive(active, true), 15);
 		};
 
-		resize();
+		beforePosition();
 	}, []);
 
 	useEffect(() => {
@@ -54,7 +55,7 @@ const MenuSelect = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 			focus();
 		};
 
-		resize();
+		beforePosition();
 	});
 
 	useEffect(() => {
@@ -107,16 +108,6 @@ const MenuSelect = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 
 		if (!items.length) {
 			items.push({ id: 'empty', name: translate('menuSelectEmpty'), className: 'empty', isEmpty: true });
-		};
-
-		const { bottomItems } = data;
-
-		if (withAdd || bottomItems?.length) {
-			items = items.concat([
-				{ isDiv: true },
-				...(bottomItems || []),
-				...(withAdd ? [{ id: 'add', name: translate('commonAddRelation') }] : [])
-			]);
 		};
 
 		return items || [];
@@ -200,12 +191,13 @@ const MenuSelect = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		return Relation.getArrayValue(value).includes(String(item.id));
 	};
 
-	const resize = () => {
+	const beforePosition = () => {
 		const items = getItems(true);
 		const obj = $(`#${getId()}`);
 		const content = obj.find('.content');
 		const withFilter = isWithFilter();
-		
+		const mh = useMaxWindowHeight ? getMaxHeight?.(keyboard.isPopup()) || 0 : maxHeight;
+
 		if (!noScroll) {
 			let height = 0;
 			if (withFilter) {
@@ -221,18 +213,17 @@ const MenuSelect = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 				height = items.reduce((res: number, current: any) => res + getRowHeight(current), height);
 			};
 
-			height = Math.min(maxHeight || 370, height);
+			height = Math.min(mh || 370, height);
 			height = Math.max(44, height);
 
 			content.css({ height });
 		};
 
-		obj.toggleClass('withFilter', Boolean(withFilter));
-		obj.toggleClass('withAdd', Boolean(withAdd));
-		obj.toggleClass('noScroll', Boolean(noScroll));
-		obj.toggleClass('noVirtualisation', Boolean(noVirtualisation));
-
-		position();
+		obj.toggleClass('withFilter', !!withFilter);
+		obj.toggleClass('withAdd', !!withAdd);
+		obj.toggleClass('noScroll', !!noScroll);
+		obj.toggleClass('noVirtualisation', !!noVirtualisation);
+		obj.toggleClass('withMaxHeight', !!useMaxWindowHeight);
 	};
 
 	const items = getItems(true);
@@ -353,6 +344,7 @@ const MenuSelect = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		getFilterRef: () => filterRef.current,
 		updateOptions,
 		onSwitch,
+		beforePosition,
 	}));
 	
 	return (
@@ -360,7 +352,7 @@ const MenuSelect = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 			{withFilter ? (
 				<Filter 
 					ref={filterRef}
-					className="outlined"
+					className="outlined round"
 					value={filter}
 					placeholder={placeholder}
 					onChange={onFilterChange}
@@ -372,6 +364,19 @@ const MenuSelect = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 			<div className="items">
 				{content}
 			</div>
+
+			{buttons.length ? (
+				<div className="bottom">
+					{buttons.map((item, i) => (
+						<MenuItemVertical 
+							key={item.id}
+							{...item}
+							onMouseEnter={() => setHover(item)} 
+							onClick={e => onClick(e, item)}
+						/>
+					))}
+				</div>
+			) : ''}
 		</>
 	);
 	

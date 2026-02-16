@@ -2,8 +2,14 @@
 
 .menus {
 	.menu.menuSelect {
-		.content { transition: none; overflow: hidden; padding: 0px; }
-		.items { height: 100%; overflow: auto; }
+		.content { transition: none; overflow: hidden; padding: 0px; display: flex; flex-direction: column; }
+		.items { overflow: auto; flex-grow: 1; }
+
+		.filter { flex-shrink: 0; }
+		.bottom { padding: 8px 0px; position: relative; flex-shrink: 0; }
+		.bottom::before {
+			content: ''; position: absolute; top: 0px; left: 14px; height: 1px; width: calc(100% - 28px); background: var(--color-shape-secondary); 
+		}
 
 		.item { display: flex; align-items: center; }
 		.item {
@@ -15,15 +21,14 @@
 		.item.isInitial {
 			.name { text-transform: uppercase; @include text-very-small; }
 		}
-	}
 
-	.menu.menuSelect.withFilter {
-		.content { padding: 8px 0px 0px 0px; }
-		.items { height: calc(100% - 30px); }
-	}
+		&.withFilter {
+			.content { padding: 12px 0px 0px 0px; }
+		}
 
-	.menu.menuSelect.withAdd {
-		.content { max-height: 378px; }
+		&.withMaxHeight {
+			.content { max-height: unset; }
+		}
 	}
 
 	.menu.menuSelect.skip { width: var(--menu-width-value); }

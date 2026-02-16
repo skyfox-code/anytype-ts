@@ -16,6 +16,7 @@ const MenuDataviewRelationEdit = observer(forwardRef<I.MenuRef, I.Menu>((props, 
 
 	const filterRef = useRef(null);
 	const buttonRef = useRef(null);
+	const keyHandlerRef = useRef<(e: any) => void>(() => {});
 	const [ format, setFormat ] = useState<I.RelationType>(null);
 	const [ objectTypes, setObjectTypes ] = useState<string[]>([]);
 	const [ includeTime, setIncludeTime ] = useState<boolean>(false);
@@ -52,9 +53,9 @@ const MenuDataviewRelationEdit = observer(forwardRef<I.MenuRef, I.Menu>((props, 
 
 	const rebind = () => {
 		unbind();
-		$(window).on('keydown.menu', e => onKeyDown(e));
+		$(window).on('keydown.menu', e => keyHandlerRef.current(e));
 	};
-	
+
 	const unbind = () => {
 		$(window).off('keydown.menu');
 	};
@@ -149,7 +150,7 @@ const MenuDataviewRelationEdit = observer(forwardRef<I.MenuRef, I.Menu>((props, 
 				{
 					children: [
 						canAlign ? { id: 'align', icon: U.Data.alignHIcon(viewRelation?.align), name: translate('commonAlign'), arrow: true } : null,
-						canCalculate ? { id: 'calculate', icon: 'relation c-number', name: translate('commonCalculate'), arrow: true } : null,
+						canCalculate ? { id: 'calculate', icon: `relation ${Relation.className(I.RelationType.Number)}`, name: translate('commonCalculate'), arrow: true } : null,
 					]
 				},
 			]);
@@ -517,6 +518,8 @@ const MenuDataviewRelationEdit = observer(forwardRef<I.MenuRef, I.Menu>((props, 
 		keyboard.shortcut('enter', e, () => onSubmit(e));
 	};
 
+	keyHandlerRef.current = (e: any) => onKeyDown(e);
+
 	const checkButton = () => {
 		const name = String(filterRef.current?.getValue() || '');
 		const canSave = name.length && (format !== null) && !isReadonlyHandler();
@@ -555,17 +558,21 @@ const MenuDataviewRelationEdit = observer(forwardRef<I.MenuRef, I.Menu>((props, 
 	const save = () => {
 		const name = String(filterRef.current?.getValue() || '');
 		const relation = getRelation();
-		const item: any = { 
-			relationFormat: format,
+		const isExisting = relation && relation.id;
+		const item: any = {
 			relationFormatObjectTypes: Relation.isObject(format) ? Relation.getArrayValue(objectTypes) : [],
 			relationFormatIncludeTime: includeTime,
+		};
+
+		if (!isExisting) {
+			item.relationFormat = format;
 		};
 
 		if (name) {
 			item.name = name;
 		};
 
-		relation && relation.id ? update(item) : add(item);
+		isExisting ? update(item) : add(item);
 	};
 
 	const add = (item: any) => {
@@ -579,7 +586,7 @@ const MenuDataviewRelationEdit = observer(forwardRef<I.MenuRef, I.Menu>((props, 
 			const { details } = message;
 			
 			data.relationId = details.id;
-			S.Detail.update(J.Constant.subId.relation, { id: details.id, details }, false);
+			S.Detail.update(U.Subscription.spaceSubId(J.Constant.subId.relation), { id: details.id, details }, false);
 			addCommand?.(rootId, blockId, { ...details, _index_: item._index_ }, onChange);
 
 			Preview.toastShow({ text: U.String.sprintf(translate('menuDataviewRelationEditToastOnCreate'), details.name) });
@@ -716,7 +723,7 @@ const MenuDataviewRelationEdit = observer(forwardRef<I.MenuRef, I.Menu>((props, 
 				<div className="name">{translate('menuDataviewRelationEditRelationType')}</div>
 				<MenuItemVertical 
 					id="relation-type" 
-					icon={format === null ? undefined : `relation ${Relation.className(format)}`} 
+					icon={format === null ? undefined : `relation ${Relation.className(format)}`}
 					name={format === null ? translate('menuDataviewRelationEditSelectRelationType') : translate(`relationName${format}`)}
 					onMouseEnter={onRelationType} 
 					readonly={isReadonly}

@@ -22,15 +22,11 @@ const CellItemObject = observer(forwardRef<{}, Props>((props, ref: any) => {
 	const cn = [ 'element' ];
 
 	const onClickHandler = (e: any) => {
-		if (onClick) {
-			onClick(e, getObjectHandler());
-		};
+		onClick?.(e, getObjectHandler());
 	};
 
 	const onContextHandler = (e: any) => {
-		if (onContext) {
-			onContext(e, getObjectHandler());
-		};
+		onContext?.(e, getObjectHandler());
 	};
 
 	const onRemoveHandler = (e: any) => {
@@ -60,6 +56,7 @@ const CellItemObject = observer(forwardRef<{}, Props>((props, ref: any) => {
 		cn.push('canEdit');
 		iconRemove = <Icon className="objectRemove" onClick={onRemoveHandler} />;
 	};
+
 	if (relation.relationKey != 'type') {
 		iconObject = (
 			<IconObject 
@@ -67,6 +64,7 @@ const CellItemObject = observer(forwardRef<{}, Props>((props, ref: any) => {
 				object={object} 
 				size={size} 
 				iconSize={iconSize}
+				noClick={true}
 				canEdit={!isReadonly && !isArchived && allowedDetails && U.Object.isTaskLayout(layout)} 
 			/>
 		);

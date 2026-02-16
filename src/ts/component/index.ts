@@ -12,6 +12,7 @@ import SelectionProvider from './selection/provider';
 import SelectionTarget from './selection/target';
 
 import GraphProvider from './graph/provider';
+import GraphTimeline from './graph/timeline';
 
 import ListPopup from './list/popup';
 import ListMenu from './list/menu';
@@ -87,6 +88,7 @@ import Preview from './preview';
 import PreviewLink from './preview/link';
 import PreviewObject from './preview/object';
 import PreviewDefault from './preview/default';
+import PreviewTab from './preview/tab';
 
 import Cell from './cell';
 
@@ -126,6 +128,7 @@ export {
 	SelectionTarget,
 
 	GraphProvider,
+	GraphTimeline,
 
 	ListPopup,
 	ListMenu,
@@ -189,6 +192,7 @@ export {
 	PreviewLink,
 	PreviewObject,
 	PreviewDefault,
+	PreviewTab,
 
 	Cell,
 

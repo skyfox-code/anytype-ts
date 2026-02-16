@@ -32,12 +32,12 @@ const WidgetObject = observer(forwardRef<{}, I.WidgetComponent>((props, ref) => 
 
 		switch (realId) {
 			case J.Constant.widgetId.unread: {
-				subId = J.Constant.subId.chat;
+				subId = U.Subscription.spaceSubId(J.Constant.subId.chat);
 				break;
 			};
 
 			case J.Constant.widgetId.type: {
-				subId = J.Constant.subId.type;
+				subId = U.Subscription.spaceSubId(J.Constant.subId.type);
 				break;
 			};
 

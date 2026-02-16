@@ -354,7 +354,7 @@ const MenuDataviewObjectList = observer(forwardRef<I.MenuRef, I.Menu>((props, re
 		<div className={[ 'wrap', (!noFilter ? 'withFilter' : '') ].join(' ')}>
 			{!noFilter ? (
 				<Filter
-					className="outlined"
+					className="outlined round"
 					icon="search"
 					ref={filterRef} 
 					placeholder={placeholder}

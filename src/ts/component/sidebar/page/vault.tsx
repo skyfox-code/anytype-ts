@@ -7,7 +7,7 @@ import { SortableContext, verticalListSortingStrategy, sortableKeyboardCoordinat
 import { restrictToVerticalAxis, restrictToParentElement } from '@dnd-kit/modifiers';
 import { CSS } from '@dnd-kit/utilities';
 import { IconObject, ObjectName, Filter, Label, Icon, Button, EmptySearch, ChatCounter } from 'Component';
-import { I, U, S, J, C, keyboard, translate, analytics, sidebar, Key, Highlight, Storage, Action, Preview } from 'Lib';
+import { I, U, S, J, C, keyboard, translate, analytics, sidebar, Key, Highlight, Storage, Action, Preview, Renderer } from 'Lib';
 
 const LIMIT = 20;
 const HEIGHT_ITEM = 44;
@@ -301,6 +301,9 @@ const SidebarPageVault = observer(forwardRef<{}, I.SidebarPageComponent>((props,
 			return;
 		};
 
+		if (S.Common.isPinned) {
+			Renderer.send('openSpaceInTab', item.targetSpaceId, item.uxType);
+		} else
 		if (item.targetSpaceId != space) {
 			U.Router.switchSpace(item.targetSpaceId, '', !!space, {}, false);
 		} else {

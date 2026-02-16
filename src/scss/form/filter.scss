@@ -1,6 +1,6 @@
 @import "~scss/_mixins";
 
-.filter { padding: 0px 14px; cursor: text; }
+.filter { cursor: text; }
 .filter {
 	.inner { position: relative; width: 100%; height: 35px; display: flex; align-items: center; gap: 0px 2px; }
 	.filterInputWrap { position: relative; width: 100%; }

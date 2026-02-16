@@ -1,6 +1,6 @@
 /**
- * Graph rendering worker for force-directed and clustered layouts using D3 and canvas.
- * Handles simulation, drawing, and user interaction logic for graph visualization.
+ * Graph rendering worker using PixiJS WebGL and D3 force simulation.
+ * GPU-accelerated rendering for improved performance with large graphs.
  *
  * @file dist/workers/graph.js
  */
@@ -14,10 +14,8 @@ importScripts(
 	'./lib/d3/d3-force.min.js',
 	'./lib/d3/d3-force-cluster.min.js',
 	'./lib/tween.js',
-	'./lib/util.js'
+	'./lib/pixi.min.js'
 );
-
-const util = new Util();
 
 // CONSTANTS
 
@@ -67,7 +65,6 @@ const forceProps = {
 
 let canvas = null;
 let data = {};
-let ctx = null;
 let width = 0;
 let height = 0;
 let density = 0;
@@ -84,7 +81,7 @@ let isHovering = false;
 let edgeMap = new Map();
 let nodeMap = new Map();
 let hoverAlpha = 0.3;
-let fontFamily = 'Helvetica, san-serif';
+let fontFamily = 'Inter, Helvetica, sans-serif';
 let timeoutHover = 0;
 let rootId = '';
 let root = null;
@@ -96,9 +93,37 @@ let borderRadius = 0;
 let lineWidth = 0;
 let lineWidth3 = 0;
 
-addEventListener('message', ({ data }) => { 
+// Timeline state
+let timelineActive = false;
+let timelinePlaying = false;
+let timelinePosition = 0;
+let timelineSpeed = 1;
+let timelineSortedNodes = [];
+let timelineMinDate = 0;
+let timelineMaxDate = 0;
+let timelineDateRange = 0;
+let timelineLastTick = 0;
+let timelineVisibleNodeIds = null;
+let timelineAllNodes = null;
+let timelineAllEdges = null;
+const TIMELINE_DURATION = 15000;
+
+// PixiJS objects
+let app = null;
+let edgesGraphics = null;
+let nodesContainer = null;
+let labelsContainer = null;
+let edgeLabelsContainer = null;
+let selectBoxGraphics = null;
+let nodeSprites = new Map();
+let nodeLabels = new Map();
+let edgeLabels = new Map();
+let circleTexture = null;
+let initialized = false;
+
+addEventListener('message', ({ data }) => {
 	if (this[data.id]) {
-		this[data.id](data); 
+		this[data.id](data);
 	};
 });
 
@@ -106,33 +131,48 @@ addEventListener('message', ({ data }) => {
  * Initializes the graph worker with provided parameters and sets up the simulation.
  * @param {Object} param - Initialization parameters including canvas, nodes, edges, settings, etc.
  */
-init = (param) => {
+init = async (param) => {
 	data = param;
 	canvas = data.canvas;
 	settings = data.settings;
 	rootId = data.rootId;
-	ctx = canvas.getContext('2d');
-	edges = util.objectCopy(data.edges);
-	nodes = util.objectCopy(data.nodes);
 	zoom = data.zoom;
+	width = data.width;
+	height = data.height;
+	density = data.density;
 
-	util.ctx = ctx;
-	resize(data);
+	// Shallow copy with object spread - faster than deep copy for initial load
+	edges = data.edges.map(d => ({ ...d }));
+	nodes = data.nodes.map(d => ({ ...d }));
+
 	initTheme(data.theme);
-	initFonts();
 	recalcConstants();
 
-	ctx.lineCap = 'round';
-	ctx.fillStyle = data.colors.bg;
-	
 	transform = d3.zoomIdentity.translate(zoom.x, zoom.y).scale(zoom.k);
+
+	// Initialize simulation with fast convergence settings
 	simulation = d3.forceSimulation(nodes);
 	simulation.alpha(1);
 	simulation.alphaDecay(0.05);
+	simulation.alphaMin(0.01); // Stop earlier - good enough layout
 
-	initForces();
+	// Initialize forces
+	initForcesOnly();
+
+	// Run simulation to completion - no animation, show final state immediately
+	const maxIterations = 300; // Safety limit
+	let iterations = 0;
+	while (simulation.alpha() > simulation.alphaMin() && iterations < maxIterations) {
+		simulation.tick();
+		iterations++;
+	};
+	simulation.stop();
+
+	// Initialize PixiJS
+	await initPixi();
+
+	// Set up tick handler for future interactions (drag, settings changes)
 	simulation.on('tick', () => redraw());
-	simulation.tick(100);
 
 	root = getNodeById(rootId);
 
@@ -140,7 +180,77 @@ init = (param) => {
 	const y = root ? root.y : height / 2;
 
 	transform = Object.assign(transform, getCenter(x, y));
+
+	// Build node sprites after PixiJS is ready
+	updateNodeSprites();
+
+	// Draw the settled graph
+	redraw();
+
 	send('onTransform', { ...transform });
+};
+
+/**
+ * Initialize PixiJS application and containers
+ */
+initPixi = async () => {
+	if (initialized) {
+		return;
+	};
+
+	app = new PIXI.Application();
+
+	await app.init({
+		canvas: canvas,
+		width: width * density,
+		height: height * density,
+		antialias: true,
+		backgroundAlpha: 0,
+		resolution: 1,
+		autoDensity: false,
+		preference: 'webgl',
+		powerPreference: 'high-performance',
+		hello: false, // Disable console hello message
+	});
+
+	// Create render containers with optimized settings
+	edgesGraphics = new PIXI.Graphics();
+	edgeLabelsContainer = new PIXI.Container();
+	nodesContainer = new PIXI.Container();
+	labelsContainer = new PIXI.Container();
+	selectBoxGraphics = new PIXI.Graphics();
+
+	// Disable interactivity - we handle events manually via D3
+	edgesGraphics.eventMode = 'none';
+	edgeLabelsContainer.eventMode = 'none';
+	nodesContainer.eventMode = 'none';
+	labelsContainer.eventMode = 'none';
+	selectBoxGraphics.eventMode = 'none';
+
+	app.stage.addChild(edgesGraphics);
+	app.stage.addChild(edgeLabelsContainer);
+	app.stage.addChild(nodesContainer);
+	app.stage.addChild(labelsContainer);
+	app.stage.addChild(selectBoxGraphics);
+
+	// Create base circle texture for nodes
+	createCircleTexture();
+
+	initialized = true;
+};
+
+/**
+ * Creates a reusable circle texture for node sprites
+ */
+createCircleTexture = () => {
+	const size = 64;
+	const graphics = new PIXI.Graphics();
+
+	graphics.circle(size / 2, size / 2, size / 2);
+	graphics.fill({ color: 0xffffff });
+
+	circleTexture = app.renderer.generateTexture(graphics);
+	graphics.destroy();
 };
 
 /**
@@ -156,28 +266,68 @@ initTheme = (theme) => {
 };
 
 /**
- * Loads and registers custom fonts for the graph.
- */
-initFonts = () => {
-	if (!self.FontFace) {
-		return;
-	};
-
-	const name = 'Inter';
-	const fontFace = new FontFace(name, `url("../font/inter/regular.woff2") format("woff2")`);
-
-	self.fonts.add(fontFace);
-	fontFace.load().then(() => fontFamily = name);
-};
-
-/**
  * Registers an image bitmap for a given source.
  * @param {{src: string, bitmap: ImageBitmap}} param - Image source and bitmap.
  */
 image = ({ src, bitmap }) => {
 	if (!images[src]) {
 		images[src] = bitmap;
+
+		// Create texture from bitmap for PixiJS
+		if (app && app.renderer) {
+			const texture = PIXI.Texture.from(bitmap);
+			images[src + '_texture'] = texture;
+		};
 	};
+};
+
+/**
+ * Initializes D3 forces for the simulation (without triggering updateForces/redraw).
+ * Used during initial setup to avoid redundant work.
+ */
+initForcesOnly = () => {
+	const { center, charge, link, forceX, forceY } = forceProps;
+
+	updateOrphans();
+
+	simulation
+	.force('link', d3.forceLink().id(d => d.id))
+	.force('charge', d3.forceManyBody())
+	.force('center', d3.forceCenter())
+	.force('forceX', d3.forceX(nodes))
+	.force('forceY', d3.forceY(nodes));
+
+	simulation.force('center')
+	.x(width * center.x)
+	.y(height * center.y);
+
+	simulation.force('charge')
+	.strength(charge.strength)
+	.distanceMax(charge.distanceMax);
+
+	simulation.force('link')
+	.links(edges)
+	.distance(link.distance)
+	.strength(d => d.source.type == d.target.type ? 1 : 0.5);
+
+	simulation.force('forceX')
+	.strength(d => !d.isOrphan ? forceX.strength : 0)
+	.x(width * forceX.x);
+
+	simulation.force('forceY')
+	.strength(d => !d.isOrphan ? forceY.strength : 0)
+	.y(height * forceY.y);
+
+	// Build edgeMap and nodeMap
+	const tmpEdgeMap = getEdgeMap();
+	edgeMap.clear();
+	nodes.forEach(d => {
+		edgeMap.set(d.id, tmpEdgeMap.get(d.id) || []);
+	});
+	nodeMap = getNodeMap();
+
+	// Set up clusters if enabled
+	updateClusters();
 };
 
 /**
@@ -225,7 +375,7 @@ initForces = () => {
  */
 updateForces = () => {
 	const old = getNodeMap();
-	
+
 	let types = [];
 	if (settings.link) {
 		types.push(EdgeType.Link);
@@ -234,8 +384,9 @@ updateForces = () => {
 		types.push(EdgeType.Relation);
 	};
 
-	edges = util.objectCopy(data.edges);
-	nodes = util.objectCopy(data.nodes);
+	// Use shallow copy instead of deep copy - sufficient for filtering
+	edges = data.edges.map(d => ({ ...d }));
+	nodes = data.nodes.map(d => ({ ...d }));
 
 	updateOrphans();
 
@@ -299,6 +450,15 @@ updateForces = () => {
 	nodeMap = getNodeMap();
 
 	updateClusters();
+	updateNodeSprites();
+
+	if (timelineActive) {
+		timelineAllNodes = nodes.slice();
+		timelineAllEdges = edges.slice();
+		buildTimelineSortedNodes();
+		timelineRebuildSimulation();
+	};
+
 	redraw();
 };
 
@@ -327,7 +487,7 @@ updateClusters = () => {
  */
 updateSettings = (param) => {
 	const updateKeys = [ 'link', 'relation', 'orphan', 'local', 'depth', 'cluster', 'filterTypes' ];
-	
+
 	let needUpdate = false;
 	let needFocus = false;
 
@@ -367,12 +527,254 @@ updateTheme = ({ theme, colors }) => {
 };
 
 /**
+ * Builds the sorted node list for timeline animation.
+ */
+buildTimelineSortedNodes = () => {
+	const source = timelineAllNodes || nodes;
+
+	timelineSortedNodes = source
+		.filter(d => d.createdDate && (d.createdDate > 0))
+		.sort((a, b) => a.createdDate - b.createdDate);
+
+	if (timelineSortedNodes.length > 0) {
+		timelineMinDate = timelineSortedNodes[0].createdDate;
+		timelineMaxDate = timelineSortedNodes[timelineSortedNodes.length - 1].createdDate;
+		timelineDateRange = timelineMaxDate - timelineMinDate;
+	} else {
+		timelineMinDate = 0;
+		timelineMaxDate = 0;
+		timelineDateRange = 0;
+	};
+};
+
+/**
+ * Maps a timeline position (0-1) to a cutoff date using node-count weighting.
+ * Periods with more nodes get proportionally more playback time.
+ */
+getTimelineCutoffDate = (position) => {
+	if (!timelineSortedNodes.length) {
+		return 0;
+	};
+
+	const idx = Math.min(
+		Math.floor(position * timelineSortedNodes.length),
+		timelineSortedNodes.length - 1
+	);
+
+	return timelineSortedNodes[idx].createdDate;
+};
+
+/**
+ * Formats a unix timestamp (seconds) to "Mon DD, YYYY".
+ */
+formatTimelineDate = (timestamp) => {
+	if (!timestamp) {
+		return '';
+	};
+
+	const d = new Date(timestamp * 1000);
+	const months = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ];
+
+	return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+};
+
+/**
+ * Starts timeline playback.
+ */
+timelineStart = ({ speed }) => {
+	timelineSpeed = speed || 1;
+	timelineActive = true;
+	timelinePlaying = true;
+	timelineLastTick = performance.now();
+
+	if (!timelineAllNodes) {
+		timelineAllNodes = nodes.slice();
+		timelineAllEdges = edges.slice();
+	};
+
+	buildTimelineSortedNodes();
+
+	if (timelinePosition >= 1) {
+		timelinePosition = 0;
+		timelineVisibleNodeIds = null;
+	};
+
+	timelineRebuildSimulation();
+	redraw();
+};
+
+/**
+ * Pauses timeline playback.
+ */
+timelinePause = () => {
+	timelinePlaying = false;
+	redraw();
+};
+
+/**
+ * Rebuilds the simulation with only timeline-visible nodes.
+ * Positions new nodes near connected visible nodes so they flow in naturally.
+ */
+timelineRebuildSimulation = () => {
+	if (!timelineAllNodes) {
+		return;
+	};
+
+	const cutoffDate = getTimelineCutoffDate(timelinePosition);
+	const prevVisible = timelineVisibleNodeIds;
+	const newVisible = new Set();
+
+	timelineAllNodes.forEach(d => {
+		const nodeDate = d.createdDate || 0;
+
+		if ((nodeDate > 0) && (nodeDate <= cutoffDate)) {
+			newVisible.add(d.id);
+		};
+	});
+
+	// Check if visible set changed
+	let changed = !prevVisible || (newVisible.size !== prevVisible.size);
+
+	if (!changed) {
+		for (const id of newVisible) {
+			if (!prevVisible.has(id)) {
+				changed = true;
+				break;
+			};
+		};
+	};
+
+	if (!changed) {
+		return;
+	};
+
+	// Position new nodes near connected visible nodes
+	timelineAllNodes.forEach(d => {
+		if (!newVisible.has(d.id) || (prevVisible && prevVisible.has(d.id))) {
+			return;
+		};
+
+		let placed = false;
+
+		for (let i = 0; i < timelineAllEdges.length; i++) {
+			const e = timelineAllEdges[i];
+			const sid = typeof e.source === 'object' ? e.source.id : e.source;
+			const tid = typeof e.target === 'object' ? e.target.id : e.target;
+			let otherId = null;
+
+			if ((sid === d.id) && newVisible.has(tid)) {
+				otherId = tid;
+			} else
+			if ((tid === d.id) && newVisible.has(sid)) {
+				otherId = sid;
+			};
+
+			if (otherId) {
+				const other = timelineAllNodes.find(n => n.id === otherId);
+
+				if (other && (other.x !== undefined)) {
+					d.x = other.x + (Math.random() - 0.5) * 30;
+					d.y = other.y + (Math.random() - 0.5) * 30;
+					d.vx = 0;
+					d.vy = 0;
+					placed = true;
+					break;
+				};
+			};
+		};
+
+		if (!placed && (d.x === undefined)) {
+			d.x = width / 2 + (Math.random() - 0.5) * 100;
+			d.y = height / 2 + (Math.random() - 0.5) * 100;
+		};
+	});
+
+	timelineVisibleNodeIds = newVisible;
+
+	nodes = timelineAllNodes.filter(d => newVisible.has(d.id));
+	edges = timelineAllEdges.filter(d => {
+		const sid = typeof d.source === 'object' ? d.source.id : d.source;
+		const tid = typeof d.target === 'object' ? d.target.id : d.target;
+
+		return newVisible.has(sid) && newVisible.has(tid);
+	});
+
+	simulation.nodes(nodes);
+	simulation.force('link').id(d => d.id).links(edges);
+	simulation.alpha(0.3).restart();
+
+	nodeMap = getNodeMap();
+	const tmpEdgeMap = getEdgeMap();
+	edgeMap.clear();
+	nodes.forEach(d => {
+		edgeMap.set(d.id, tmpEdgeMap.get(d.id) || []);
+	});
+
+	maxDegree = 0;
+	updateOrphans();
+	updateNodeSprites();
+};
+
+/**
+ * Seeks the timeline to a specific position.
+ */
+timelineSeek = ({ position }) => {
+	timelineActive = true;
+	timelinePosition = Math.max(0, Math.min(1, position));
+
+	if (!timelineAllNodes) {
+		timelineAllNodes = nodes.slice();
+		timelineAllEdges = edges.slice();
+	};
+
+	if (!timelineSortedNodes.length) {
+		buildTimelineSortedNodes();
+	};
+
+	timelineRebuildSimulation();
+	redraw();
+};
+
+/**
+ * Resets the timeline and restores full graph visibility.
+ */
+timelineReset = () => {
+	timelineActive = false;
+	timelinePlaying = false;
+	timelinePosition = 0;
+	timelineSortedNodes = [];
+	timelineVisibleNodeIds = null;
+
+	if (timelineAllNodes) {
+		nodes = timelineAllNodes;
+		edges = timelineAllEdges;
+
+		nodes.forEach(d => {
+			delete d._timelineVisible;
+			delete d._timelineAlpha;
+		});
+
+		simulation.nodes(nodes);
+		simulation.force('link').id(d => d.id).links(edges);
+		simulation.alpha(0.3).restart();
+
+		nodeMap = getNodeMap();
+		const tmpEdgeMap = getEdgeMap();
+		edgeMap.clear();
+		nodes.forEach(d => {
+			edgeMap.set(d.id, tmpEdgeMap.get(d.id) || []);
+		});
+		updateNodeSprites();
+	};
+
+	timelineAllNodes = null;
+	timelineAllEdges = null;
+
+	redraw();
+};
+
+/**
  * Builds a map of edges grouped by their connected vertex IDs.
- *
- * Iterates over the global `edges` array and creates a `Map` where each key
- * is a vertex ID (`source` or `target`), and the value is an array of edges
- * connected to that vertex.
- *
  * @returns {Map<*, Object[]>} A map where each key is a vertex ID and each value is an array of edge objects.
  */
 getEdgeMap = () => {
@@ -451,40 +853,165 @@ updateOrphans = () => {
 };
 
 /**
+ * Update or create sprites for nodes
+ */
+updateNodeSprites = () => {
+	if (!app || !nodesContainer) {
+		return;
+	};
+
+	// Track existing node IDs
+	const currentNodeIds = new Set(nodes.map(d => d.id));
+
+	// Remove sprites for nodes that no longer exist
+	for (const [id, sprite] of nodeSprites) {
+		if (!currentNodeIds.has(id)) {
+			nodesContainer.removeChild(sprite);
+			sprite.destroy();
+			nodeSprites.delete(id);
+		};
+	};
+
+	// Remove labels for nodes that no longer exist
+	for (const [id, label] of nodeLabels) {
+		if (!currentNodeIds.has(id)) {
+			labelsContainer.removeChild(label);
+			label.destroy();
+			nodeLabels.delete(id);
+		};
+	};
+
+	// Pre-create sprites and labels for new nodes
+	// This avoids expensive object creation during the render loop
+	for (const d of nodes) {
+		// Pre-create sprite if needed
+		if (!nodeSprites.has(d.id)) {
+			const sprite = new PIXI.Sprite(circleTexture);
+			sprite.anchor.set(0.5);
+			sprite.visible = false;
+			nodesContainer.addChild(sprite);
+			nodeSprites.set(d.id, sprite);
+		};
+
+		// Pre-create label if needed (labels are expensive to create)
+		if (!nodeLabels.has(d.id)) {
+			const label = new PIXI.Text({
+				text: d.shortName || '',
+				style: new PIXI.TextStyle({
+					fontFamily: fontFamily,
+					fontSize: 12,
+					fill: parseColor(data.colors?.text || '#000000'),
+					align: 'center',
+				}),
+				resolution: density,
+			});
+			label.anchor.set(0.5, 0);
+			label.visible = false;
+			labelsContainer.addChild(label);
+			nodeLabels.set(d.id, label);
+		};
+	};
+};
+
+/**
  * Draws the entire graph (edges, nodes, selection box) for the current frame.
  * @param {number} t - The current animation time.
  */
 draw = (t) => {
-	const radius = 5.7 / transform.k;
+	if (!app || !initialized) {
+		return;
+	};
 
 	recalcConstants();
 
 	time = t;
 	TWEEN.update();
 
-	ctx.save();
-	ctx.clearRect(0, 0, width, height);
-	ctx.translate(transform.x, transform.y);
-	ctx.scale(transform.k, transform.k);
-	ctx.font = getFont();
+	// Update stage transform
+	app.stage.scale.set(transform.k * density);
+	app.stage.position.set(transform.x * density, transform.y * density);
+
+	// Clear and redraw edges
+	edgesGraphics.clear();
+
+	// Clear any edge labels
+	if (edgeLabelsContainer) {
+		edgeLabelsContainer.removeChildren();
+		edgeLabels.clear();
+	};
+
+	// Timeline animation tick
+	if (timelineActive) {
+		const now = performance.now();
+
+		if (timelinePlaying) {
+			const delta = (now - timelineLastTick) / TIMELINE_DURATION * timelineSpeed;
+			timelinePosition = Math.min(1, timelinePosition + delta);
+
+			if (timelinePosition >= 1) {
+				timelinePlaying = false;
+				send('onTimelineComplete', {});
+			};
+		};
+
+		timelineLastTick = now;
+
+		// Rebuild simulation if visible set changed
+		timelineRebuildSimulation();
+
+		// Update fade alpha for visible nodes
+		const cutoffDate = getTimelineCutoffDate(timelinePosition);
+		const fadeRange = timelineDateRange * 0.05;
+
+		nodes.forEach(d => {
+			const nodeDate = d.createdDate || 0;
+			d._timelineVisible = true;
+
+			if ((fadeRange > 0) && ((cutoffDate - nodeDate) < fadeRange)) {
+				d._timelineAlpha = Math.max(0.1, (cutoffDate - nodeDate) / fadeRange);
+			} else {
+				d._timelineAlpha = 1;
+			};
+		});
+
+		send('onTimelineUpdate', {
+			position: timelinePosition,
+			dateLabel: cutoffDate > 0 ? formatTimelineDate(cutoffDate) : '',
+			cutoffDate,
+			isPlaying: timelinePlaying,
+		});
+
+		if (timelinePlaying) {
+			redraw();
+		};
+	};
+
+	const radius = 5.7 / transform.k;
 
 	edges.forEach(d => {
+
 		if (checkNodeInViewport(d.target) || checkNodeInViewport(d.source)) {
 			drawEdge(d, radius, radius * 1.3, settings.marker && d.isDouble, settings.marker);
 		};
 	});
 
+	// Update nodes
 	nodes.forEach(d => {
 		if (checkNodeInViewport(d)) {
 			drawNode(d);
+		} else {
+			hideNode(d);
 		};
 	});
 
+	// Draw selection box
+	selectBoxGraphics.clear();
 	if (selectBox.x && selectBox.y && selectBox.width && selectBox.height) {
 		drawSelectBox();
 	};
 
-	ctx.restore();
+	// Render
+	app.render();
 };
 
 /**
@@ -498,7 +1025,7 @@ redraw = () => {
 };
 
 /**
- * Draws a single edge, including optional arrowheads and labels.
+ * Draws a single edge using PixiJS Graphics.
  * @param {Object} d - The edge object.
  * @param {number} arrowWidth - Width of the arrowhead.
  * @param {number} arrowHeight - Height of the arrowhead.
@@ -518,7 +1045,7 @@ drawEdge = (d, arrowWidth, arrowHeight, arrowStart, arrowEnd) => {
 	const sin1 = Math.sin(a1);
 	const cos2 = Math.cos(a2);
 	const sin2 = Math.sin(a2);
-	const mx = (x1 + x2) / 2;  
+	const mx = (x1 + x2) / 2;
 	const my = (y1 + y2) / 2;
 	const sx1 = x1 + r1 * cos1;
 	const sy1 = y1 + r1 * sin1;
@@ -528,61 +1055,102 @@ drawEdge = (d, arrowWidth, arrowHeight, arrowStart, arrowEnd) => {
 	const io = (isOver == d.source.id) || (isOver == d.target.id);
 	const showName = io && d.name && settings.label;
 
-	let colorLink = data.colors.link;
-	let colorArrow = data.colors.arrow;
-	let colorText = data.colors.text;
+	let colorLink = parseColor(data.colors.link);
+	let colorArrow = parseColor(data.colors.arrow);
+	let colorText = parseColor(data.colors.text);
+	let alpha = 1;
 
 	if (isHovering) {
-		ctx.globalAlpha = hoverAlpha;
+		alpha = hoverAlpha;
 	};
 
 	if (io) {
-		colorLink = colorArrow = colorText = data.colors.highlight;
-		ctx.globalAlpha = 1;
+		colorLink = colorArrow = colorText = parseColor(data.colors.highlight);
+		alpha = 1;
 	};
 
-	util.line(sx1, sy1, sx2, sy2, lineWidth, colorLink);
+	// Draw the edge line
+	edgesGraphics.moveTo(sx1, sy1);
+	edgesGraphics.lineTo(sx2, sy2);
+	edgesGraphics.stroke({ width: lineWidth, color: colorLink, alpha: alpha });
 
 	let tw = 0;
 	let th = 0;
 	let offset = arrowStart && arrowEnd ? -k : 0;
 
-	// Relation name
-	if (showName) {
-		ctx.textAlign = 'center';
-		ctx.textBaseline = 'middle';
+	// Relation name label
+	if (showName && transform.k >= transformThreshold) {
+		// Use fixed font size for crisp rendering, scale container instead
+		const baseFontSize = 12;
+		const labelScale = 1 / transform.k;
+		const scaledPadding = k * transform.k;
+		const scaledBorderRadius = borderRadius * transform.k;
+		const scaledLineWidth = lineWidth3 * transform.k;
 
-		const { top, bottom, left, right } = util.textMetrics(d.name);
+		// Get or create label for this edge
+		const edgeKey = d.source.id + '-' + d.target.id;
+		let labelContainer = edgeLabels.get(edgeKey);
 
-		tw = Math.abs(right - left);
-		th = Math.abs(bottom - top);
+		if (!labelContainer) {
+			labelContainer = new PIXI.Container();
+			edgeLabelsContainer.addChild(labelContainer);
+			edgeLabels.set(edgeKey, labelContainer);
+		};
+
+		// Clear previous content
+		labelContainer.removeChildren();
+
+		// Create text at base resolution for crisp rendering
+		const label = new PIXI.Text({
+			text: d.name,
+			style: new PIXI.TextStyle({
+				fontFamily: fontFamily,
+				fontSize: baseFontSize,
+				fill: colorText,
+				align: 'center',
+			}),
+			resolution: density,
+		});
+		label.anchor.set(0.5);
+
+		// Get text dimensions at base size
+		const textWidth = label.width;
+		const textHeight = label.height;
+
+		// Calculate world-space dimensions for arrow offset
+		tw = textWidth * labelScale;
+		th = textHeight * labelScale;
 		offset = arrowHeight / 2;
 
-		// Rectangle
-		ctx.save();
-		ctx.translate(mx, my);
-		ctx.rotate(Math.abs(a1) <= 1.5 ? a1 : a2);
-		util.roundedRect(left - k, top - k, tw + k * 2, th + k * 2, borderRadius);
+		// Create background rectangle in label space
+		const bgGraphics = new PIXI.Graphics();
+		bgGraphics.roundRect(
+			-textWidth / 2 - scaledPadding,
+			-textHeight / 2 - scaledPadding,
+			textWidth + scaledPadding * 2,
+			textHeight + scaledPadding * 2,
+			scaledBorderRadius
+		);
+		bgGraphics.fill({ color: parseColor(data.colors.bg) });
+		bgGraphics.stroke({ width: scaledLineWidth, color: colorLink });
 
-		ctx.strokeStyle = colorLink;
-		ctx.lineWidth = lineWidth3;
-		ctx.fillStyle = data.colors.bg;
-		ctx.fill();
-		ctx.stroke();
+		labelContainer.addChild(bgGraphics);
+		labelContainer.addChild(label);
 
-		// Label
-		ctx.fillStyle = colorText;
-		ctx.fillText(d.name, 0, 0);
-		ctx.restore();
+		// Position, rotate, and scale the container
+		labelContainer.position.set(mx, my);
+		labelContainer.scale.set(labelScale);
+		// Rotate to align with edge, but keep text readable (flip if pointing left)
+		labelContainer.rotation = Math.abs(a1) <= 1.5 ? a1 : a2;
+		labelContainer.visible = true;
 	};
 
 	// Arrow heads
-
 	if ((arrowStart || arrowEnd) && (transform.k >= transformThresholdHalf)) {
 		let move = arrowHeight;
 		if (showName) {
 			move = arrowHeight * 2 + tw / 2 + offset;
-		} else 
+		} else
 		if (arrowStart && arrowEnd) {
 			move = arrowHeight * 2;
 		};
@@ -590,45 +1158,77 @@ drawEdge = (d, arrowWidth, arrowHeight, arrowStart, arrowEnd) => {
 		if (arrowStart) {
 			const sax1 = mx - move * cos1;
 			const say1 = my - move * sin1;
-
-			util.arrowHead(sax1, say1, a1, arrowWidth, arrowHeight, colorArrow);
+			drawArrowHead(sax1, say1, a1, arrowWidth, arrowHeight, colorArrow, alpha);
 		};
 
 		if (arrowEnd) {
 			const sax2 = mx - move * cos2;
 			const say2 = my - move * sin2;
-
-			util.arrowHead(sax2, say2, a2, arrowWidth, arrowHeight, colorArrow);
+			drawArrowHead(sax2, say2, a2, arrowWidth, arrowHeight, colorArrow, alpha);
 		};
 	};
 };
 
 /**
- * Draws a single node, including icon, selection, and label.
+ * Draws an arrowhead at the specified position
+ */
+drawArrowHead = (x, y, angle, width, height, color, alpha) => {
+	if (!width || !height) {
+		return;
+	};
+
+	const halfWidth = width / 2;
+	const cos = Math.cos(angle);
+	const sin = Math.sin(angle);
+
+	// Calculate arrow points
+	const tipX = x;
+	const tipY = y;
+	const baseX1 = x + height * cos - halfWidth * (-sin);
+	const baseY1 = y + height * sin - halfWidth * cos;
+	const baseX2 = x + height * cos + halfWidth * (-sin);
+	const baseY2 = y + height * sin + halfWidth * cos;
+
+	edgesGraphics.moveTo(tipX, tipY);
+	edgesGraphics.lineTo(baseX1, baseY1);
+	edgesGraphics.lineTo(baseX2, baseY2);
+	edgesGraphics.lineTo(tipX, tipY);
+	edgesGraphics.fill({ color: color, alpha: alpha });
+};
+
+/**
+ * Draws a single node using PixiJS sprites.
  * @param {Object} d - The node object.
  */
 drawNode = (d) => {
+	// Timeline visibility override
+	if (timelineActive && !d._timelineVisible) {
+		hideNode(d);
+		return;
+	};
+
 	const radius = getRadius(d);
 	const img = images[d.src];
+	const texture = images[d.src + '_texture'];
 	const diameter = radius * 2;
 	const isSelected = selected.includes(d.id);
 	const io = isOver == d.id;
 	const iconColors = data.colors?.icon || {};
 	const opt = (iconColors.list || [])[d.iconOption - 1];
-	
-	let colorNode = iconColors.bg[opt] || data.colors.node;
-	let colorText = data.colors.text;
-	let colorLine = '';
+
+	let colorNode = parseColor(iconColors.bg?.[opt] || data.colors.node);
+	let colorLine = null;
 	let lw = 0;
+	let alpha = timelineActive ? (d._timelineAlpha !== undefined ? d._timelineAlpha : 1) : 1;
 
 	if (isHovering) {
-		ctx.globalAlpha = hoverAlpha;
+		alpha = hoverAlpha;
 
 		const connections = edgeMap.get(d.id);
 		if (connections && connections.length) {
 			for (let i = 0; i < connections.length; i++) {
 				if ((isOver == connections[i].source.id) || (isOver == connections[i].target.id)) {
-					ctx.globalAlpha = 1;
+					alpha = 1;
 					break;
 				};
 			};
@@ -636,89 +1236,127 @@ drawNode = (d) => {
 	};
 
 	if (io || (root && (d.id == root.id))) {
-		colorNode = colorText = colorLine = data.colors.highlight;
+		colorNode = colorLine = parseColor(data.colors.highlight);
 		lw = lineWidth3;
-		ctx.globalAlpha = 1;
+		alpha = 1;
 	};
 
 	if (isSelected) {
-		colorNode = colorText = colorLine = data.colors.selected;
+		colorNode = colorLine = parseColor(data.colors.selected);
 	};
 
 	if (io || isSelected) {
 		lw = lineWidth3;
 	};
 
-	if (settings.icon && img && (transform.k >= transformThresholdHalf)) {
-		ctx.save();
+	// Get or create sprite for this node
+	let sprite = nodeSprites.get(d.id);
+	const showIcon = settings.icon && texture && (transform.k >= transformThresholdHalf);
 
-		if (lw) {
-			util.roundedRect(d.x - radius - lw * 2, d.y - radius - lw * 2, diameter + lw * 4, diameter + lw * 4, borderRadius);
-			ctx.fillStyle = data.colors.bg;
-			ctx.fill();
-
-			ctx.strokeStyle = colorLine;
-			ctx.lineWidth = lw;
-			ctx.stroke();
+	if (!sprite) {
+		if (showIcon) {
+			sprite = new PIXI.Sprite(texture);
+		} else {
+			sprite = new PIXI.Sprite(circleTexture);
 		};
-
-		let x = d.x - radius;
-		let y = d.y - radius;
-		let w = diameter;
-		let h = diameter;
-	
-		if (d.iconImage) {
-			x = d.x - radius;
-			y = d.y - radius;
-	
-			if (isLayoutHuman(d) || isLayoutParticipant(d)) {
-				util.circle(d.x, d.y, radius);
-			} else {
-				util.roundedRect(d.x - radius, d.y - radius, diameter, diameter, borderRadius);
-			};
-	
-			ctx.fillStyle = data.colors.bg;
-			ctx.fill();
-			ctx.clip();
-	
-			if (img.width > img.height) {
-				w = h * (img.width / img.height);
-				x -= (w - diameter) / 2;
-			} else {
-				h = w * (img.height / img.width);
-				y -= (h - diameter) / 2;
-			};
-		};
-
-		ctx.drawImage(img, 0, 0, img.width, img.height, x, y, w, h);
-		ctx.restore();
-	} else {
-		util.circle(d.x, d.y, radius);
-		ctx.fillStyle = colorNode;
-		ctx.fill();
+		nodesContainer.addChild(sprite);
+		nodeSprites.set(d.id, sprite);
 	};
 
-	// Node name
+	// Update sprite texture if needed
+	if (showIcon && sprite.texture !== texture) {
+		sprite.texture = texture;
+	} else
+	if (!showIcon && sprite.texture !== circleTexture) {
+		sprite.texture = circleTexture;
+	};
+
+	// Update sprite properties
+	sprite.visible = true;
+	sprite.alpha = alpha;
+	sprite.anchor.set(0.5);
+	sprite.position.set(d.x, d.y);
+
+	if (showIcon) {
+		// For image icons, preserve aspect ratio
+		const maxSize = diameter;
+		const scale = maxSize / Math.max(img.width, img.height);
+		sprite.scale.set(scale);
+
+		// Apply mask for human/participant layouts (circular)
+		if (isLayoutHuman(d) || isLayoutParticipant(d)) {
+			sprite.tint = 0xffffff;
+		} else {
+			sprite.tint = 0xffffff;
+		};
+	} else {
+		// For circle nodes, scale based on radius
+		const baseRadius = 32; // circleTexture is 64x64
+		sprite.scale.set(radius / baseRadius);
+		sprite.tint = colorNode;
+	};
+
+	// Draw outline if needed
+	if (lw > 0) {
+		if (showIcon) {
+			// Rounded rectangle outline for all icons (matching canvas behavior)
+			const size = diameter + lw * 4;
+			edgesGraphics.roundRect(d.x - size / 2, d.y - size / 2, size, size, borderRadius);
+			edgesGraphics.stroke({ width: lw, color: colorLine });
+		} else {
+			// Circle outline for non-icon nodes
+			edgesGraphics.circle(d.x, d.y, radius + lw);
+			edgesGraphics.stroke({ width: lw, color: colorLine });
+		};
+	};
+
+	// Node label
 	if (settings.label && (transform.k >= transformThreshold)) {
-		ctx.textAlign = 'center';
-		ctx.textBaseline = 'middle';
+		let label = nodeLabels.get(d.id);
 
-		const { top, bottom, left, right } = util.textMetrics(d.shortName);
-		const tw = right - left;
-		const th = bottom - top;
-		const offset = 4 / transform.k;
+		if (!label) {
+			label = new PIXI.Text({
+				text: d.shortName || '',
+				style: {
+					fontFamily: fontFamily,
+					fontSize: 12,
+					fill: parseColor(data.colors.text),
+					align: 'center',
+				},
+				resolution: density,
+			});
+			label.anchor.set(0.5, 0);
+			labelsContainer.addChild(label);
+			nodeLabels.set(d.id, label);
+		};
 
-		// Rectangle
-		ctx.save();
-		ctx.translate(d.x, d.y);
-		ctx.fillStyle = data.colors.bg;
-		util.rect(left, top + diameter + offset, tw, th);
-		ctx.fill();
+		const labelScale = 1 / transform.k;
+		label.scale.set(labelScale);
+		label.position.set(d.x, d.y + radius + 4 / transform.k);
+		label.style.fill = io || isSelected ? (isSelected ? parseColor(data.colors.selected) : parseColor(data.colors.highlight)) : parseColor(data.colors.text);
+		label.text = d.shortName || '';
+		label.visible = true;
+		label.alpha = alpha;
+	} else {
+		const label = nodeLabels.get(d.id);
+		if (label) {
+			label.visible = false;
+		};
+	};
+};
 
-		// Label
-		ctx.fillStyle = colorText;
-		ctx.fillText(d.shortName, 0, diameter + offset);
-		ctx.restore();
+/**
+ * Hides a node sprite when it's outside viewport
+ */
+hideNode = (d) => {
+	const sprite = nodeSprites.get(d.id);
+	if (sprite) {
+		sprite.visible = false;
+	};
+
+	const label = nodeLabels.get(d.id);
+	if (label) {
+		label.visible = false;
 	};
 };
 
@@ -728,14 +1366,9 @@ drawNode = (d) => {
 drawSelectBox = () => {
 	const { x, y, width, height } = selectBox;
 
-	ctx.save();
-	util.roundedRect(x, y, width, height, 1);
-
-	ctx.strokeStyle = data.colors.selected;
-	ctx.lineWidth = lineWidth3;
-	ctx.stroke();
-	ctx.restore();
-}
+	selectBoxGraphics.roundRect(x, y, width, height, 1);
+	selectBoxGraphics.stroke({ width: lineWidth3, color: parseColor(data.colors.selected) });
+};
 
 /**
  * Handles zoom events and updates the transform.
@@ -744,7 +1377,6 @@ drawSelectBox = () => {
 onZoom = (data) => {
 	transform = Object.assign(transform, data.transform);
 
-	util.clearCache('text');
 	recalcConstants();
 	redraw();
 };
@@ -863,7 +1495,7 @@ onClick = ({ x, y }) => {
  */
 onSelect = ({ x, y, selectRelated }) => {
   	const d = getNodeByCoords(x, y);
-  	
+
 	let related = [];
 
 	if (d) {
@@ -975,7 +1607,7 @@ onAddNode = ({ target, sourceId }) => {
 
 	target = Object.assign(target, {
 		index: id,
-		vx: 1, 
+		vx: 1,
 		vy: 1,
 		forceShow: true,
 	});
@@ -995,6 +1627,23 @@ onAddNode = ({ target, sourceId }) => {
  */
 onRemoveNode = ({ ids }) => {
 	isHovering = false;
+
+	// Remove sprites for deleted nodes
+	ids.forEach(id => {
+		const sprite = nodeSprites.get(id);
+		if (sprite) {
+			nodesContainer.removeChild(sprite);
+			sprite.destroy();
+			nodeSprites.delete(id);
+		};
+
+		const label = nodeLabels.get(id);
+		if (label) {
+			labelsContainer.removeChild(label);
+			label.destroy();
+			nodeLabels.delete(id);
+		};
+	});
 
 	data.nodes = data.nodes.filter(d => !ids.includes(d.id));
 	data.edges = data.edges.filter(d => !ids.includes(d.source.id) && !ids.includes(d.target.id));
@@ -1047,13 +1696,30 @@ restart = (alpha) => {
  * @param {Object} data - Resize data.
  */
 resize = (data) => {
+	const oldDensity = density;
+
 	width = data.width;
 	height = data.height;
 	density = data.density;
 
-	ctx.canvas.width = width * density;
-	ctx.canvas.height = height * density;
-	ctx.scale(density, density);
+	if (app && app.renderer) {
+		app.renderer.resize(width * density, height * density);
+	};
+
+	// Recreate text labels if density changed (e.g. moved to a different DPI monitor)
+	if (oldDensity !== density) {
+		for (const [id, label] of nodeLabels) {
+			labelsContainer.removeChild(label);
+			label.destroy();
+			nodeLabels.delete(id);
+		};
+		for (const [id, label] of edgeLabels) {
+			edgeLabelsContainer.removeChild(label);
+			label.destroy();
+			edgeLabels.delete(id);
+		};
+		updateNodeSprites();
+	};
 
 	redraw();
 };
@@ -1067,6 +1733,39 @@ resize = (data) => {
  */
 const send = (id, data) => {
 	this.postMessage({ id, data });
+};
+
+/**
+ * Parses a CSS color string to a numeric value for PixiJS
+ * @param {string} color - CSS color string (hex or rgba)
+ * @returns {number} Numeric color value
+ */
+const parseColor = (color) => {
+	if (!color) {
+		return 0x000000;
+	};
+
+	if (typeof color === 'number') {
+		return color;
+	};
+
+	// Handle hex colors
+	if (color.startsWith('#')) {
+		return parseInt(color.slice(1), 16);
+	};
+
+	// Handle rgba colors
+	if (color.startsWith('rgba') || color.startsWith('rgb')) {
+		const match = color.match(/[\d.]+/g);
+		if (match && match.length >= 3) {
+			const r = parseInt(match[0]);
+			const g = parseInt(match[1]);
+			const b = parseInt(match[2]);
+			return (r << 16) | (g << 8) | b;
+		};
+	};
+
+	return 0x000000;
 };
 
 /**

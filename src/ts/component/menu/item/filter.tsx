@@ -36,7 +36,7 @@ const MenuItemFilter = observer(forwardRef<{}, Props>((props, ref) => {
 	if (isDictionary) {
 		conditionOptions = Relation.filterConditionsDictionary();
 	} else {
-		conditionOptions = Relation.filterConditionsByType(relation.format);
+		conditionOptions = Relation.filterConditionsByType(relation.format, props.value);
 	};
 
 	const conditionOption: any = conditionOptions.find(it => it.id == condition) || {};

@@ -3,6 +3,7 @@ import $ from 'jquery';
 import { observer } from 'mobx-react';
 import { I, S, U, J, C, translate, analytics, Relation, Dataview } from 'Lib';
 import { Select, Icon, Input, MenuItemVertical, Label, OptionSelect, CalendarSelect, TabSwitch } from 'Component';
+import { format } from 'path';
 
 const SUB_ID_PREFIX = 'filterOptionList';
 
@@ -50,6 +51,21 @@ const MenuDataviewFilterValues = observer(forwardRef<I.MenuRef, I.Menu>((props, 
 			window.clearTimeout(timeout.current);
 		};
 	}, []);
+
+	useEffect(() => {
+		if (!item) {
+			return;
+		};
+
+		const relation = S.Record.getRelationByKey(item.relationKey);
+		if (!relation) {
+			return;
+		};
+
+		const conditionOptions = Relation.filterConditionsByType(relation.format, item.value);
+
+		conditionRef.current?.setOptions(conditionOptions);
+	}, [ item?.relationKey, item?.value ]);
 
 	useEffect(() => {
 		const view = getView();
@@ -196,6 +212,8 @@ const MenuDataviewFilterValues = observer(forwardRef<I.MenuRef, I.Menu>((props, 
 
 			analytics.event('ChangeFilterValue', {
 				condition: item.condition,
+				relationKey: item.relationKey,
+				format: rel.format,
 				objectType: object.type,
 				embedType: analytics.embedType(isInline)
 			});
@@ -372,7 +390,7 @@ const MenuDataviewFilterValues = observer(forwardRef<I.MenuRef, I.Menu>((props, 
 
 	const isReadonly = readonly || !S.Block.checkFlags(rootId, blockId, [ I.RestrictionDataview.View ]);
 	const relationOptions = getRelationOptions();
-	const conditionOptions = Relation.filterConditionsByType(relation.format);
+	const conditionOptions = Relation.filterConditionsByType(relation.format, item.value);
 	const checkboxOptions: I.Option[] = [
 		{ id: '1', name: translate('menuDataviewFilterValuesChecked') },
 		{ id: '0', name: translate('menuDataviewFilterValuesUnchecked') },
@@ -403,8 +421,9 @@ const MenuDataviewFilterValues = observer(forwardRef<I.MenuRef, I.Menu>((props, 
 	const textInput = (key?: string, placeholder?: string): any => (
 		<div className="textInputWrapper">
 			<Input
+				className="round c36"
 				key={key ? key : 'value-text'}
-				ref={ref => inputRef.current = ref}
+				ref={inputRef}
 				value={item.value}
 				placeholder={placeholder || translate(`placeholderCell${relation.format}`)}
 				onFocus={onFocusText}
@@ -488,10 +507,6 @@ const MenuDataviewFilterValues = observer(forwardRef<I.MenuRef, I.Menu>((props, 
 							};
 						};
 
-						if (items.length && templates.length) {
-							templates.push({ isDiv: true });
-						};
-
 						return templates.concat(items);
 					}}
 					rootId={rootId}
@@ -556,7 +571,7 @@ const MenuDataviewFilterValues = observer(forwardRef<I.MenuRef, I.Menu>((props, 
 		value = (
 			<Select 
 				id={[ 'filter', 'dictionary', item.id ].join('-')} 
-				ref={ref => selectRef.current = ref}
+				ref={selectRef}
 				className="checkboxValue" 
 				arrowClassName="light"
 				options={Relation.getDictionaryOptions(item.relationKey)} 

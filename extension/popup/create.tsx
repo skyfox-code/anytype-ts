@@ -98,7 +98,7 @@ const Create = observer(forwardRef<{}, I.PageComponent>((props, ref) => {
 
 	const getTypes = () => {
 		const layouts = U.Object.getPageLayouts();
-		return getObjects(J.Constant.subId.type).
+		return getObjects(U.Subscription.spaceSubId(J.Constant.subId.type)).
 			map(Util.optionMapper).
 			filter(filter).
 			filter(it => layouts.includes(it.recommendedLayout) && (it.spaceId == S.Common.space) && (it.uniqueKey != J.Constant.typeKey.template)).
@@ -156,9 +156,9 @@ const Create = observer(forwardRef<{}, I.PageComponent>((props, ref) => {
 	};
 
 	const getTagsValue = () => {
-		return S.Record.getRecordIds(J.Constant.subId.option, '').
+		return S.Record.getRecordIds(U.Subscription.spaceSubId(J.Constant.subId.option), '').
 			filter(id => (detailsRef.current.tag as string[]).includes(id)).
-			map(id => S.Detail.get(J.Constant.subId.option, id)).
+			map(id => S.Detail.get(U.Subscription.spaceSubId(J.Constant.subId.option), id)).
 			filter(it => it && !it._empty_);
 	};
 

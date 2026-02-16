@@ -8,6 +8,7 @@ import sha1 from 'sha1';
 class UtilSubscription {
 
 	private map = new Map<string, string>();
+	private spaceSubIds: Set<string> = new Set();
 
 	/**
 	 * Generates a SHA-1 hash from the provided arguments.
@@ -17,6 +18,16 @@ class UtilSubscription {
 	makeHash (...args: any[]): string {
 		args = args || [];
 		return sha1(JSON.stringify(args));
+	};
+
+	/**
+	 * Returns a space-qualified subscription ID by appending the spaceId.
+	 * @param {string} subId - The base subscription ID.
+	 * @param {string} [spaceId] - Optional space ID; defaults to S.Common.space.
+	 * @returns {string} The space-qualified subscription ID.
+	 */
+	spaceSubId (subId: string, spaceId?: string): string {
+		return [ subId, spaceId || S.Common.space ].join('-');
 	};
 
 	/**
@@ -505,7 +516,7 @@ class UtilSubscription {
 		const spaceview = U.Space.getSpaceview();
 		const list: any[] = [
 			{
-				subId: J.Constant.subId.deleted,
+				subId: this.spaceSubId(J.Constant.subId.deleted),
 				keys: [],
 				filters: [
 					{ relationKey: 'isDeleted', condition: I.FilterCondition.Equal, value: true },
@@ -514,7 +525,7 @@ class UtilSubscription {
 				noDeps: true,
 			},
 			{
-				subId: J.Constant.subId.archived,
+				subId: this.spaceSubId(J.Constant.subId.archived),
 				keys: [],
 				filters: [
 					{ relationKey: 'isArchived', condition: I.FilterCondition.Equal, value: true },
@@ -523,16 +534,16 @@ class UtilSubscription {
 				noDeps: true,
 			},
 			{
-				subId: J.Constant.subId.type,
+				subId: this.spaceSubId(J.Constant.subId.type),
 				keys: this.typeRelationKeys(false),
 				filters: [
 					{ relationKey: 'resolvedLayout', condition: I.FilterCondition.Equal, value: I.ObjectLayout.Type },
 				],
 				sorts: [
 					{ relationKey: 'orderId', type: I.SortType.Asc, empty: I.EmptyType.End },
-					{ 
-						relationKey: 'uniqueKey', 
-						type: I.SortType.Custom, 
+					{
+						relationKey: 'uniqueKey',
+						type: I.SortType.Custom,
 						customOrder: U.Data.typeSortKeys(spaceview.isChat || spaceview.isOneToOne),
 					},
 					{ relationKey: 'name', type: I.SortType.Asc },
@@ -548,7 +559,7 @@ class UtilSubscription {
 				},
 			},
 			{
-				subId: J.Constant.subId.chat,
+				subId: this.spaceSubId(J.Constant.subId.chat),
 				keys: this.chatRelationKeys(),
 				filters: [
 					{ relationKey: 'resolvedLayout', condition: I.FilterCondition.Equal, value: I.ObjectLayout.Chat },
@@ -560,7 +571,7 @@ class UtilSubscription {
 				noDeps: true,
 			},
 			{
-				subId: J.Constant.subId.recentEditMe,
+				subId: this.spaceSubId(J.Constant.subId.recentEditMe),
 				filters: [
 					{ relationKey: 'resolvedLayout', condition: I.FilterCondition.NotIn, value: U.Object.getFileAndSystemLayouts().concat(I.ObjectLayout.Participant).filter(it => !U.Object.isTypeLayout(it)) },
 					{ relationKey: 'recommendedLayout', condition: I.FilterCondition.NotIn, value: [ I.ObjectLayout.Participant ] },
@@ -576,7 +587,7 @@ class UtilSubscription {
 				limit: 10,
 			},
 			{
-				subId: J.Constant.subId.recentEditAll,
+				subId: this.spaceSubId(J.Constant.subId.recentEditAll),
 				filters: [
 					{ relationKey: 'resolvedLayout', condition: I.FilterCondition.NotIn, value: U.Object.getFileAndSystemLayouts().concat(I.ObjectLayout.Participant).filter(it => !U.Object.isTypeLayout(it)) },
 					{ relationKey: 'recommendedLayout', condition: I.FilterCondition.NotIn, value: [ I.ObjectLayout.Participant ] },
@@ -591,7 +602,7 @@ class UtilSubscription {
 				limit: 10,
 			},
 			{
-				subId: J.Constant.subId.relation,
+				subId: this.spaceSubId(J.Constant.subId.relation),
 				keys: J.Relation.relation,
 				filters: [
 					{ relationKey: 'resolvedLayout', condition: I.FilterCondition.Equal, value: I.ObjectLayout.Relation },
@@ -607,7 +618,7 @@ class UtilSubscription {
 				},
 			},
 			{
-				subId: J.Constant.subId.option,
+				subId: this.spaceSubId(J.Constant.subId.option),
 				keys: this.optionRelationKeys(false),
 				filters: [
 					{ relationKey: 'resolvedLayout', condition: I.FilterCondition.Equal, value: I.ObjectLayout.Option },
@@ -615,7 +626,7 @@ class UtilSubscription {
 				noDeps: true,
 			},
 			{
-				subId: J.Constant.subId.participant,
+				subId: this.spaceSubId(J.Constant.subId.participant),
 				keys: this.participantRelationKeys(),
 				filters: [
 					{ relationKey: 'resolvedLayout', condition: I.FilterCondition.Equal, value: I.ObjectLayout.Participant },
@@ -628,7 +639,11 @@ class UtilSubscription {
 			},
 		];
 
-		this.destroyList(list.map(it => it.subId), true, () => {
+		const oldIds = [ ...this.spaceSubIds ];
+
+		this.destroyList(oldIds, true, () => {
+			this.spaceSubIds.clear();
+			list.forEach(it => this.spaceSubIds.add(it.subId));
 			this.createList(list, () => this.createTypeCheck(callBack));
 		});
 	};
@@ -795,12 +810,12 @@ class UtilSubscription {
 		let subId = '';
 		switch (S.Common.recentEditMode) {
 			case I.RecentEditMode.All: {
-				subId = J.Constant.subId.recentEditAll;
+				subId = this.spaceSubId(J.Constant.subId.recentEditAll);
 				break;
 			};
 
 			case I.RecentEditMode.Me: {
-				subId = J.Constant.subId.recentEditMe;
+				subId = this.spaceSubId(J.Constant.subId.recentEditMe);
 				break;
 			};
 		};

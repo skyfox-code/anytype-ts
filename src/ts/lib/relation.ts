@@ -2,6 +2,7 @@ import { I, S, U, J, translate, Dataview } from 'Lib';
 
 const DICTIONARY = [ 'layout', 'origin', 'importType' ];
 const SKIP_SYSTEM_KEYS = [ 'tag', 'description' ];
+const relationIcons = require.context('img/icon/relation/default', false, /\.svg$/);
 
 class Relation {
 
@@ -41,6 +42,25 @@ class Relation {
 		return key == 'description' ? 'description' : this.typeName(v);
 	};
 
+	public icon (key: string, format: I.RelationType, color?: string): string {
+		let svg = '';
+		try {
+			svg = relationIcons(`./${this.iconName(key, format)}.svg`) as string;
+		} catch (e) {
+			svg = require('img/icon/error.svg');
+		};
+
+		if (color) {
+			try {
+				const chunk = svg.split('base64,')[1];
+				const decoded = atob(chunk).replace(/fill="black"/g, `fill="${color}"`);
+				svg = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(decoded)));
+			} catch (e) { /**/ };
+		};
+
+		return svg;
+	};
+
 	/**
 	 * Returns the select class name for a relation type.
 	 * @param {I.RelationType} v - The relation type.
@@ -75,10 +95,12 @@ class Relation {
 	/**
 	 * Returns available filter conditions for a relation type.
 	 * @param {I.RelationType} type - The relation type.
-	 * @returns {Array<{id: I.FilterCondition, name: string}>} The filter conditions.
+	 * @returns {Array<{id: I.FilterCondition, name: string, short?: string, colon?: boolean}>} The filter conditions.
 	 */
-	public filterConditionsByType (type: I.RelationType): { id: I.FilterCondition, name: string}[] {
-		let ret: { id: I.FilterCondition, name: string }[] = [];
+	public filterConditionsByType (type: I.RelationType, value?: any): { id: I.FilterCondition, name: string, short?: string, colon?: boolean }[] {
+		value = this.formatValue({ format: type }, value, false);
+
+		let ret: { id: I.FilterCondition, name: string, short?: string, colon?: boolean }[] = [];
 
 		switch (type) {
 			case I.RelationType.ShortText:
@@ -87,12 +109,12 @@ class Relation {
 			case I.RelationType.Email:
 			case I.RelationType.Phone: {
 				ret = [
+					{ id: I.FilterCondition.Like,		 name: translate('filterConditionLike'), short: '', colon: true },
+					{ id: I.FilterCondition.NotLike,	 name: translate('filterConditionNotLike'), short: translate('filterConditionShortNot'), colon: true },
 					{ id: I.FilterCondition.Equal,		 name: translate('filterConditionEqual') },
 					{ id: I.FilterCondition.NotEqual,	 name: translate('filterConditionNotEqual') },
-					{ id: I.FilterCondition.Like,		 name: translate('filterConditionLike') },
-					{ id: I.FilterCondition.NotLike,	 name: translate('filterConditionNotLike') },
 					{ id: I.FilterCondition.Empty,		 name: translate('filterConditionEmpty') },
-					{ id: I.FilterCondition.NotEmpty,	 name: translate('filterConditionNotEmpty') },
+					{ id: I.FilterCondition.NotEmpty,	 name: translate('filterConditionNotEmpty'), short: translate('filterConditionShortNotEmpty') },
 				];
 				break;
 			};
@@ -101,12 +123,14 @@ class Relation {
 			case I.RelationType.Object:
 			case I.RelationType.Select:
 			case I.RelationType.MultiSelect: {
+				const length = value.length;
+
 				ret = [
-					{ id: I.FilterCondition.In,			 name: translate('filterConditionInArray') },
-					{ id: I.FilterCondition.AllIn,		 name: translate('filterConditionAllIn') },
-					{ id: I.FilterCondition.NotIn,		 name: translate('filterConditionNotInArray') },
+					{ id: I.FilterCondition.In,			 name: translate('filterConditionInArray'), short: '', colon: true },
+					{ id: I.FilterCondition.AllIn, name: translate('filterConditionAllIn'), short: translate('filterConditionShortAll'), colon: true },
+					{ id: I.FilterCondition.NotIn,		 name: translate('filterConditionNotInArray'), short: translate('filterConditionShortNot'), colon: true },
 					{ id: I.FilterCondition.Empty,		 name: translate('filterConditionEmpty') },
-					{ id: I.FilterCondition.NotEmpty,	 name: translate('filterConditionNotEmpty') },
+					{ id: I.FilterCondition.NotEmpty,	 name: translate('filterConditionNotEmpty'), short: translate('filterConditionShortNotEmpty') },
 				];
 				break;
 			};
@@ -120,21 +144,21 @@ class Relation {
 					{ id: I.FilterCondition.GreaterOrEqual,	 name: '≥' },
 					{ id: I.FilterCondition.LessOrEqual,	 name: '≤' },
 					{ id: I.FilterCondition.Empty,		 name: translate('filterConditionEmpty') },
-					{ id: I.FilterCondition.NotEmpty,	 name: translate('filterConditionNotEmpty') },
+					{ id: I.FilterCondition.NotEmpty,	 name: translate('filterConditionNotEmpty'), short: translate('filterConditionShortNotEmpty') },
 				];
 				break;
 			};
 
 			case I.RelationType.Date: {
 				ret = [
-					{ id: I.FilterCondition.Equal,			 name: translate('filterConditionEqual') },
-					{ id: I.FilterCondition.Greater,		 name: translate('filterConditionGreaterDate') },
-					{ id: I.FilterCondition.Less,			 name: translate('filterConditionLessDate') },
-					{ id: I.FilterCondition.GreaterOrEqual,	 name: translate('filterConditionGreaterOrEqualDate') },
-					{ id: I.FilterCondition.LessOrEqual,	 name: translate('filterConditionLessOrEqualDate') },
-					{ id: I.FilterCondition.In,				 name: translate('filterConditionInDate') },
+					{ id: I.FilterCondition.Equal,			 name: translate('filterConditionEqual'), short: '', colon: true },
+					{ id: I.FilterCondition.Greater,		 name: translate('filterConditionGreaterDate'), short: translate('filterConditionShortAfter'), colon: true },
+					{ id: I.FilterCondition.Less,			 name: translate('filterConditionLessDate'), short: translate('filterConditionShortBefore'), colon: true },
+					{ id: I.FilterCondition.GreaterOrEqual,	 name: translate('filterConditionGreaterOrEqualDate'), short: translate('filterConditionShortFrom'), colon: true },
+					{ id: I.FilterCondition.LessOrEqual,	 name: translate('filterConditionLessOrEqualDate'), short: translate('filterConditionShortUntil'), colon: true },
+					{ id: I.FilterCondition.In,				 name: translate('filterConditionInDate'), short: '', colon: true },
 					{ id: I.FilterCondition.Empty,			 name: translate('filterConditionEmpty') },
-					{ id: I.FilterCondition.NotEmpty,		 name: translate('filterConditionNotEmpty') },
+					{ id: I.FilterCondition.NotEmpty,		 name: translate('filterConditionNotEmpty'), short: translate('filterConditionShortNotEmpty') },
 				];
 				break;
 			};
@@ -142,14 +166,14 @@ class Relation {
 			case I.RelationType.Checkbox:
 			default: {
 				ret = [
-					{ id: I.FilterCondition.Equal,			 name: translate('filterConditionEqual') },
-					{ id: I.FilterCondition.NotEqual,		 name: translate('filterConditionNotEqual') },
+					{ id: I.FilterCondition.Equal,			 name: translate('filterConditionEqual'), short: '', colon: true },
+					{ id: I.FilterCondition.NotEqual,		 name: translate('filterConditionNotEqual'), short: translate('filterConditionShortNot'), colon: true },
 				];
 				break;
 			};
 
 		};
-		return ret;
+		return ret.filter(it => it);
 	};
 
 	/**
@@ -252,14 +276,14 @@ class Relation {
 
 	/**
 	 * Returns filter conditions for dictionary relations.
-	 * @returns {Array<{id: I.FilterCondition, name: string}>} The filter conditions.
+	 * @returns {Array<{id: I.FilterCondition, name: string, short?: string, colon?: boolean}>} The filter conditions.
 	 */
 	public filterConditionsDictionary () {
 		return [
-			{ id: I.FilterCondition.Equal,		 name: translate('filterConditionEqual') },
-			{ id: I.FilterCondition.NotEqual,	 name: translate('filterConditionNotEqual') },
+			{ id: I.FilterCondition.Equal,		 name: translate('filterConditionEqual'), short: '', colon: true },
+			{ id: I.FilterCondition.NotEqual,	 name: translate('filterConditionNotEqual'), short: translate('filterConditionShortNot'), colon: true },
 			{ id: I.FilterCondition.Empty,		 name: translate('filterConditionEmpty') },
-			{ id: I.FilterCondition.NotEmpty,	 name: translate('filterConditionNotEmpty') },
+			{ id: I.FilterCondition.NotEmpty,	 name: translate('filterConditionNotEmpty'), short: translate('filterConditionShortNotEmpty') },
 		];
 	};
 
@@ -608,10 +632,10 @@ class Relation {
 				return;
 			};
 
-			ret.push({ 
-				id: relation.relationKey, 
+			ret.push({
+				id: relation.relationKey,
 				icon: `relation ${this.className(relation.format)}`,
-				name: relation.name, 
+				name: relation.name,
 				isHidden: relation.isHidden,
 				format: relation.format,
 				maxCount: relation.maxCount,
@@ -647,20 +671,20 @@ class Relation {
 			};
 			return !it.isHidden && formats.includes(it.format);
 		}).map(it => ({
-			id: it.relationKey, 
-			icon: `relation ${this.className(it.format)}`,
-			name: it.name, 
+			id: it.relationKey,
+			object: { relationFormat: it.format, layout: I.ObjectLayout.Relation },
+			name: it.name,
 		}));
 
-		const ret = [
+		const ret: any[] = [
 			{ id: 'none', icon: '', name: translate('commonNone') },
 			{ id: J.Relation.pageCover, icon: 'image', name: translate('libRelationPageCover') },
 		];
 
 		if (!options.find(it => it.id == 'picture')) {
-			ret.push({ 
-				id: 'picture', 
-				icon: `relation ${this.className(I.RelationType.File)}`,
+			ret.push({
+				id: 'picture',
+				object: { relationFormat: I.RelationType.File, layout: I.ObjectLayout.Relation },
 				name: translate('libRelationPicture'),
 			});
 		};
@@ -720,9 +744,9 @@ class Relation {
 		});
 
 		return U.Common.arrayUniqueObjects(options, 'relationKey').map(it => ({
-			id: it.relationKey, 
-			icon: `relation ${this.className(it.format)}`,
-			name: it.name, 
+			id: it.relationKey,
+			object: { relationFormat: it.format, layout: I.ObjectLayout.Relation },
+			name: it.name,
 		}));
 	};
 

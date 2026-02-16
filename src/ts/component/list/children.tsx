@@ -36,7 +36,7 @@ const ListChildren = observer(forwardRef<{}, Props>((props, ref) => {
 	};
 
 	if (!length) {
-		if (block.isTextToggle() && !readonly) {
+		if ((block.isTextToggle() || block.isTextToggleHeader()) && !readonly) {
 			return (
 				<DropTarget 
 					{...props}
@@ -59,7 +59,7 @@ const ListChildren = observer(forwardRef<{}, Props>((props, ref) => {
 	};
 	
 	const c = String(className || '').replace(/first|last/g, '');
-	const cn = [ 'children', (block.isTextToggle() ? 'canToggle' : '') ];
+	const cn = [ 'children', ((block.isTextToggle() || block.isTextToggleHeader()) ? 'canToggle' : '') ];
 	const isRow = block.isLayoutRow();
 
 	let ColResize: any = (): any => null;

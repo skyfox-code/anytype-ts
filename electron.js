@@ -195,18 +195,27 @@ function createWindow () {
 	MenuManager.initMenu();
 	MenuManager.initTray();
 
-	Api.systemInfo(mainWindow);
-
 	installNativeMessagingHost();
 
 	//ipcMain.removeHandler('Api');
 	ipcMain.handle('Api', (e, id, cmd, args) => {
 		const Api = require('./electron/js/api.js');
+		const Util = require('./electron/js/util.js');
 		const win = BrowserWindow.fromId(id);
 
 		if (!win) {
 			console.error('[Api] window is not defined', cmd, id);
 			return;
+		};
+
+		// For events that should only be processed once per broadcast,
+		// skip if the sender is not the active tab
+		if (Api.activeTabOnly?.has(cmd)) {
+			const activeView = Util.getActiveView(win);
+
+			if (!activeView || (e.sender.id !== activeView.webContents.id)) {
+				return;
+			};
 		};
 
 		if (Api[cmd]) {

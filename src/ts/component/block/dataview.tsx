@@ -42,6 +42,7 @@ const BlockDataview = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	const editingRecordId = useRef('');
 	const filterRef = useRef('');
 	const viewIdRef = useRef('');
+	const viewTypeRef = useRef<I.ViewType | null>(null);
 	const menuContext = useRef(null);
 	const cellRefs = useRef<Map<string, any>>(new Map());
 	const recordRefs = useRef<Map<string, any>>(new Map());
@@ -103,7 +104,13 @@ const BlockDataview = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 
 	useEffect(() => {
 		const { routeParam } = S.Common;
-	
+		const view = getView();
+		const viewTypeChanged = view && (view.type !== viewTypeRef.current);
+
+		if (view) {
+			viewTypeRef.current = view.type;
+		};
+
 		let viewId = S.Record.getMeta(getSubId(), '').viewId;
 
 		if ((routeParam.ref == 'widget') && routeParam.viewId) {
@@ -111,7 +118,7 @@ const BlockDataview = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			S.Common.routeParam = {};
 		};
 
-		if (viewId && (viewId != viewIdRef.current)) {
+		if (viewId && ((viewId != viewIdRef.current) || viewTypeChanged)) {
 			loadData(viewId, 0, true);
 		};
 
@@ -193,6 +200,9 @@ const BlockDataview = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		S.Record.metaSet(subId, '', { offset, viewId });
 
 		if ([ I.ViewType.Calendar, I.ViewType.Timeline, I.ViewType.Graph, I.ViewType.Board ].includes(view.type)) {
+			if (view.type !== viewTypeRef.current) {
+				viewIdRef.current = '';
+			} else
 			if (viewRef.current && viewRef.current.load) {
 				viewRef.current.load();
 			} else {
@@ -1077,12 +1087,15 @@ const BlockDataview = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	const onFilterAdd = (item: any, callBack?: () => void) => {
 		const view = getView();
 		const object = getTarget();
+		const relation = S.Record.getRelationByKey(item.relationKey);
 
 		Dataview.addFilter(rootId, block.id, view.id, item, () => {
 			callBack?.();
 
 			analytics.event('AddFilter', {
 				condition: item.condition,
+				format: relation?.format,
+				relationKey: item.relationKey,
 				objectType: object.type,
 				embedType: analytics.embedType(isInline),
 			});
