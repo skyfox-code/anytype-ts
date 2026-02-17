@@ -255,7 +255,7 @@ class Dataview {
 		};
 
 		if (it.nestedFilters && it.nestedFilters.length) {
-			it.nestedFilters = it.nestedFilters.map(child => this.filterMapper(child, param));
+			it.nestedFilters = it.nestedFilters.map(child => this.filterMapper({ ...child, includeTime: false }, param));
 		};
 
 		return it;
