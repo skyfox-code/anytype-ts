@@ -34,7 +34,11 @@ class UtilSpace {
 
 		U.Object.openRoute(home, param);
 		S.Common.setLeftSidebarState('vault', 'widget');
-		sidebar.leftPanelSubPageOpen('widget', false, false);
+
+		const dataLeft = sidebar.getData(I.SidebarPanel.Left);
+		if (!(dataLeft.isClosed && dataLeft.savedClosed)) {
+			sidebar.leftPanelSubPageOpen('widget', false, false);
+		};
 	};
 
 	openDashboardOrVoid (param?: Partial<I.RouteParam>) {
