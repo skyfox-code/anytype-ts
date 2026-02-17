@@ -231,24 +231,31 @@ class Dataview {
 				return it;
 			};
 
+			const isArrayType = Relation.isArrayType(relation.format);
+
 			it.format = relation.format;
 			if (undefined === it.includeTime) {
 				it.includeTime = relation.includeTime;
 			};
 
-			if (Relation.isArrayType(relation.format)) {
+			if (Array.isArray(it.value)) {
+				it.value = it.value.map(it => {
+					it = Relation.formatValue(relation, it, false);
+					if (isArrayType) {
+						it = this.valueTemplateMapper(it, param);
+					};
+					return it;
+				});
+			} else {
 				it.value = Relation.formatValue(relation, it.value, false);
-
-				if (Array.isArray(it.value)) {
-					it.value = it.value.map(it => this.valueTemplateMapper(it, param));
-				} else {
+				if (isArrayType) {
 					it.value = this.valueTemplateMapper(it.value, param);
 				};
 			};
 		};
 
 		if (it.nestedFilters && it.nestedFilters.length) {
-			it.nestedFilters = it.nestedFilters.map((child: any) => this.filterMapper(child, param));
+			it.nestedFilters = it.nestedFilters.map(child => this.filterMapper(child, param));
 		};
 
 		return it;
