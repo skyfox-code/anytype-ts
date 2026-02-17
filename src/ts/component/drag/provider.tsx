@@ -148,6 +148,22 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 			position.current = I.BlockPosition.Bottom;
 		};
 
+		// DOM-based fallback for Linux where coordinate tracking may fail
+		if (!data && !isFileDrop) {
+			const dropEl = $(e.target).closest('.dropTarget.isDroppable');
+			if (dropEl.length) {
+				data = initNode(dropEl.get(0), 0);
+				if (data) {
+					const dropY = e.pageY || e.clientY || lastKnownCoords.current.y || 0;
+					if (dropY && data.height) {
+						position.current = (dropY <= data.y + data.height * 0.5) ? I.BlockPosition.Top : I.BlockPosition.Bottom;
+					} else {
+						position.current = I.BlockPosition.Bottom;
+					};
+				};
+			};
+		};
+
 		if (!data && !isFileDrop) {
 			console.log('[DragProvider].onDropCommon no valid drop target');
 		};
@@ -236,6 +252,16 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 		win.on('drag.drag', e => onDrag(e));
 		win.on('dragend.drag', e => onDragEnd(e));
 
+		// Safety net: ensure preventDefault is called even if React onDragOver doesn't fire (Linux)
+		win.on('dragover.drag', e => {
+			e.preventDefault();
+			const ox = e.pageX || e.clientX || 0;
+			const oy = e.pageY || e.clientY || 0;
+			if (ox || oy) {
+				lastKnownCoords.current = { x: ox, y: oy };
+			};
+		});
+
 		container.off('scroll.drag').on('scroll.drag', e => onScroll(e));
 		sidebar.off('scroll.drag').on('scroll.drag', e => onScroll(e));
 
@@ -259,8 +285,8 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 		e.preventDefault();
 		e.stopPropagation();
 
-		let x = e.pageX;
-		let y = e.pageY;
+		let x = e.pageX || e.clientX || 0;
+		let y = e.pageY || e.clientY || 0;
 
 		// Save last known good coordinates for Linux fallback
 		if (x || y) {
@@ -273,7 +299,13 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 
 		scrollOnMove.onMouseMove(e.clientX || x, e.clientY || y);
 		initData();
-		checkNodes(e, x, y);
+
+		// Only run target detection with valid coordinates.
+		// On Linux, dragover events may report (0, 0) — calling checkNodes
+		// with bad coords clears hoverData without finding a replacement.
+		if (x || y) {
+			checkNodes(e, x, y);
+		};
 
 		if (!dragActive.current) {
 			dragActive.current = true;
@@ -339,24 +371,46 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 		// it means onDropCommon never ran - perform the drop using saved drag data.
 		// Fall back to lastValidTarget if hoverData was cleared by a late event.
 		try {
-			const target = hoverData.current || lastValidTarget.current?.data;
-			const pos = (position.current != I.BlockPosition.None) ? position.current : (lastValidTarget.current?.position ?? I.BlockPosition.None);
+			let target = hoverData.current || lastValidTarget.current?.data;
+			let pos = (position.current != I.BlockPosition.None) ? position.current : (lastValidTarget.current?.position ?? I.BlockPosition.None);
 
-			if (target && (pos != I.BlockPosition.None) && canDrop.current && dragData.current) {
-				let targetId = String(target.id || '');
-
-				if (targetId == 'blockLast') {
-					targetId = '';
-					position.current = I.BlockPosition.Bottom;
+			// DOM-based fallback using last known coordinates when coordinate tracking failed
+			if (!target && dragData.current) {
+				const { x, y } = lastKnownCoords.current;
+				if (x || y) {
+					const el = document.elementFromPoint(x, y);
+					if (el) {
+						const dropEl = $(el).closest('.dropTarget.isDroppable');
+						if (dropEl.length) {
+							target = initNode(dropEl.get(0), 0);
+							if (target) {
+								pos = (y <= target.y + target.height * 0.5) ? I.BlockPosition.Top : I.BlockPosition.Bottom;
+							};
+						};
+					};
 				};
+			};
 
-				const fakeEvent = {
-					dataTransfer: {
-						getData: () => JSON.stringify(dragData.current),
-					},
+			if (target && (pos != I.BlockPosition.None) && dragData.current) {
+				const ids = dragData.current.ids || [];
+				const isValid = (dragData.current.dropType != I.DropType.Block) || checkParentIds(ids, String(target.id || ''));
+
+				if (isValid) {
+					let targetId = String(target.id || '');
+
+					if (targetId == 'blockLast') {
+						targetId = '';
+						position.current = I.BlockPosition.Bottom;
+					};
+
+					const fakeEvent = {
+						dataTransfer: {
+							getData: () => JSON.stringify(dragData.current),
+						},
+					};
+
+					onDrop(fakeEvent, target.dropType, targetId, pos);
 				};
-
-				onDrop(fakeEvent, target.dropType, targetId, pos);
 			};
 		} catch (err) {
 			console.error('[DragProvider].onDragEnd drop failed', err);
@@ -995,7 +1049,7 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 	};
 
 	const unbind = () => {
-		$(window).off('drag.drag dragend.drag');
+		$(window).off('drag.drag dragover.drag dragend.drag');
 	};
 
 	useEffect(() => {
