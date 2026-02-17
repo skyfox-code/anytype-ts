@@ -297,18 +297,24 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 	};
 
 	const onDrag = (e: any) => {
-		// On Linux, drag events may report (0, 0) coordinates - use last known good coordinates as fallback
 		let x = e.pageX;
 		let y = e.pageY;
+		const hasRealCoords = !!(x || y);
 
-		if (!x && !y && (lastKnownCoords.current.x || lastKnownCoords.current.y)) {
+		if (!hasRealCoords && (lastKnownCoords.current.x || lastKnownCoords.current.y)) {
 			x = lastKnownCoords.current.x;
 			y = lastKnownCoords.current.y;
 		};
 
 		scrollOnMove.onMouseMove(e.clientX || x, e.clientY || y);
 		initData();
-		checkNodes(e, x, y);
+
+		// Only run target detection when drag event has real coordinates.
+		// On Linux, drag events report (0, 0) — using stale fallback coords
+		// causes checkNodes to clear hoverData without finding a valid replacement.
+		if (hasRealCoords) {
+			checkNodes(e, x, y);
+		};
 
 		// Reset timeout to prevent blinking on Linux where dragover events may not fire consistently
 		window.clearTimeout(timeoutDragOver.current);
@@ -759,6 +765,13 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 					hd = targetBot;
 					initVars();
 				};
+			};
+
+			// Save early before position adjustments that may reset to None
+			// (e.g. text block bottom-hover). The final save after adjustments
+			// will overwrite this with the fully-adjusted position when valid.
+			if ((position.current != I.BlockPosition.None) && canDrop.current) {
+				lastValidTarget.current = { data: hd, position: position.current };
 			};
 
 			// canDropMiddle flag for restricted objects
