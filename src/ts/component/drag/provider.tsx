@@ -338,24 +338,28 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 		// On Linux, the drop event may not fire. If hoverData is still set,
 		// it means onDropCommon never ran - perform the drop using saved drag data.
 		// Fall back to lastValidTarget if hoverData was cleared by a late event.
-		const target = hoverData.current || lastValidTarget.current?.data;
-		const pos = (position.current != I.BlockPosition.None) ? position.current : (lastValidTarget.current?.position ?? I.BlockPosition.None);
+		try {
+			const target = hoverData.current || lastValidTarget.current?.data;
+			const pos = (position.current != I.BlockPosition.None) ? position.current : (lastValidTarget.current?.position ?? I.BlockPosition.None);
 
-		if (target && (pos != I.BlockPosition.None) && canDrop.current && dragData.current) {
-			let targetId = String(target.id || '');
+			if (target && (pos != I.BlockPosition.None) && canDrop.current && dragData.current) {
+				let targetId = String(target.id || '');
 
-			if (targetId == 'blockLast') {
-				targetId = '';
-				position.current = I.BlockPosition.Bottom;
+				if (targetId == 'blockLast') {
+					targetId = '';
+					position.current = I.BlockPosition.Bottom;
+				};
+
+				const fakeEvent = {
+					dataTransfer: {
+						getData: () => JSON.stringify(dragData.current),
+					},
+				};
+
+				onDrop(fakeEvent, target.dropType, targetId, pos);
 			};
-
-			const fakeEvent = {
-				dataTransfer: {
-					getData: () => JSON.stringify(dragData.current),
-				},
-			};
-
-			onDrop(fakeEvent, target.dropType, targetId, pos);
+		} catch (err) {
+			console.error('[DragProvider].onDragEnd drop failed', err);
 		};
 
 		dragData.current = null;
@@ -448,7 +452,7 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 			case I.DropType.Block: {
 
 				// Drop into column is targeting last block
-				if (hoverData.current.isTargetCol) {
+				if (hoverData.current?.isTargetCol) {
 					const childrenIds = S.Block.getChildrenIds(targetContextId, targetId);
 				
 					targetId = childrenIds.length ? childrenIds[childrenIds.length - 1] : '';
