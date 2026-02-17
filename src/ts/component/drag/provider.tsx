@@ -981,6 +981,9 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 		prevTargetKey.current = null;
 		lastKnownCoords.current = { x: 0, y: 0 };
 		lastValidTarget.current = null;
+		canDrop.current = false;
+		dragActive.current = false;
+		origin.current = null;
 	};
 
 	const setHoverData = (v: any) => {
@@ -992,7 +995,7 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 	};
 
 	const unbind = () => {
-		$(window).off('dragend.drag');
+		$(window).off('drag.drag dragend.drag');
 	};
 
 	useEffect(() => {
