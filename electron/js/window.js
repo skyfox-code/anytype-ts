@@ -441,7 +441,7 @@ class WindowManager {
 		// Focus the new tab's webContents to receive keyboard events
 		view.webContents.focus();
 
-		Util.send(win, 'set-active-tab', id);
+		Util.sendToAllTabs(win, 'set-active-tab', id);
 	};
 
 	updateTab (win, id, data) {

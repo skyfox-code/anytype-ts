@@ -935,7 +935,7 @@ class Dispatcher {
 
 					S.Notification.add(item);
 
-					if (!windowIsFocused) {
+					if (!windowIsFocused && S.Common.isActiveTab) {
 						Renderer.send('notification', {
 							id: item.id,
 							title: item.title,
@@ -951,6 +951,10 @@ class Dispatcher {
 				};
 
 				case 'PayloadBroadcast': {
+					if (!S.Common.isActiveTab) {
+						break;
+					};
+
 					let payload: any = {};
 					try { payload = JSON.parse(mapped.payload); } catch (e) { /**/ };
 
@@ -998,7 +1002,7 @@ class Dispatcher {
 						S.Chat.add(subId, idx, message);
 					});
 
-					if (showNotification && notification && !windowIsFocused && (message.creator != account.id)) {
+					if (showNotification && notification && !windowIsFocused && S.Common.isActiveTab && (message.creator != account.id)) {
 						const title = [];
 
 						if (spaceview) {

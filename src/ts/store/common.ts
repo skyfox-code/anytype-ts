@@ -62,6 +62,7 @@ class CommonStore {
 	public refs: Map<string, any> = new Map();
 	public windowId = '';
 	public tabId = '';
+	public isActiveTab = true;
 	public windowIsFocused = true;
 	public routeParam: any = {};
 	public openObjectIds: Map<string, Set<string>> = new Map();
@@ -1018,6 +1019,14 @@ class CommonStore {
 	 */
 	tabIdSet (id: string) {
 		this.tabId = String(id || '');
+	};
+
+	/**
+	 * Sets whether this tab is the active tab in the window.
+	 * @param {boolean} v - Whether this tab is active.
+	 */
+	isActiveTabSet (v: boolean) {
+		this.isActiveTab = v;
 	};
 
 	/**

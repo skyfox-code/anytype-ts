@@ -168,6 +168,7 @@ const App: FC = () => {
 		});
 		Renderer.on('notification-callback', onNotificationCallback);
 		Renderer.on('payload-broadcast', onPayloadBroadcast);
+		Renderer.on('set-active-tab', (e: any, id: string) => S.Common.isActiveTabSet(id === S.Common.tabId));
 
 		Renderer.on('shutdownStart', () => {
 			setIsLoading(true);
@@ -236,12 +237,13 @@ const App: FC = () => {
 		Renderer.remove('power-event');
 		Renderer.remove('tab-show-tooltip');
 		Renderer.remove('tab-hide-tooltip');
+		Renderer.remove('set-active-tab');
 	};
 
 	const onInit = (data: any) => {
 		data = data || {};
 
-		const { id, dataPath, config, isDark, languages, isPinChecked, isPinned, css, isSingleTab } = data;
+		const { id, dataPath, config, isDark, languages, isPinChecked, isPinned, css, isSingleTab, activeTabId } = data;
 		const body = $('body');
 		const node = $(nodeRef.current);
 		const bubbleLoader = $('#bubble-loader');
@@ -262,6 +264,7 @@ const App: FC = () => {
 		S.Common.dataPathSet(dataPath);
 		S.Common.windowIdSet(id);
 		S.Common.tabIdSet(tabId);
+		S.Common.isActiveTabSet(activeTabId === tabId);
 		S.Common.setLeftSidebarState('vault', '');
 		S.Common.isPinnedSet(isPinned || false);
 		S.Common.singleTabSet(isSingleTab);
