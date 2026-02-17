@@ -87,16 +87,16 @@ const Popup = observer(forwardRef<{}, I.Popup>((props, ref) => {
 	};
 
 	const animate = () => {
-		window.setTimeout(() => {
+		raf(() => {
 			if (isAnimatingRef.current) {
 				return;
 			};
-			
+
 			isAnimatingRef.current = true;
 
 			$(nodeRef.current).addClass('show');
 			window.setTimeout(() => { isAnimatingRef.current = false; }, S.Popup.getTimeout());
-		}, 50);
+		});
 	};
 
 	const position = () => {
