@@ -119,7 +119,7 @@ const PageMainSet = observer(forwardRef<I.PageRef, I.PageComponent>((props, ref)
 		keyboard.shortcut('createObject', e, () => {
 			e.preventDefault();
 
-			ref?.ref?.onRecordAdd(e, -1, '', {
+			ref?.getChildNode()?.onRecordAdd(e, -1, '', {
 				horizontal: I.MenuDirection.Center,
 				vertical: I.MenuDirection.Center,
 				rect: { x: ww / 2, y: wh / 2, width: 0, height: 0 },

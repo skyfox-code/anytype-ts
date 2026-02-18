@@ -1,4 +1,4 @@
-import React, { forwardRef, useState, useRef, useEffect, MouseEvent } from 'react';
+import React, { forwardRef, useState, useRef, useEffect, MouseEvent, useImperativeHandle } from 'react';
 import $ from 'jquery';
 import raf from 'raf';
 import { motion, AnimatePresence } from 'motion/react';
@@ -1618,6 +1618,12 @@ const BlockDataview = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		);
 	};
 
+	useImperativeHandle(ref, () => ({
+		getNode: () => nodeRef.current,
+		onRecordAdd,
+		resize,
+	}));
+	
 	return (
 		<div 
 			ref={nodeRef}
