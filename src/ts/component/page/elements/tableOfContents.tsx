@@ -49,9 +49,10 @@ const TableOfContents = observer(forwardRef<TableOfContentsRefProps, I.BlockComp
 			return [];
 		};
 
+		const treeIds = new Set(tree.map(it => it.id));
 		const ids = headers.map(it => it.id);
 		const root = S.Block.wrapTree(rootId, rootId);
-		const list = S.Block.unwrapTree([ root ]).filter(it => ids.includes(it.id));
+		const list = S.Block.unwrapTree([ root ]).filter(it => ids.includes(it.id) && treeIds.has(it.id));
 
 		return list;
 	};
