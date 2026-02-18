@@ -679,9 +679,10 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 					};
 				};
 
-				// If emoji markup is first do not count one space character in mark adjustment
+				// If emoji or code markup is first do not count one space character in mark adjustment
 				const isFirstEmoji = Mark.getInRange(marksRef.current, I.MarkType.Emoji, { from: Length[newStyle], to: Length[newStyle] + 1 });
-				if (isFirstEmoji) {
+				const isFirstCode = Mark.getInRange(marksRef.current, I.MarkType.Code, { from: 0, to: 0 });
+				if (isFirstEmoji || isFirstCode) {
 					continue;
 				};
 
