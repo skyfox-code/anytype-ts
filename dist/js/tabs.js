@@ -304,7 +304,7 @@ $(() => {
 				offsetLeft: offset.left,
 				width: tab.outerWidth(),
 				objectName: item.data.title || '',
-				action: item.data.action || '',
+				routeParam: item.data.routeParam || {},
 			};
 
 			tooltipTimeout = window.setTimeout(() => {

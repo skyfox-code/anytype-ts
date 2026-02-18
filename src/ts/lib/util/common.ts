@@ -1585,11 +1585,21 @@ class UtilCommon {
 			return;
 		};
 
+		const { routeParam } = data;
+		let headerObject = spaceview;
+
+		if ((routeParam?.action == 'settings') && !this.getSpaceSettingsPages().includes(routeParam?.id)) {
+			const profile = U.Space.getProfile();
+			if (profile && !profile._empty_) {
+				headerObject = profile;
+			};
+		};
+
 		Preview.previewShow({
 			rect: { x: data.offsetLeft, y: 0, width: data.width, height: 0 },
 			classNameWrap: 'isTab',
-			object: spaceview,
-			target: spaceview.id,
+			object: headerObject,
+			target: headerObject.id,
 			noUnlink: true,
 			noEdit: true,
 			passThrough: true,
@@ -1597,7 +1607,7 @@ class UtilCommon {
 			noOffset: true,
 			typeX: I.MenuDirection.Left,
 			relatedData: {
-				action: data?.action,
+				action: routeParam?.action,
 				name: data?.objectName,
 				object: data?.objectData,
 			},
@@ -1614,6 +1624,15 @@ class UtilCommon {
 		return (view.filters || []).filter(it => {
 			return S.Record.getRelationByKey(it.relationKey) || [ I.FilterOperator.And, I.FilterOperator.Or ].includes(it.operator);
 		});
+	};
+
+	getSpaceSettingsPages (): string[] {
+		return [
+			'spaceIndex', 'spaceIndexEmpty', 'spaceStorage', 'spaceShare', 'spaceNotifications',
+			'importIndex', 'importNotion', 'importNotionHelp', 'importNotionWarning', 'importCsv', 'importObsidian',
+			'exportIndex', 'exportProtobuf', 'exportMarkdown',
+			'set', 'relation', 'archive',
+		];
 	};
 
 };
