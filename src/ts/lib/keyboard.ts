@@ -50,6 +50,9 @@ class Keyboard {
 		win.on('mousemove.common', e => this.onMouseMove(e));
 		win.on('resize.common', () => this.onResize());
 
+		document.removeEventListener('copy', this.onCopyEvent);
+		document.addEventListener('copy', this.onCopyEvent);
+
 		win.on('online.common offline.common', () => {
 			S.Common.isOnlineSet(navigator.onLine);
 
@@ -109,6 +112,35 @@ class Keyboard {
 	};
 	
 	/**
+	 * Strips zero-width space characters from native browser copy events.
+	 */
+	onCopyEvent = (e: ClipboardEvent) => {
+		if (e.defaultPrevented) {
+			return;
+		};
+
+		const selection = window.getSelection();
+		if (!selection || selection.isCollapsed) {
+			return;
+		};
+
+		const text = selection.toString();
+		if (!text.includes('\u200B')) {
+			return;
+		};
+
+		e.preventDefault();
+
+		e.clipboardData.setData('text/plain', text.replace(/\u200B/g, ''));
+
+		const range = selection.getRangeAt(0);
+		const div = document.createElement('div');
+
+		div.appendChild(range.cloneContents());
+		e.clipboardData.setData('text/html', div.innerHTML.replace(/\u200B/g, ''));
+	};
+
+	/**
 	 * Unbinds all keyboard event listeners.
 	 */
 	unbind () {
@@ -125,6 +157,7 @@ class Keyboard {
 		];
 
 		$(window).off(events.map(it => `${it}.common`).join(' '));
+		document.removeEventListener('copy', this.onCopyEvent);
 	};
 
 	/**

@@ -208,10 +208,10 @@ class UtilCommon {
 			e.preventDefault();
 
 			if (data.text) {
-				e.clipboardData.setData('text/plain', data.text);
+				e.clipboardData.setData('text/plain', data.text.replace(/\u200B/g, ''));
 			};
 			if (data.html) {
-				e.clipboardData.setData('text/html', data.html);
+				e.clipboardData.setData('text/html', data.html.replace(/\u200B/g, ''));
 			};
 			if (data.anytype) {
 				e.clipboardData.setData('application/json', JSON.stringify(data.anytype));
