@@ -369,7 +369,7 @@ class UtilData {
 			};
 		});
 
-		C.FileSetAutoDownload(S.Common.autoDownload, false);
+		C.FileAutoDownloadSetLimit(S.Common.autoDownload);
 
 		this.getMembershipData();
 
