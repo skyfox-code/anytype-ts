@@ -102,8 +102,14 @@ const DataviewFilterItem = observer(forwardRef<{}, Props>((props, ref) => {
 
 		case I.RelationType.File:
 		case I.RelationType.Object: {
+			const isObject = Relation.isObject(relation.format);
+
 			list = Relation.getArrayValue(value).map(it => S.Detail.get(subId, it, []));
 			list = list.filter(it => !it._empty_);
+
+			if (isObject) {
+				list = Relation.getFilterTemplateOptions().map(it => ({ ...it, isSystem: true })).concat(list);
+			};
 
 			v = list.map(it => it.name).join(', ');
 			break;
