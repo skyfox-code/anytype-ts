@@ -372,9 +372,10 @@ class ChatStore {
 	/**
 	 * Gets the mention and message counters for a space.
 	 * @param {string} spaceId - The space ID.
-	 * @returns {Counter} The counters for the space.
+	 * @param {boolean} [ignoreMute] - If true, include counters regardless of notification mode.
+	 * @returns {I.ChatCounter} The counters for the space.
 	 */
-	getSpaceCounters (spaceId: string): I.ChatCounter {
+	getSpaceCounters (spaceId: string, ignoreMute?: boolean): I.ChatCounter {
 		const ret = { mentionCounter: 0, messageCounter: 0 };
 		const spaceMap = this.stateMap.get(spaceId);
 
@@ -396,11 +397,11 @@ class ChatStore {
 
 			const chatMode = U.Object.getChatNotificationMode(spaceview, chatId);
 
-			if (state.mentionCounter && [ I.NotificationMode.All, I.NotificationMode.Mentions ].includes(chatMode)) {
+			if (state.mentionCounter && (ignoreMute || [ I.NotificationMode.All, I.NotificationMode.Mentions ].includes(chatMode))) {
 				ret.mentionCounter += Number(state.mentionCounter) || 0;
 			};
 
-			if (state.messageCounter && [ I.NotificationMode.All ].includes(chatMode)) {
+			if (state.messageCounter && (ignoreMute || [ I.NotificationMode.All ].includes(chatMode))) {
 				ret.messageCounter += Number(state.messageCounter) || 0;
 			};
 		};

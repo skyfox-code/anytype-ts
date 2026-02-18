@@ -410,6 +410,9 @@ const SidebarPageVault = observer(forwardRef<{}, I.SidebarPageComponent>((props,
 			cn.push('isMuted');
 		};
 
+		const rawCounters = !isChat && !isOneToOne ? S.Chat.getSpaceCounters(targetSpaceId, true) : null;
+		const hasUnread = rawCounters && (item.notificationMode != I.NotificationMode.Nothing) && !!(rawCounters.messageCounter || rawCounters.mentionCounter);
+
 		if (lastMessage) {
 			const { createdAt, creator, isSynced } = lastMessage;
 
@@ -497,7 +500,7 @@ const SidebarPageVault = observer(forwardRef<{}, I.SidebarPageComponent>((props,
 					{vaultIsMinimal ? counter : ''}
 				</div>
 				{!vaultIsMinimal ? (
-					<div className="info">
+					<div className={[ 'info', (hasUnread ? 'hasUnread' : '') ].join(' ')}>
 						{info}
 					</div>
 				) : ''}
