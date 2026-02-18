@@ -9,13 +9,19 @@ const ObjectType: FC<Props> = ({
 	object = {},
 }) => {
 
-	return object && !object._empty_ && !object.isDeleted ? (
-		<>{U.String.shorten(U.Object.name(object), 32)}</>
-	): (
-		<span className="textColor-red">
-			{translate('commonDeletedType')}
-		</span>
-	);
+	if (!object || object._empty_) {
+		return null;
+	};
+
+	if (object.isDeleted) {
+		return (
+			<span className="textColor-red">
+				{translate('commonDeletedType')}
+			</span>
+		);
+	};
+
+	return U.String.shorten(U.Object.name(object), 32);
 
 };
 
