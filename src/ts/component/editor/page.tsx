@@ -2329,7 +2329,6 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	const blockSplit = (focused: I.Block, range: I.TextRange, isShift: boolean) => {
 		const { content } = focused;
 		const isTitle = focused.isTextTitle();
-		const isHeader = focused.isTextHeader();
 		const isToggle = focused.canToggle();
 		const isCallout = focused.isTextCallout();
 		const isQuote = focused.isTextQuote();
@@ -2343,7 +2342,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		let style = I.TextStyle.Paragraph;
 		let mode = I.BlockSplitMode.Bottom;
 
-		if (isList || (!isTitle && !isHeader && ((range.from != length) || (range.to != length)))) {
+		if (isList || (!isTitle && ((range.from != length) || (range.to != length)))) {
 			if (isCheckbox && !range.to) {
 				style = content.style;
 			} else {
