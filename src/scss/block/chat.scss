@@ -6,8 +6,6 @@
 .blocks {
 	.block.blockChat { @include text-common; }
 	.block.blockChat {
-		.wrap.isDraggingOver { opacity: 0.5; cursor: copy; }
-
 		.scrollWrapper { display: flex; flex-direction: column; justify-content: flex-end; padding: 40px 0px 0px 0px; }
 		.scrollWrapper {
 			.scroll { min-height: 100%; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px 0px; padding: 0px 0px 16px 0px; }

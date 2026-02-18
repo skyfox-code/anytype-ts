@@ -254,7 +254,8 @@ class UtilFile {
 	 * @returns {boolean} True if files are present, false otherwise.
 	 */
 	checkDropFiles (e: DragEvent): boolean {
-		return (e.dataTransfer.files && e.dataTransfer.files.length) ? true : false;
+		const dt = e.dataTransfer;
+		return ((dt.files && dt.files.length) || (dt.types && dt.types.includes('Files'))) ? true : false;
 	};
 
 };

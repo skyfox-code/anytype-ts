@@ -58,9 +58,9 @@
 
 	.bottom { width: 100%; height: 12px; background-color: var(--color-bg-primary); }
 
-	.dragOverlay { 
-		pointer-events: none; background-color: var(--color-bg-primary); flex-grow: 1; z-index: 10; width: 100%;
-		display: flex; flex-direction: column; align-items: center; justify-content: center; display: none; height: 100%;
+	.dragOverlay {
+		display: none; pointer-events: none; background-color: var(--color-bg-primary); flex-grow: 1; z-index: 10; width: 100%;
+		flex-direction: column; align-items: center; justify-content: center;
 	}
 	.dragOverlay {
 		.inner { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px 0px; }
@@ -68,9 +68,10 @@
 		.label { @include text-header3; font-weight: 700; color: var(--color-text-tertiary); }
 	}
 
-	&.isDraggingOver { height: 100%; height: 100%; display: flex; flex-direction: column; }
+	&.isDraggingOver { display: flex; flex-direction: column; padding: 0px; }
 	&.isDraggingOver {
 		.dragOverlay { display: flex; }
+		> .inner, > .grad, > .bg { display: none; }
 	}
 }
 
