@@ -29,6 +29,7 @@ class BlockStore {
 	public spaceviewId = '';
 	public workspaceId = '';
 
+	public toggleVersion = 0;
 	public treeMap: Map<string, Map<string, I.BlockStructure>> = new Map();
 	public blockMap: Map<string, Map<string, I.Block>> = new Map();
 	public restrictionMap: Map<string, Map<string, any>> = new Map();
@@ -40,6 +41,7 @@ class BlockStore {
 			spaceviewId: observable,
 			widgetsId: observable,
 			workspaceId: observable,
+			toggleVersion: observable,
 
 			profile: computed,
 			spaceview: computed,
@@ -50,6 +52,7 @@ class BlockStore {
 			widgetsSet: action,
 			spaceviewSet: action,
 			workspaceSet: action,
+			incrementToggleVersion: action,
 
 			set: action,
 			clear: action,
@@ -889,6 +892,10 @@ class BlockStore {
 	 * @param {string} blockId - The block ID.
 	 * @param {boolean} v - The toggled value.
 	 */
+	incrementToggleVersion () {
+		this.toggleVersion++;
+	};
+
 	toggle (rootId: string, blockId: string, v: boolean) {
 		const element = $(`#block-${blockId}`);
 		if (!element.length) {
@@ -897,6 +904,7 @@ class BlockStore {
 
 		element.toggleClass('isToggled', v);
 		Storage.setToggle(rootId, blockId, v);
+		this.incrementToggleVersion();
 
 		U.Common.triggerResizeEditor(keyboard.isPopup());
 	};
@@ -1034,12 +1042,15 @@ class BlockStore {
 	 */
 	getTableOfContents (rootId: string, withTitle?: boolean) {
 		const list: any[] = [];
-		
+
+		// Read toggleVersion to create MobX dependency for observer components
+		const _tv = this.toggleVersion;
+
 		let hasH1 = false;
 		let hasH2 = false;
 
 		// Optimized: Direct traversal instead of wrapTree/unwrapTree
-		const collectHeaders = (blockId: string) => {
+		const collectHeaders = (blockId: string, isHidden: boolean) => {
 			const block = this.getLeaf(rootId, blockId);
 			if (!block) {
 				return;
@@ -1049,7 +1060,7 @@ class BlockStore {
 			const isHeader = block.isTextHeader();
 			const isTitle = withTitle && block.isTextTitle();
 
-			if (isHeader || isTitle) {
+			if ((isHeader || isTitle) && !isHidden) {
 				let depth = 0;
 
 				if (block.isTextHeader1() || block.isTextToggleHeader1()) {
@@ -1076,15 +1087,16 @@ class BlockStore {
 				});
 			};
 
-			// Recursively process children
+			// Recursively process children — if this block can toggle and is collapsed, children are hidden
+			const childrenHidden = isHidden || (block.canToggle() && !Storage.checkToggle(rootId, block.id));
 			const childrenIds = this.getChildrenIds(rootId, blockId);
 			for (const childId of childrenIds) {
-				collectHeaders(childId);
+				collectHeaders(childId, childrenHidden);
 			};
 		};
 
 		// Start traversal from root
-		collectHeaders(rootId);
+		collectHeaders(rootId, false);
 
 		// Adjust depth if withTitle is true
 		if (withTitle) {
