@@ -807,7 +807,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				keyboard.onSearchText(text.substring(range.from, range.to), 'editor');
 			});
 
-			if (block.isTextToggle() || block.isTextToggleHeader()) {
+			if (block.canToggle()) {
 				keyboard.shortcut(`${cmd}+shift+t`, e, () => {
 					S.Block.toggle(rootId, block.id, !Storage.checkToggle(rootId, block.id));
 				});
@@ -897,7 +897,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			};
 
 			keyboard.shortcut('alt+arrowdown, alt+arrowup', e, (pressed: string) => {
-				if (block.isTextToggle() || block.isTextToggleHeader()) {
+				if (block.canToggle()) {
 					e.preventDefault();
 					S.Block.toggle(rootId, block.id, pressed.match('arrowdown') ? true : false);
 				};
@@ -1008,7 +1008,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		
 		if (canTab) {
 			Action.move(rootId, rootId, obj.id, ids, (shift ? I.BlockPosition.Bottom : I.BlockPosition.Inner), () => {
-				if (next && (next.isTextToggle() || next.isTextToggleHeader())) {
+				if (next && next.canToggle()) {
 					S.Block.toggle(rootId, next.id, true);
 				};
 			});
@@ -1074,11 +1074,11 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		};
 
 		Action.move(rootId, rootId, next.id, ids, position, () => { 
-			if (nextParent && (nextParent.isTextToggle() || nextParent.isTextToggleHeader())) {
+			if (nextParent && (nextParent.canToggle())) {
 				S.Block.toggle(rootId, nextParent.id, true);
 			};
 
-			if (next && (next.isTextToggle() || next.isTextToggleHeader())) {
+			if (next && next.canToggle()) {
 				S.Block.toggle(rootId, next.id, true);
 			};
 
@@ -1149,11 +1149,11 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		};
 
 		Action.move(rootId, rootId, next.id, [ block.id ], position, () => {
-			if (nextParent && (nextParent.isTextToggle() || nextParent.isTextToggleHeader())) {
+			if (nextParent && (nextParent.canToggle())) {
 				S.Block.toggle(rootId, nextParent.id, true);
 			};
 
-			if (next && (next.isTextToggle() || next.isTextToggleHeader())) {
+			if (next && next.canToggle()) {
 				S.Block.toggle(rootId, next.id, true);
 			};
 
@@ -1504,7 +1504,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 
 			focus.setWithTimeout(block.id, { from: range.from, to: range.to }, 50);
 
-			if (next && (next.isTextToggle() || next.isTextToggleHeader())) {
+			if (next && next.canToggle()) {
 				S.Block.toggle(rootId, next.id, true);
 			};
 		});
@@ -1524,6 +1524,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		const length = block.getLength();
 		const parent = S.Block.getParentLeaf(rootId, block.id);
 		const replace = !range.to && block.isTextList() && !length;
+		const canToggle = block.canToggle();
 
 		if (block.isTextCode() && isEnter) {
 			return;
@@ -1557,15 +1558,14 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				style: I.TextStyle.Paragraph,
 			});
 		} else
-		if (block.isTextToggleHeader() && (range.from == length)) {
-			S.Block.toggle(rootId, block.id, true);
-			blockCreate(block.id, I.BlockPosition.InnerFirst, {
+		if (canToggle && !Storage.checkToggle(rootId, block.id) && (range.from == length)) {
+			blockCreate(block.id, I.BlockPosition.Bottom, {
 				type: I.BlockType.Text,
 				style: I.TextStyle.Paragraph,
 			});
 			return;
 		} else
-		if ((block.isTextToggle() || block.isTextToggleHeader()) && !Storage.checkToggle(rootId, block.id) && S.Block.getChildrenIds(rootId, block.id).length && !range.to) {
+		if (canToggle && !Storage.checkToggle(rootId, block.id) && S.Block.getChildrenIds(rootId, block.id).length && !range.to) {
 			blockCreate(block.id, I.BlockPosition.Top, {
 				type: I.BlockType.Text,
 				style: I.TextStyle.Paragraph,
@@ -1610,7 +1610,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		const cb = () => {
 			if (!next) {
 				// If block is closed toggle - find next block on the same level
-				if (block && (block.isTextToggle() || block.isTextToggleHeader()) && !Storage.checkToggle(rootId, block.id)) {
+				if (block && block.canToggle() && !Storage.checkToggle(rootId, block.id)) {
 					next = S.Block.getNextBlock(rootId, focused, dir, it => (it.parentId != block.id) && it.isFocusable());
 				} else {
 					next = S.Block.getNextBlock(rootId, focused, dir, it => it.isFocusable());
@@ -1626,7 +1626,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			const parent = S.Block.getHighestParent(rootId, next.id);
 
 			// If highest parent is closed toggle, next is parent
-			if (parent && (parent.isTextToggle() || parent.isTextToggleHeader()) && !Storage.checkToggle(rootId, parent.id)) {
+			if (parent && parent.canToggle() && !Storage.checkToggle(rootId, parent.id)) {
 				next = parent;
 			};
 
@@ -1772,7 +1772,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				cb();
 			};
 		} else {
-			if (block.isTextToggle() || block.isTextToggleHeader()) {
+			if (block.canToggle()) {
 				if ((dir < 0) && (range.to == 0)) {
 					S.Block.toggle(rootId, block.id, false);
 				};
@@ -1986,7 +1986,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				message.blockIds.forEach((id: string) => {
 					const block = S.Block.getLeaf(rootId, id);
 
-					if (block && (block.isTextToggle() || block.isTextToggleHeader())) {
+					if (block && block.canToggle()) {
 						S.Block.toggle(rootId, block.id, true);
 					};
 				});
@@ -2295,6 +2295,11 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			const focusBlockId = dir < 0 ? next.id : focused.id;
 			focusSet(focusBlockId, to, to, true);
 
+			const parent = S.Block.getHighestParent(rootId, next.id);
+			if (parent && parent.canToggle() && !Storage.checkToggle(rootId, parent.id)) {
+				S.Block.toggle(rootId, parent.id, true);
+			};
+
 			analytics.event('DeleteBlock', { count: 1 });
 		};
 
@@ -2324,7 +2329,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	const blockSplit = (focused: I.Block, range: I.TextRange, isShift: boolean) => {
 		const { content } = focused;
 		const isTitle = focused.isTextTitle();
-		const isToggle = focused.isTextToggle() || focused.isTextToggleHeader();
+		const isToggle = focused.canToggle();
 		const isCallout = focused.isTextCallout();
 		const isQuote = focused.isTextQuote();
 		const isList = focused.isTextList();
@@ -2423,7 +2428,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			const parent = S.Block.getHighestParent(rootId, next.id);
 
 			// If highest parent is closed toggle, next is parent
-			if (parent && (parent.isTextToggle() || parent.isTextToggleHeader()) && !Storage.checkToggle(rootId, parent.id)) {
+			if (parent && parent.canToggle() && !Storage.checkToggle(rootId, parent.id)) {
 				next = parent;
 			};
 

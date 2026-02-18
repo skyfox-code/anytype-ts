@@ -201,7 +201,7 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 			console.log('[DragProvider].onDrop paths', paths);
 
 			C.FileDrop(rootId, targetId, position.current, paths, () => {
-				if (target && (target.isTextToggle() || target.isTextToggleHeader()) && (position.current == I.BlockPosition.InnerFirst)) {
+				if (target && (target.canToggle()) && (position.current == I.BlockPosition.InnerFirst)) {
 					S.Block.toggle(rootId, targetId, true);
 				};
 			});
@@ -520,7 +520,7 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 				};
 				
 				if (target) {
-					isToggle = target.isTextToggle() || target.isTextToggleHeader();
+					isToggle = target.canToggle();
 		
 					if ((target.isLink() || target.isBookmark()) && (position == I.BlockPosition.InnerFirst)) {
 						targetContextId = target.getTargetObjectId();

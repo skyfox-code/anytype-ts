@@ -150,6 +150,10 @@ class Block implements I.Block {
 		return !this.isSystem() && !this.isTable() && !this.isDataview() && !this.isCover() && !this.isChat() && !this.isEmbedExcalidraw();
 	};
 
+	canToggle(): boolean {
+		return this.isTextToggle() || this.isTextToggleHeader();
+	};
+
 	isSystem () {
 		return this.isPage() || this.isLayout();
 	};

@@ -135,6 +135,7 @@ export interface Block {
 	canTurnPage?(): boolean;
 	canTurnList?(): boolean;
 	canTurnObject?(): boolean;
+	canToggle?(): boolean;
 	canCreateBlock?(): boolean;
 	canBecomeWidget?(): boolean;
 	canContextMenu?(): boolean;
