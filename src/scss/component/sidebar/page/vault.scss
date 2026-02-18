@@ -59,6 +59,10 @@
 
 		.name { flex-grow: 1; @include text-overflow-nw; font-weight: 500; line-height: 20px; }
 		.label { @include text-small; color: var(--color-text-secondary); flex-grow: 1; }
+
+		.info.hasUnread {
+			.label.lastMessage, .label.chatName { color: var(--color-text-primary); }
+		}
 		.label.chatName { font-weight: 500; @include text-overflow-nw; }
 
 		&::before {
