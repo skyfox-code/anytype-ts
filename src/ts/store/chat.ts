@@ -373,7 +373,7 @@ class ChatStore {
 	 * Gets the mention and message counters for a space.
 	 * @param {string} spaceId - The space ID.
 	 * @param {boolean} [ignoreMute] - If true, include counters regardless of notification mode.
-	 * @returns {Counter} The counters for the space.
+	 * @returns {I.ChatCounter} The counters for the space.
 	 */
 	getSpaceCounters (spaceId: string, ignoreMute?: boolean): I.ChatCounter {
 		const ret = { mentionCounter: 0, messageCounter: 0 };

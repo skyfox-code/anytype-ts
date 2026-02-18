@@ -46,6 +46,9 @@
 			.chatCounter { position: absolute; right: -4px; bottom: -4px; }
 		}
 		.info { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+		.info.hasUnread {
+			.label.lastMessage, .label.chatName { color: var(--color-text-primary); }
+		}
 
 		&.noMessages {
 			.info { flex-direction: row; }
@@ -59,10 +62,6 @@
 
 		.name { flex-grow: 1; @include text-overflow-nw; font-weight: 500; line-height: 20px; }
 		.label { @include text-small; color: var(--color-text-secondary); flex-grow: 1; }
-
-		.info.hasUnread {
-			.label.lastMessage, .label.chatName { color: var(--color-text-primary); }
-		}
 		.label.chatName { font-weight: 500; @include text-overflow-nw; }
 
 		&::before {
