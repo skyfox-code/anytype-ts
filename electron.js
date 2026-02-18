@@ -8,9 +8,8 @@ const protocol = 'anytype';
 const remote = require('@electron/remote/main');
 const { installNativeMessagingHost } = require('./electron/js/lib/installNativeMessagingHost.js');
 const binPath = fixPathForAsarUnpack(path.join(__dirname, 'dist', `anytypeHelper${is.windows ? '.exe' : ''}`));
-const Store = require('electron-store');
-const suffix = app.isPackaged ? '' : 'dev';
-const store = new Store({ name: [ 'localStorage', suffix ].join('-') });
+const { getSafeStorage } = require('./electron/js/safeStorage.js');
+const store = getSafeStorage();
 
 // gRPC DevTools extension ID
 const GRPC_DEVTOOLS_ID = 'fohdnlaeecihjiendkfhifhlgldpeopm';
@@ -38,8 +37,6 @@ let waitLibraryPromise = null;
 let mainWindow = null;
 let lastPowerEvent = 'suspend';
 let isReady = false;
-
-MenuManager.store = store;
 
 for (let i in Cors) {
 	csp.push([ i ].concat(Cors[i]).join(' '));

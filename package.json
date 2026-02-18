@@ -124,7 +124,6 @@
 		"electron-dl": "^3.5.2",
 		"electron-json-storage": "^4.5.0",
 		"electron-log": "^5.2.0",
-		"electron-store": "^8.2.0",
 		"electron-updater": "^6.6.7",
 		"electron-util": "^0.12.3",
 		"electron-window-state": "^5.0.3",
@@ -373,10 +372,6 @@
 				"to": "node_modules/async"
 			},
 			{
-				"from": "node_modules/atomically",
-				"to": "node_modules/atomically"
-			},
-			{
 				"from": "node_modules/balanced-match",
 				"to": "node_modules/balanced-match"
 			},
@@ -397,10 +392,6 @@
 				"to": "node_modules/concat-map"
 			},
 			{
-				"from": "node_modules/conf",
-				"to": "node_modules/conf"
-			},
-			{
 				"from": "node_modules/core-util-is",
 				"to": "node_modules/core-util-is"
 			},
@@ -409,16 +400,8 @@
 				"to": "node_modules/cross-spawn-async"
 			},
 			{
-				"from": "node_modules/debounce-fn",
-				"to": "node_modules/debounce-fn"
-			},
-			{
 				"from": "node_modules/debug",
 				"to": "node_modules/debug"
-			},
-			{
-				"from": "node_modules/dot-prop",
-				"to": "node_modules/dot-prop"
 			},
 			{
 				"from": "node_modules/electron-dl",
@@ -435,10 +418,6 @@
 			{
 				"from": "node_modules/electron-log",
 				"to": "node_modules/electron-log"
-			},
-			{
-				"from": "node_modules/electron-store",
-				"to": "node_modules/electron-store"
 			},
 			{
 				"from": "node_modules/electron-updater",
@@ -527,10 +506,6 @@
 			{
 				"from": "node_modules/inherits",
 				"to": "node_modules/inherits"
-			},
-			{
-				"from": "node_modules/is-obj",
-				"to": "node_modules/is-obj"
 			},
 			{
 				"from": "node_modules/is-plain-obj",

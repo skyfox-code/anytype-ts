@@ -9,6 +9,7 @@ const ConfigManager = require('./config.js');
 const UpdateManager = require('./update.js');
 const MenuManager = require('./menu.js');
 const Util = require('./util.js');
+const { getSafeStorage } = require('./safeStorage.js');
 const port = Util.getPort();
 
 const TABS_STORAGE_KEY = 'savedTabs';
@@ -873,9 +874,7 @@ class WindowManager {
 			return;
 		};
 
-		const Store = require('electron-store');
-		const suffix = app.isPackaged ? '' : 'dev';
-		const store = new Store({ name: [ 'localStorage', suffix ].join('-') });
+		const store = getSafeStorage();
 
 		const tabsData = win.views.map(view => ({
 			data: view.data || {},
@@ -898,9 +897,7 @@ class WindowManager {
 	 * @returns {Object|null} The saved tabs state or null if not found
 	 */
 	loadTabs () {
-		const Store = require('electron-store');
-		const suffix = app.isPackaged ? '' : 'dev';
-		const store = new Store({ name: [ 'localStorage', suffix ].join('-') });
+		const store = getSafeStorage();
 
 		const state = store.get(TABS_STORAGE_KEY);
 		if (state && state.tabs && state.tabs.length > 0) {
@@ -915,9 +912,7 @@ class WindowManager {
 	 * Clears saved tabs from storage
 	 */
 	clearSavedTabs () {
-		const Store = require('electron-store');
-		const suffix = app.isPackaged ? '' : 'dev';
-		const store = new Store({ name: [ 'localStorage', suffix ].join('-') });
+		const store = getSafeStorage();
 
 		store.delete(TABS_STORAGE_KEY);
 		Util.log('info', '[WindowManager].clearSavedTabs: Cleared saved tabs');

@@ -13,6 +13,7 @@ const WindowManager = require('./window.js');
 const UpdateManager = require('./update.js');
 const Server = require('./server.js');
 const Util = require('./util.js');
+const { getSafeStorage } = require('./safeStorage.js');
 
 const KEYTAR_SERVICE = 'Anytype';
 
@@ -278,9 +279,7 @@ class Api {
 	};
 
 	setHardwareAcceleration (win, enabled) {
-		const Store = require('electron-store');
-		const suffix = app.isPackaged ? '' : 'dev';
-		const store = new Store({ name: [ 'localStorage', suffix ].join('-') });
+		const store = getSafeStorage();
 
 		store.set('hardwareAcceleration', enabled);
 		this.setConfig(win, { hardwareAcceleration: enabled }, () => this.exit(win, '', true, false));

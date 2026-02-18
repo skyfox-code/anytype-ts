@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const ConfigManager = require('./config.js');
 const Util = require('./util.js');
+const { getSafeStorage } = require('./safeStorage.js');
 const Separator = { type: 'separator' };
 
 const DEFAULT_SHORTCUTS = {
@@ -32,14 +33,12 @@ class MenuManager {
 	win = null;
 	menu = null;
 	tray = null;
-	store = null;
-
 	setWindow (win) {
 		this.win = win;
 	};
 
 	initShortcuts () {
-		this.shortcuts = this.store.get('shortcuts') || {};
+		this.shortcuts = getSafeStorage().get('shortcuts') || {};
 	};
 
 	getAccelerator (id) {
