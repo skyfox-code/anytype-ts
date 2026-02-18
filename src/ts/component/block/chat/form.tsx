@@ -768,7 +768,7 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 			return;
 		};
 
-		saveState([ ...list, ...attachments ]);
+		saveState([ ...attachments, ...list ]);
 		historySaveState();
 
 		/*
@@ -786,7 +786,7 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 					};
 				});
 
-				saveState([ ...list, ...attachments ]);
+				saveState([ ...attachments, ...list ]);
 				historySaveState();
 			};
 		};
@@ -1292,7 +1292,7 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 					object.isTmp = true;
 					object.timestamp = U.Date.now();
 
-					saveState([ object ]);
+					saveState([ ...attachments, object ]);
 				});
 				break;
 			};
