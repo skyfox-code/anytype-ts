@@ -595,6 +595,7 @@
 	"pageSettingsColorModeButtonSystem": "Auto Mode",
 
 	"pageSettingsSpaceGeneral": "General",
+	"pageSettingsSpaceGeneralTab": "Channel Settings",
 	"pageSettingsSpaceRemoteStorage": "Remote Storage",
 	"pageSettingsSpaceSynced": "Synced",
 	"pageSettingsSpaceNotSynced": "Not Synced",
@@ -842,6 +843,7 @@
 
 	"popupSettingsSpaceTitle": "Space",
 	"popupSettingsProfileTitle": "Profile",
+	"popupSettingsProfileTitleTab": "Profile Settings",
 	"popupSettingsApplicationTitle": "Application",
 	"popupSettingsAccountAndKeyTitle": "Vault & Key",
 	"popupSettingsDataManagementTitle": "Data Management",

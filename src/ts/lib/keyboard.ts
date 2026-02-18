@@ -1359,15 +1359,16 @@ class Keyboard {
 		let title = titles[action];
 
 		if (action == 'settings') {
-			const map = U.Menu.settingsSectionsMap();
-			const mapped = map[id];
+			if ([ 'spaceIndex', 'spaceIndexEmpty' ].includes(id)) {
+				title = translate('pageSettingsSpaceGeneralTab');
+			} else if (id == 'account') {
+				title = translate('popupSettingsProfileTitleTab');
+			} else {
+				const map = U.Menu.settingsSectionsMap();
+				const mapped = map[id];
 
-			title = [ translate('commonSettings') ];
-			if (mapped) {
-				title.push(mapped);
+				title = mapped || translate('commonSettings');
 			};
-
-			title = title.join(' › ');
 		};
 
 		if (title) {
