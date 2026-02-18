@@ -858,10 +858,11 @@ class UtilData {
 	/**
 	 * Sets the tab title text.
 	 * @param {string} text - The text to set as the tab title.
-	 * @param {string} action - Optional layout of the current object, useful for tab tooltips.
+	 * @param {object} routeParam - Route parameters for the current page.
 	 */
-	setTabTitleText(text: string, action?: string) {
+	setTabTitleText(text: string, routeParam?: { action: string; id: string }) {
 		const spaceview = U.Space.getSpaceview();
+		const action = routeParam?.action || '';
 
 		const layouts = {
 			navigation: I.ObjectLayout.Navigation,
@@ -879,7 +880,7 @@ class UtilData {
 			spaceIcon: U.Graph.imageSrc(spaceview) || U.Object.defaultIcon(spaceview?.layout, spaceview?.type, 100),
 			spaceId: spaceview.targetSpaceId || '',
 			layout,
-			action,
+			routeParam,
 		});
 	};
 

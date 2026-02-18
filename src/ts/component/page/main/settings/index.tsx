@@ -81,13 +81,6 @@ const Components: any = {
 	archive: 			 PageMainArchive,
 };
 
-const SPACE_PAGES = [
-	'spaceIndex', 'spaceIndexEmpty', 'spaceStorage', 'spaceShare', 'spaceNotifications',
-	'importIndex', 'importNotion', 'importNotionHelp', 'importNotionWarning', 'importCsv', 'importObsidian',
-	'exportIndex', 'exportProtobuf', 'exportMarkdown',
-	'set', 'relation', 'archive',
-];
-
 const SKIP_CONTAINER = [ 'set', 'relation', 'archive' ];
 
 const PageMainSettingsIndex = observer(forwardRef<{}, I.PageComponent>((props, ref) => {
@@ -103,7 +96,7 @@ const PageMainSettingsIndex = observer(forwardRef<{}, I.PageComponent>((props, r
 	const init = () => {
 		let page = '';
 
-		if (!SPACE_PAGES.includes(id)) {
+		if (!U.Common.getSpaceSettingsPages().includes(id)) {
 			page = 'settings';
 		} else {
 			if (!U.Space.canMyParticipantWrite()) {

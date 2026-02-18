@@ -1361,7 +1361,8 @@ class Keyboard {
 		if (action == 'settings') {
 			if ([ 'spaceIndex', 'spaceIndexEmpty' ].includes(id)) {
 				title = translate('pageSettingsSpaceGeneralTab');
-			} else if (id == 'account') {
+			} else
+			if (id == 'account') {
 				title = translate('popupSettingsProfileTitleTab');
 			} else {
 				const map = U.Menu.settingsSectionsMap();
@@ -1373,7 +1374,7 @@ class Keyboard {
 
 		if (title) {
 			U.Data.setWindowTitleText(title);
-			U.Data.setTabTitleText(title, action);
+			U.Data.setTabTitleText(title, { action, id });
 		} else {
 			U.Data.setWindowTitle(rootId, rootId);
 			U.Data.setTabTitle(rootId, rootId);
