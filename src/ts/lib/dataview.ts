@@ -232,25 +232,19 @@ class Dataview {
 			};
 
 			const isArrayType = Relation.isArrayType(relation.format);
+			const mapArray = (v: any, fn: (v: any) => any) => Array.isArray(v) ? v.map(fn) : fn(v);
 
 			it.format = relation.format;
+
 			if (undefined === it.includeTime) {
 				it.includeTime = relation.includeTime;
 			};
 
-			if (Array.isArray(it.value)) {
-				it.value = it.value.map(it => {
-					it = Relation.formatValue(relation, it, false);
-					if (isArrayType) {
-						it = this.valueTemplateMapper(it, param);
-					};
-					return it;
-				});
-			} else {
+			if (isArrayType) {
 				it.value = Relation.formatValue(relation, it.value, false);
-				if (isArrayType) {
-					it.value = this.valueTemplateMapper(it.value, param);
-				};
+				it.value = mapArray(it.value, v => this.valueTemplateMapper(v, param));
+			} else {
+				it.value = mapArray(it.value, v => Relation.formatValue(relation, v, false));
 			};
 		};
 
