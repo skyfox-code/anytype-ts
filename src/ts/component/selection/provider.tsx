@@ -412,6 +412,7 @@ const SelectionProvider = observer(forwardRef<SelectionRefProps, Props>((props, 
 			const value = selected.find('#value');
 
 			if (!value.length) {
+				renderSelection();
 				return;
 			};
 
