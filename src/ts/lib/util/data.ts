@@ -863,12 +863,22 @@ class UtilData {
 	setTabTitleText(text: string, action?: string) {
 		const spaceview = U.Space.getSpaceview();
 
+		const layouts = {
+			navigation: I.ObjectLayout.Navigation,
+			graph: I.ObjectLayout.Graph,
+			archive: I.ObjectLayout.Archive,
+			settings: I.ObjectLayout.Settings,
+		};
+
+		const layout = layouts[action] || I.ObjectLayout.Page;
+		const icon = layouts[action] ? U.Object.defaultIcon(layout, '', 100) : '';
+
 		Renderer.send('updateTab', S.Common.tabId, {
 			title: text,
-			icon: '',
+			icon,
 			spaceIcon: U.Graph.imageSrc(spaceview) || U.Object.defaultIcon(spaceview?.layout, spaceview?.type, 100),
 			spaceId: spaceview.targetSpaceId || '',
-			layout: I.ObjectLayout.Page,
+			layout,
 			action,
 		});
 	};
