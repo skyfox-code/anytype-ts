@@ -14,6 +14,27 @@ class SafeStorage {
 	};
 
 	_load () {
+		// Check for orphaned temp file (process died during _writeAtomic after fsync but before rename)
+		if (fs.existsSync(this.tmpPath)) {
+			const tmp = this._readJson(this.tmpPath);
+
+			if (tmp !== null) {
+				console.log('[SafeStorage] Recovered from interrupted write:', this.tmpPath);
+
+				try {
+					fs.renameSync(this.tmpPath, this.filePath);
+					return tmp;
+				} catch (e) {
+					console.error('[SafeStorage] Failed to recover from temp file:', e.message);
+				};
+			} else {
+				// Temp file is corrupt (incomplete write), remove it
+				try {
+					fs.unlinkSync(this.tmpPath);
+				} catch (e) {};
+			};
+		};
+
 		// Try main file first
 		const main = this._readJson(this.filePath);
 		if (main !== null) {

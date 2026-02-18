@@ -323,6 +323,20 @@ app.on('before-quit', e => {
 	};
 });
 
+// Handle SIGINT (Ctrl+C) and SIGTERM gracefully instead of abrupt exit
+const handleSignal = (signal) => {
+	Util.log('info', `Received ${signal}`);
+
+	if (app.isQuiting) {
+		app.exit(0);
+	} else {
+		Api.exit(mainWindow, signal, false, false);
+	};
+};
+
+process.on('SIGINT', () => handleSignal('SIGINT'));
+process.on('SIGTERM', () => handleSignal('SIGTERM'));
+
 app.on('activate', () => {
 	if (WindowManager.list.size && mainWindow) {
 		mainWindow.show();

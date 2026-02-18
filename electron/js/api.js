@@ -1,4 +1,4 @@
-const { app, shell, BrowserWindow, Menu, Notification, ipcMain } = require('electron');
+const { app, shell, BrowserWindow, Menu, Notification, ipcMain, session } = require('electron');
 const { is } = require('electron-util');
 const fs = require('fs');
 const path = require('path');
@@ -424,6 +424,13 @@ class Api {
 
 	shutdown (win, relaunch, isUpdate) {
 		Util.log('info', '[Api].shutdown, relaunch: ' + relaunch + ', isUpdate: ' + isUpdate);
+
+		// Flush browser localStorage to disk before exiting
+		try {
+			session.defaultSession.flushStorageData();
+		} catch (e) {
+			console.error('[Api].shutdown: Failed to flush storage data:', e.message);
+		};
 
 		if (relaunch) {
 			if (isUpdate) {
