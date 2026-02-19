@@ -434,7 +434,7 @@ const Block = observer(forwardRef<Ref, Props>((props, ref) => {
 			});
 
 			item.off('mousedown.link').on('mousedown.link', e => {
-				if (e.button) {
+				if (e.button == 2) {
 					return;
 				};
 
@@ -442,9 +442,39 @@ const Block = observer(forwardRef<Ref, Props>((props, ref) => {
 
 				const item = $(e.currentTarget);
 				const url = String(item.attr('href') || '');
-				const { isInside, route, target } = U.Common.getLinkParamFromUrl(url);
+				const { isInside, target, spaceId } = U.Common.getLinkParamFromUrl(url);
 
-				isInside ? U.Router.go(route, {}) : Action.openUrl(target);
+				const openObject = (id: string, spaceId: string) => {
+					const cb = (object) => {
+						if (object) {
+							U.Object.openEvent(e, object);
+						};
+					};
+
+					if (spaceId) {
+						U.Object.getById(id, { spaceId }, cb);
+					} else {
+						cb(S.Detail.get(subId, id, []));
+					};
+				};
+
+				if (isInside) {
+					openObject(target, spaceId);
+					return;
+				};
+
+				// Handle external URLs that resolve to internal routes (e.g. object.any.coop)
+				const route = U.Common.getRouteFromUrl(url);
+				if (route) {
+					const routeParam = U.Router.getParam(route);
+
+					if (routeParam.id) {
+						openObject(routeParam.id, routeParam.spaceId);
+						return;
+					};
+				};
+
+				Action.openUrl(target);
 			});
 
 			item.off('mouseenter.link').on('mouseenter.link', e => {

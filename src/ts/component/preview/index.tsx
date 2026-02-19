@@ -28,7 +28,20 @@ const PreviewIndex = observer(forwardRef(() => {
 
 		switch (type) {
 			case I.PreviewType.Link: {
-				Action.openUrl(target);	
+				const route = U.Common.getRouteFromUrl(target);
+
+				if (route) {
+					const routeParam = U.Router.getParam(route);
+
+					if (routeParam.id && routeParam.spaceId) {
+						U.Object.getById(routeParam.id, { spaceId: routeParam.spaceId }, (obj) => {
+							obj ? U.Object.openConfig(e, obj) : Action.openUrl(target);
+						});
+						break;
+					};
+				};
+
+				Action.openUrl(target);
 				break;
 			};
 
