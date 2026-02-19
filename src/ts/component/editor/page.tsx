@@ -2050,7 +2050,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		const isInsideTable = S.Block.checkIsInsideTable(rootId, block.id);
 		const win = $(window);
 		const length = block.getLength();
-		const position = length ? I.BlockPosition.Bottom : I.BlockPosition.Replace;
+		const position = (!length && block.isText()) ? I.BlockPosition.Replace : I.BlockPosition.Bottom;
 		const processor = U.Embed.getProcessorByUrl(url);
 		const canBookmark = !isInsideTable && !isLocal;
 		const linkParam = U.Common.getLinkParamFromUrl(linkParamUrl);
