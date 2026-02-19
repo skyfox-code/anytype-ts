@@ -1,7 +1,7 @@
 import React, { forwardRef, useRef, useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { analytics, I, J, keyboard, Relation, S, Storage, translate, U, sidebar } from 'Lib';
-import { Button, Filter, Icon, IconObject, ObjectName } from 'Component';
+import { Button, Filter, Icon, IconObject, ObjectName, Label } from 'Component';
 import { AutoSizer, CellMeasurer, InfiniteLoader, List, CellMeasurerCache } from 'react-virtualized';
 
 const LIMIT = 30;
@@ -474,7 +474,7 @@ const SidebarPageSettingsLibrary = observer(forwardRef<{}, I.SidebarPageComponen
 					<Icon className="back withBackground" onClick={onBack} />
 				</div>
 				<div className="side center">
-					<div className="name">{title}</div>
+					<Label text={title} />
 				</div>
 				<div className="side right">
 					<Icon id="button-object-more" className="more withBackground" onClick={onMore} />
