@@ -934,10 +934,12 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				};
 			});
 
-			// Last/first block
-			keyboard.shortcut(`${cmd}+arrowup, ${cmd}+arrowdown`, e, (pressed: string) => {
-				onCtrlArrowBlock(e, pressed);
-			});
+			// Last/first block (Mac only; on Windows Ctrl+Up/Down is used for prevBlock/nextBlock)
+			if (U.Common.isPlatformMac()) {
+				keyboard.shortcut(`${cmd}+arrowup, ${cmd}+arrowdown`, e, (pressed: string) => {
+					onCtrlArrowBlock(e, pressed);
+				});
+			};
 
 			// Page navigation
 			keyboard.shortcut('pageup, pagedown', e, (pressed: string) => {
