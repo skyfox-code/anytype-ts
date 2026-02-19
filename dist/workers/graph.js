@@ -148,6 +148,48 @@ init = async (param) => {
 	initTheme(data.theme);
 	recalcConstants();
 
+	// Apply settings filters before simulation starts
+	updateOrphans();
+
+	let types = [];
+	if (settings.link) {
+		types.push(EdgeType.Link);
+	};
+	if (settings.relation) {
+		types.push(EdgeType.Relation);
+	};
+
+	if (settings.filterTypes && settings.filterTypes.length) {
+		nodes = nodes.filter(d => !settings.filterTypes.includes(d.type));
+	};
+
+	if (!settings.link) {
+		const typesSet = new Set(types);
+		edges = edges.filter(d => d.isDouble ? d.types.some(t => typesSet.has(t)) : d.type != EdgeType.Link);
+		const ids = nodeIdsFromEdges(edges);
+		nodes = nodes.filter(d => ids.has(d.id) || d.isOrphan);
+	};
+
+	if (!settings.relation) {
+		const typesSet = new Set(types);
+		edges = edges.filter(d => d.isDouble ? d.types.some(t => typesSet.has(t)) : d.type != EdgeType.Relation);
+		const ids = nodeIdsFromEdges(edges);
+		nodes = nodes.filter(d => ids.has(d.id) || d.isOrphan);
+	};
+
+	if (settings.local) {
+		edges = filterEdgesByDepth([ rootId ], settings.depth || 1);
+		const ids = nodeIdsFromEdges(edges); ids.add(rootId);
+		nodes = nodes.filter(d => ids.has(d.id));
+	};
+
+	if (!settings.orphan) {
+		nodes = nodes.filter(d => !d.isOrphan || d.forceShow);
+	};
+
+	let map = getNodeMap();
+	edges = edges.filter(d => map.get(d.source) && map.get(d.target));
+
 	transform = d3.zoomIdentity.translate(zoom.x, zoom.y).scale(zoom.k);
 
 	// Initialize simulation with fast convergence settings
