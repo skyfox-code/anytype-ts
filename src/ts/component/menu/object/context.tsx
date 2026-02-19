@@ -241,7 +241,7 @@ const MenuObjectContext = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =>
 		const itemId = objectIds[0];
 		const menuParam = {
 			menuKey: item.id,
-			element: `#${getId()} #item-${item.id}`,
+			element: `#${getId()} #item-${U.Common.esc(item.id)}`,
 			offsetX: getSize().width,
 			vertical: I.MenuDirection.Center,
 			isSub: true,
@@ -455,7 +455,7 @@ const MenuObjectContext = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =>
 
 			case 'editChat': {
 				U.Menu.onChatMenu({
-					element: `#${getId()} #item-${item.id}`,
+					element: `#${getId()} #item-${U.Common.esc(item.id)}`,
 					className,
 					classNameWrap,
 					offsetX: getSize().width,

@@ -160,8 +160,8 @@ const CellSelect = observer(forwardRef<I.CellRef, I.Cell>((props, ref) => {
 		e.preventDefault();
 		e.stopPropagation();
 
-		S.Menu.open('dataviewOptionEdit', { 
-			element: `#${id} #item-${item.id}`,
+		S.Menu.open('dataviewOptionEdit', {
+			element: `#${id} #item-${U.Common.esc(item.id)}`,
 			className: menuParam.className,
 			classNameWrap: menuParam.classNameWrap,
 			offsetY: 4,

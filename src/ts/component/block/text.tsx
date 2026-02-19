@@ -869,7 +869,7 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		};
 
 		const win = $(window);
-		const element = $(`#block-${block.id}`);
+		const element = $(`#block-${U.Common.esc(block.id)}`);
 
 		let value = getTextValue();
 
@@ -927,7 +927,7 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		let value = getTextValue();
 
 		S.Menu.open('smile', {
-			element: `#block-${block.id}`,
+			element: `#block-${U.Common.esc(block.id)}`,
 			classNameWrap: 'fromBlock',
 			recalcRect: () => {
 				const rect = U.Common.getSelectionRect();
@@ -1173,7 +1173,7 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		const currentFrom = focus.state.range.from;
 		const currentTo = focus.state.range.to;
 		const win = $(window);
-		const el = $(`#block-${block.id}`);
+		const el = $(`#block-${U.Common.esc(block.id)}`);
 
 		if (!currentTo || (currentFrom == currentTo) || !block.canHaveMarks() || ids.length) {
 			if (S.Menu.isOpen('blockContext') && !keyboard.isContextCloseDisabled) {

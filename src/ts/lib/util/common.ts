@@ -36,7 +36,11 @@ class UtilCommon {
 		};
 		return JSON.parse(JSON.stringify(o));
 	};
-	
+
+	esc (v: any): string {
+		return $.escapeSelector(String(v || ''));
+	};
+
 	/**
 	 * Returns the length of an object or array.
 	 * @param {any} o - The object or array.
@@ -1448,7 +1452,7 @@ class UtilCommon {
 	 * @returns {void}
 	 */
 	scrollToHeader (rootId: string, item: any, isPopup: boolean) {
-		const node = $(`.focusable.c${item.id}`);
+		const node = $(`.focusable.c${this.esc(item.id)}`);
 
 		if (!node.length) {
 			return;
