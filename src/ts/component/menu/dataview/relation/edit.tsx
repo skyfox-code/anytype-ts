@@ -76,9 +76,11 @@ const MenuDataviewRelationEdit = observer(forwardRef<I.MenuRef, I.Menu>((props, 
 		const isFile = relation && (relation.format == I.RelationType.File);
 		const isName = relation && (relation.relationKey == 'name');
 		const isDescription = relation && (relation.relationKey == 'description');
+		const view = getView?.();
+		const isListRegular = view && (view.type == I.ViewType.List) && (view.listSize == I.ListSize.Regular);
 		const canFilter = !isFile;
 		const canSort = !isFile;
-		const canHide = !isName;
+		const canHide = !isName && !(isDescription && isListRegular);
 		const canAlign = !isName; 
 		const canCalculate = relation;
 		const isType = U.Object.isTypeLayout(object.layout);

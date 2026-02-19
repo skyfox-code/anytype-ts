@@ -190,8 +190,8 @@
 
 				.row.add { height: 28px; display: block; }
 			}
-        }
-    }
+		}
+	}
 
 	.block.blockDataview.isInline {
 		.viewContent.viewList { padding: 9px 0px 0px 0px; }
@@ -208,7 +208,7 @@
 			}
 
 			&.isRegular {
-				.row { height: 52px !important; }
+				.row { height: 52px !important; display: flex; align-items: center; }
 			}
 		}
 	}

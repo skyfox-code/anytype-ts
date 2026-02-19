@@ -657,6 +657,10 @@ class Relation {
 		];
 	};
 
+	/**
+	 * Gets size options for list view.
+	 * @returns {Array<{id: I.ListSize, name: string}>} The list size options.
+	 */
 	public getListSizeOptions () {
 		return [
 			{ id: I.ListSize.Compact, name: translate('libRelationCompact') },

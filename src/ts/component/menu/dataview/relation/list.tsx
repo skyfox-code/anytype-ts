@@ -207,7 +207,9 @@ const MenuRelationList = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => 
 	const Item = (item: any) => {
 		const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id, disabled: isReadonly });
 		const isName = item.relationKey == 'name';
-		const canHide = !isReadonly && (!isName || (view.type == I.ViewType.Gallery));
+		const isDescription = item.relationKey == 'description';
+		const isListRegular = (view.type == I.ViewType.List) && (view.listSize == I.ListSize.Regular);
+		const canHide = !isReadonly && (!isName || (view.type == I.ViewType.Gallery)) && !(isDescription && isListRegular);
 		const cn = [ 'item' ];
 		const style = {
 			...item.style,
