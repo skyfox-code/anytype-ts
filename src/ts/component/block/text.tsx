@@ -302,6 +302,18 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			};
 		};
 
+		// For code blocks, indent/outdent are handled explicitly below
+		// to avoid double blockSetText calls (causes extra lines)
+		if (block.isTextCode()) {
+			const skipKeys = [ 'indent', 'outdent' ];
+
+			for (let i = saveKeys.length - 1; i >= 0; i--) {
+				if (skipKeys.includes(saveKeys[i].key)) {
+					saveKeys.splice(i, 1);
+				};
+			};
+		};
+
 		// Make div
 		const newBlock: any = { 
 			bgColor: block.bgColor,
@@ -388,17 +400,92 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			});
 		});
 
-		keyboard.shortcut('indent', e, () => {
+		keyboard.shortcut('indent, outdent', e, (pressed: string) => {
 			e.preventDefault();
 
-			if (block.isTextCode()) {
-				value = U.String.insert(value, '\t', range.from, range.from);
+			const isOutdent = pressed == 'outdent';
 
-				U.Data.blockSetText(rootId, block.id, value, marksRef.current, true, () => {
-					focus.set(block.id, { from: range.from + 1, to: range.from + 1 });
+			if (block.isTextCode()) {
+				const lineStart = value.lastIndexOf('\n', range.from - 1) + 1;
+				let lineEnd = value.indexOf('\n', range.to);
+
+				if (lineEnd == -1) {
+					lineEnd = value.length;
+				};
+
+				const block_text = value.substring(lineStart, lineEnd);
+				const lines = block_text.split('\n');
+				const isMultiLine = (range.from != range.to) && (lines.length > 1);
+
+				let newValue = value;
+				let newRange = { from: range.from, to: range.to };
+
+				if (isOutdent) {
+					let firstLineAdded = 0;
+					let totalAdded = 0;
+
+					const processed = lines.map((line, i) => {
+						let removed = 0;
+
+						if (line.startsWith('\t')) {
+							line = line.substring(1);
+							removed = 1;
+						} else
+						if (line.match(/^ {1,4}/)) {
+							const spaces = line.match(/^ {1,4}/)[0].length;
+							line = line.substring(spaces);
+							removed = spaces;
+						};
+
+						if (i == 0) {
+							firstLineAdded = -removed;
+						};
+						totalAdded += -removed;
+						return line;
+					});
+
+					newValue = value.substring(0, lineStart) + processed.join('\n') + value.substring(lineEnd);
+
+					if (isMultiLine) {
+						newRange = {
+							from: Math.max(lineStart, range.from + firstLineAdded),
+							to: Math.max(lineStart, range.to + totalAdded),
+						};
+					} else {
+						const caret = Math.max(lineStart, range.from + firstLineAdded);
+						newRange = { from: caret, to: caret };
+					};
+				} else {
+					if (isMultiLine) {
+						let firstLineAdded = 0;
+						let totalAdded = 0;
+
+						const processed = lines.map((line, i) => {
+							if (i == 0) {
+								firstLineAdded = 1;
+							};
+							totalAdded += 1;
+							return '\t' + line;
+						});
+
+						newValue = value.substring(0, lineStart) + processed.join('\n') + value.substring(lineEnd);
+						newRange = {
+							from: range.from + firstLineAdded,
+							to: range.to + totalAdded,
+						};
+					} else {
+						newValue = U.String.insert(value, '\t', range.from, range.from);
+						newRange = { from: range.from + 1, to: range.from + 1 };
+					};
+				};
+
+				focus.set(block.id, newRange);
+
+				U.Data.blockSetText(rootId, block.id, newValue, marksRef.current, true, () => {
 					focus.apply();
 				});
-			} else {
+			} else
+			if (!isOutdent) {
 				setText(marksRef.current, true, () => {
 					focus.apply();
 					onKeyDown(e, value, marksRef.current, range, props);
