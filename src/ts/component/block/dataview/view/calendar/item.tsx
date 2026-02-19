@@ -93,8 +93,8 @@ const CalendarItem = observer(forwardRef<Ref, Props>((props, ref) => {
 		});
 	};
 
-	const onOpen = (record: any) => {
-		U.Object.openConfig(null, record);
+	const onOpen = (e: any, record: any) => {
+		U.Object.openConfig(e, record);
 	};
 
 	const onMouseEnter = (e: any, item: any) => {
@@ -246,7 +246,7 @@ const CalendarItem = observer(forwardRef<Ref, Props>((props, ref) => {
 		let content = (
 			<>
 				{icon}
-				<ObjectName object={item} onClick={() => onOpen(item)} />
+				<ObjectName object={item} onClick={(e) => onOpen(e, item)} />
 			</>
 		);
 

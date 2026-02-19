@@ -735,7 +735,7 @@ const BlockDataview = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 
 			if (keyboard.withCommand(e)) {
 				if (!ids.length) {
-					U.Object.openPopup(record);
+					U.Object.openEvent(e, record);
 				};
 			} else {
 				U.Object.openConfig(e, record);

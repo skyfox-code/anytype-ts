@@ -52,6 +52,7 @@ const Graph = observer(forwardRef<GraphRefProps, Props>(({
 	const zoom = useRef(null);
 	const isDraggingToSelect = useRef(false);
 	const nodesSelectedByDragToSelect = useRef([]);
+	const lastClickEvent = useRef<any>(null);
 	const [ dummy, setDummy ] = useState(0);
 
 	const send = (id: string, param: any, transfer?: any[]) => {
@@ -185,14 +186,18 @@ const Graph = observer(forwardRef<GraphRefProps, Props>(({
 			let event = '';
 			if (local) {
 				event = 'onSetRootId';
+			} else
+			if (e.shiftKey && !(e.metaKey || e.ctrlKey)) {
+				event = 'onSelect';
 			} else {
-				event = e.shiftKey ? 'onSelect' : 'onClick';
+				event = 'onClick';
+				lastClickEvent.current = e;
 			};
 
 			send(event, { x, y });
 		})
 		.on('dblclick', (e: any) => {
-			if (e.shiftKey) {
+			if (e.shiftKey && !(e.metaKey || e.ctrlKey)) {
 				const [ x, y ] = d3.pointer(e);
 				send('onSelect', { x, y, selectRelated: true });
 			};
@@ -685,7 +690,8 @@ const Graph = observer(forwardRef<GraphRefProps, Props>(({
 	const onClickObject = (id: string) => {
 		setSelected([]);
 		onPreviewHide();
-		U.Object.openConfig(null, getNode(id));
+		U.Object.openConfig(lastClickEvent.current, getNode(id));
+		lastClickEvent.current = null;
 	};
 
 	const addNewNode = (id: string, sourceId?: string, param?: any, callBack?: (object: any) => void) => {

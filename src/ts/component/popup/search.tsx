@@ -99,6 +99,13 @@ const PopupSearch = observer(forwardRef<{}, I.Popup>((props, ref) => {
 			onArrow(dir);
 		});
 
+		keyboard.shortcut(`${cmd}+shift+enter`, e, () => {
+			const item = items[nRef.current];
+			if (item) {
+				onClick(e, item);
+			};
+		});
+
 		keyboard.shortcut(`enter, ${cmd}+enter`, e, () => {
 			const route = U.Common.getRouteFromUrl(filter);
 
@@ -829,6 +836,7 @@ const PopupSearch = observer(forwardRef<{}, I.Popup>((props, ref) => {
 						<Shortcut keys={[ 'enter' ]} label={translate('popupSearchShortcutOpen')} />
 						<Shortcut keys={[ cmd, 'l' ]} label={translate('popupSearchShortcutCopyLink')} />
 						<Shortcut keys={[ cmd, 'enter' ]} label={translate('popupSearchShortcutNewTab')} />
+						<Shortcut keys={[ cmd, 'shift', 'enter' ]} label={translate('popupSearchShortcutNewWindow')} />
 					</>
 				) : ''}
 				{isAction ? (
