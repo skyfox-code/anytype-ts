@@ -71,9 +71,10 @@ const WidgetGalleryItem = observer(forwardRef<{}, Props>(({
 				route: analytics.route.widget,
 				objectIds: [ id ],
 				subId,
-				allowedCollection: true, 
+				allowedCollection: true,
 				allowedExport: true,
 				allowedLinkTo: true,
+				openAfterDuplicate: true,
 			},
 		});
 	};
