@@ -352,6 +352,11 @@ const SidebarSectionTypeRelation = observer(forwardRef<I.SidebarSectionRef, I.Si
 	}));
 
 	useEffect(() => {
+		setIsLoaded(false);
+		setConflictIds([]);
+	}, [ object.id ]);
+
+	useEffect(() => {
 		if (isLoaded || !object.id) {
 			return;
 		};
