@@ -3,7 +3,7 @@ import $ from 'jquery';
 import { motion, AnimatePresence } from 'motion/react';
 import { observer } from 'mobx-react';
 import { I, S, U, keyboard, Relation } from 'Lib';
-import { Cell, DropTarget, Icon, SelectionTarget } from 'Component';
+import { Cell, DropTarget, Icon, IconObject, SelectionTarget } from 'Component';
 
 interface Props extends I.ViewComponent {
 	style?: any;
@@ -112,6 +112,12 @@ const ListRow = observer(forwardRef<I.RowRef, Props>((props, ref) => {
 		onCellClick(e, relation.relationKey, record.id);
 	};
 
+	// In Regular mode, override getView to always hide the icon inside the name Cell
+	// since we render it separately at the row level
+	const getViewForCell = isRegular
+		? () => ({ ...view, hideIcon: true })
+		: getView;
+
 	const mapper = (vr: any, i: number) => {
 		const relation = S.Record.getRelationByKey(vr.relationKey);
 		const id = Relation.cellId(idPrefix, relation.relationKey, record.id);
@@ -138,6 +144,7 @@ const ListRow = observer(forwardRef<I.RowRef, Props>((props, ref) => {
 					ref={ref => onRefCell(ref, id)}
 					{...props}
 					getRecord={() => record}
+					getView={getViewForCell}
 					subId={subId}
 					relationKey={relation.relationKey}
 					viewType={view.type}
@@ -168,22 +175,37 @@ const ListRow = observer(forwardRef<I.RowRef, Props>((props, ref) => {
 	let content = null;
 
 	if (isRegular) {
+		let rowIcon = null;
+
+		if (!hideIcon) {
+			rowIcon = (
+				<IconObject
+					id={`list-icon-${record.id}`}
+					object={record}
+					size={48}
+					canEdit={!props.readonly && U.Object.isTaskLayout(record.layout)}
+					noClick={true}
+				/>
+			);
+		};
+
 		content = (
-			<div className="sides">
-				<div className="side left">
-					<div className="lines">
-						<div className="line first">
+			<div className="regularContent">
+				{rowIcon}
+				<div className="sides">
+					<div className="line first">
+						<div className="side left">
 							{left.map(mapper)}
 						</div>
-						{record.description ? (
-							<div className="line second">
-								<div className="description">{record.description}</div>
-							</div>
-						) : ''}
+						<div className="side right">
+							{right.map(mapper)}
+						</div>
 					</div>
-				</div>
-				<div className="side right">
-					{right.map(mapper)}
+					{record.description ? (
+						<div className="line second">
+							<div className="description">{record.description}</div>
+						</div>
+					) : ''}
 				</div>
 			</div>
 		);
