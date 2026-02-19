@@ -369,6 +369,7 @@ export const Mapper = {
 				groupRelationKey: obj.getGrouprelationkey(),
 				endRelationKey: obj.getEndrelationkey(),
 				wrapContent: obj.getWrapcontent(),
+				listSize: obj.getListsize(),
 				groupBackgroundColors: obj.getGroupbackgroundcolors(),
 				pageLimit: obj.getPagelimit(),
 				defaultTemplateId: obj.getDefaulttemplateid(),
@@ -1090,6 +1091,7 @@ export const Mapper = {
 			item.setGrouprelationkey(obj.groupRelationKey);
 			item.setEndrelationkey(obj.endRelationKey);
 			item.setWrapcontent(obj.wrapContent);
+			item.setListsize(obj.listSize as any);
 			item.setGroupbackgroundcolors(obj.groupBackgroundColors);
 			item.setCoverfit(obj.coverFit);
 			item.setCardsize(obj.cardSize as any);

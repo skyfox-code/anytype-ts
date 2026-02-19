@@ -6,7 +6,8 @@ import { I, S, U } from 'Lib';
 import BodyRow from './list/row';
 import AddRow from './grid/body/add';
 
-const HEIGHT = 32;
+const HEIGHT_COMPACT = 32;
+const HEIGHT_REGULAR = 56;
 
 const ViewList = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref) => {
 
@@ -18,7 +19,13 @@ const ViewList = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref) =>
 	const limit = getLimit();
 	const length = records.length;
 	const isAllowedObject = props.isAllowedObject();
+	const isRegular = view.listSize == I.ListSize.Regular;
+	const rowHeight = isRegular ? HEIGHT_REGULAR : HEIGHT_COMPACT;
 	const cn = [ 'viewContent', className ];
+
+	if (isRegular) {
+		cn.push('isRegular');
+	};
 
 	useEffect(() => {
 		U.Common.triggerResizeEditor(isPopup);
@@ -83,7 +90,7 @@ const ViewList = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref) =>
 										width={Number(width) || 0}
 										isScrolling={isScrolling}
 										rowCount={records.length}
-										rowHeight={HEIGHT}
+										rowHeight={rowHeight}
 										onRowsRendered={onRowsRendered}
 										rowRenderer={({ key, index, style }) => {
 											const id = records[index];

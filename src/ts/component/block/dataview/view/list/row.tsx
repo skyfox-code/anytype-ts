@@ -3,7 +3,7 @@ import $ from 'jquery';
 import { motion, AnimatePresence } from 'motion/react';
 import { observer } from 'mobx-react';
 import { I, S, U, keyboard, Relation } from 'Lib';
-import { Cell, DropTarget, Icon, SelectionTarget } from 'Component';
+import { Cell, DropTarget, Icon, IconObject, SelectionTarget } from 'Component';
 
 interface Props extends I.ViewComponent {
 	style?: any;
@@ -45,16 +45,26 @@ const ListRow = observer(forwardRef<I.RowRef, Props>((props, ref) => {
 	const cn = [ 'row' ];
 	const relations = view.getVisibleRelations();
 	const nameIndex = relations.findIndex(it => it.relationKey == 'name');
+	const isRegular = view.listSize == I.ListSize.Regular;
 	const selection = S.Common.getRef('selectionProvider');
 
 	const left = [];
 	const right = [];
 
 	relations.forEach((el, idx) => {
-		if (idx <= nameIndex) {
-			left.push(el);
+		if (isRegular) {
+			if (el.relationKey == 'name') {
+				left.push(el);
+			} else
+			if (el.relationKey != 'description') {
+				right.push(el);
+			};
 		} else {
-			right.push(el);
+			if (idx <= nameIndex) {
+				left.push(el);
+			} else {
+				right.push(el);
+			};
 		};
 	});
 
@@ -102,6 +112,12 @@ const ListRow = observer(forwardRef<I.RowRef, Props>((props, ref) => {
 		onCellClick(e, relation.relationKey, record.id);
 	};
 
+	// In Regular mode, override getView to always hide the icon inside the name Cell
+	// since we render it separately at the row level
+	const getViewForCell = isRegular
+		? () => ({ ...view, hideIcon: true })
+		: getView;
+
 	const mapper = (vr: any, i: number) => {
 		const relation = S.Record.getRelationByKey(vr.relationKey);
 		const id = Relation.cellId(idPrefix, relation.relationKey, record.id);
@@ -128,6 +144,7 @@ const ListRow = observer(forwardRef<I.RowRef, Props>((props, ref) => {
 					ref={ref => onRefCell(ref, id)}
 					{...props}
 					getRecord={() => record}
+					getView={getViewForCell}
 					subId={subId}
 					relationKey={relation.relationKey}
 					viewType={view.type}
@@ -155,19 +172,58 @@ const ListRow = observer(forwardRef<I.RowRef, Props>((props, ref) => {
 
 	const lw = 50 + left.length * 5;
 
-	let content = (
-		<div className="sides">
-			<div
-				className={[ 'side', 'left', (left.length > 1 ? 's60' : '') ].join(' ')}
-				style={{ width: `${lw}%` }}
-			>
-				{left.map(mapper)}
+	let content = null;
+
+	if (isRegular) {
+		let rowIcon = null;
+
+		if (!hideIcon) {
+			rowIcon = (
+				<IconObject
+					id={`list-icon-${record.id}`}
+					object={record}
+					size={48}
+					canEdit={!props.readonly && U.Object.isTaskLayout(record.layout)}
+					noClick={true}
+				/>
+			);
+		};
+
+		content = (
+			<div className="regularContent">
+				{rowIcon}
+				<div className="sides">
+					<div className="line first">
+						<div className="side left">
+							{left.map(mapper)}
+						</div>
+						<div className="side right">
+							{right.map(mapper)}
+						</div>
+					</div>
+					{record.description ? (
+						<div className="line second">
+							<div className="description">{record.description}</div>
+						</div>
+					) : ''}
+				</div>
 			</div>
-			<div className="side right">
-				{right.map(mapper)}
+		);
+	} else {
+		content = (
+			<div className="sides">
+				<div
+					className={[ 'side', 'left', (left.length > 1 ? 's60' : '') ].join(' ')}
+					style={{ width: `${lw}%` }}
+				>
+					{left.map(mapper)}
+				</div>
+				<div className="side right">
+					{right.map(mapper)}
+				</div>
 			</div>
-		</div>
-	);
+		);
+	};
 
 	if (!isInline) {
 		content = (

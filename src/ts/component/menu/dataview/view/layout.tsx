@@ -108,8 +108,9 @@ const MenuViewLayout = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 	};
 
 	const getSections = () => {
-		const { type, coverRelationKey, cardSize, coverFit, wrapContent, groupRelationKey, endRelationKey, groupBackgroundColors, hideIcon, pageLimit } = saveParam.current;
+		const { type, coverRelationKey, cardSize, listSize, coverFit, wrapContent, groupRelationKey, endRelationKey, groupBackgroundColors, hideIcon, pageLimit } = saveParam.current;
 		const isGrid = type == I.ViewType.Grid;
+		const isList = type == I.ViewType.List;
 		const isGallery = type == I.ViewType.Gallery;
 		const isBoard = type == I.ViewType.Board;
 		const isCalendar = type == I.ViewType.Calendar;
@@ -124,6 +125,14 @@ const MenuViewLayout = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 				id: 'wrapContent', name: translate('menuDataviewViewEditWrapContent'), withSwitch: true, switchValue: wrapContent,
 				onSwitch: (e: any, v: boolean) => onSwitch(e, 'wrapContent', v),
 			});
+		};
+
+		if (isList) {
+			const listSizeOption = Relation.getListSizeOptions().find(it => it.id == listSize);
+
+			settings = settings.concat([
+				{ id: 'listSize', name: translate('menuDataviewViewEditListSize'), caption: (listSizeOption ? listSizeOption.name : translate('commonSelect')), arrow: true },
+			]);
 		};
 
 		if (isGallery) {
@@ -316,6 +325,15 @@ const MenuViewLayout = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 				menuId = 'select';
 				menuParam.data = Object.assign(menuParam.data, {
 					options: Relation.getPageLimitOptions(type, isInline),
+				});
+				break;
+			};
+
+			case 'listSize': {
+				menuId = 'select';
+				menuParam.data = Object.assign(menuParam.data, {
+					value: String(saveParam.current.listSize),
+					options: Relation.getListSizeOptions(),
 				});
 				break;
 			};

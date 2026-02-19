@@ -7,6 +7,11 @@ export enum CardSize {
 	Large			 = 2,
 };
 
+export enum ListSize {
+	Compact			 = 0,
+	Regular			 = 1,
+};
+
 export enum DateFormat {
 	MonthAbbrBeforeDay	 = 0, // Jul 30, 2020
 	MonthAbbrAfterDay	 = 1, // 30 Jul 2020
@@ -239,6 +244,7 @@ export interface View {
 	groupBackgroundColors: boolean;
 	coverFit: boolean;
 	cardSize: I.CardSize;
+	listSize: I.ListSize;
 	hideIcon: boolean;
 	pageLimit: number;
 	sorts: Sort[];
