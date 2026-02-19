@@ -11,6 +11,7 @@ class UpdateManager {
 
 	win = null;
 	isUpdating = false;
+	isDownloading = false;
 	autoUpdate = false;
 	timeout = 0;
 
@@ -47,9 +48,10 @@ class UpdateManager {
 			Util.send(this.win, 'update-not-available', this.autoUpdate);
 		});
 		
-		autoUpdater.on('error', (err) => { 
+		autoUpdater.on('error', (err) => {
 			Util.log(`Error: ${err}`);
-			Util.send(this.win, 'update-error', err, this.autoUpdate);
+			Util.send(this.win, 'update-error', err, this.autoUpdate, this.isDownloading);
+			this.isDownloading = false;
 		});
 		
 		autoUpdater.on('download-progress', (progress) => {
@@ -68,6 +70,7 @@ class UpdateManager {
 
 		autoUpdater.on('update-downloaded', info => {
 			this.isUpdating = false;
+			this.isDownloading = false;
 
 			Util.log('info', `Update downloaded: ${JSON.stringify(info, null, 3)}`);
 			Util.send(this.win, 'update-downloaded', info);
@@ -124,6 +127,8 @@ class UpdateManager {
 	};
 
 	download () {
+		this.isDownloading = true;
+		Util.send(this.win, 'download-started');
 		autoUpdater.downloadUpdate();
 	};
 
@@ -136,6 +141,7 @@ class UpdateManager {
 
 	cancel () {
 		this.isUpdating = false;
+		this.isDownloading = false;
 		this.clearTimeout();
 	};
 

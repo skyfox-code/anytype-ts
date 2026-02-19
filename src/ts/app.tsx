@@ -151,6 +151,7 @@ const App: FC = () => {
 		Renderer.on('update-not-available', onUpdateUnavailable);
 		Renderer.on('update-downloaded', onUpdateDownloaded);
 		Renderer.on('update-error', onUpdateError);
+		Renderer.on('download-started', onDownloadStarted);
 		Renderer.on('download-progress', onUpdateProgress);
 		Renderer.on('spellcheck', onSpellcheck);
 		Renderer.on('pin-set', () => S.Common.pinInit());
@@ -218,6 +219,7 @@ const App: FC = () => {
 		Renderer.remove('update-not-available');
 		Renderer.remove('update-downloaded');
 		Renderer.remove('update-error');
+		Renderer.remove('download-started');
 		Renderer.remove('download-progress');
 		Renderer.remove('spellcheck');
 		Renderer.remove('pin-set');
@@ -276,6 +278,17 @@ const App: FC = () => {
 
 		sidebar.init(false);
 		analytics.init();
+
+		const lastAppVersion = Storage.get('lastAppVersion');
+		const currentAppVersion = electron.version?.app;
+
+		if (lastAppVersion && currentAppVersion && (lastAppVersion !== currentAppVersion)) {
+			analytics.event('UpgradeVersion');
+		};
+
+		if (currentAppVersion) {
+			Storage.set('lastAppVersion', currentAppVersion);
+		};
 
 		if (redirect) {
 			Storage.delete('redirect');
@@ -466,7 +479,11 @@ const App: FC = () => {
 		});
 	};
 
-	const onUpdateError = (e: any, err: string, auto: boolean) => {
+	const onDownloadStarted = () => {
+		analytics.event('StartUpgradeDownload');
+	};
+
+	const onUpdateError = (e: any, err: string, auto: boolean, isDownloading: boolean) => {
 		console.error(err);
 		S.Common.updateVersionSet('');
 		S.Progress.delete(I.ProgressType.Update);
@@ -491,7 +508,7 @@ const App: FC = () => {
 			},
 		});
 
-		analytics.event('UpgradeVersionError');
+		analytics.event('UpgradeVersionError', { type: isDownloading ? 'Download' : 'CheckFailed' });
 	};
 
 	const onUpdateProgress = (e: any, progress: any) => {
