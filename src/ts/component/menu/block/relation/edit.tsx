@@ -155,7 +155,7 @@ const MenuBlockRelationEdit = observer(forwardRef<I.MenuRef, I.Menu>((props, ref
 		setIncludeTime(v);
 
 		if (relation && relation.id) {
-			save();
+			save(v);
 		};
 	};
 
@@ -237,13 +237,13 @@ const MenuBlockRelationEdit = observer(forwardRef<I.MenuRef, I.Menu>((props, ref
 		close();
 	};
 
-	const save = () => {
+	const save = (time?: boolean) => {
 		const name = String(filterRef.current?.getValue() || '');
 		const relation = getRelation();
-		const item: any = { 
+		const item: any = {
 			relationFormat: format,
 			relationFormatObjectTypes: Relation.isObject(format) ? Relation.getArrayValue(objectTypes) : [],
-			relationFormatIncludeTime: includeTime,
+			relationFormatIncludeTime: time !== undefined ? time : includeTime,
 		};
 
 		if (name) {
