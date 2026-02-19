@@ -31,6 +31,7 @@ class View implements I.View {
 	coverRelationKey = '';
 	coverFit = false;
 	cardSize: I.CardSize = I.CardSize.Small;
+	listSize: I.ListSize = I.ListSize.Compact;
 	hideIcon = false;
 	groupRelationKey = '';
 	endRelationKey = '';
@@ -51,6 +52,7 @@ class View implements I.View {
 		this.coverFit = Boolean(props.coverFit);
 		this.hideIcon = Boolean(props.hideIcon);
 		this.cardSize = Number(props.cardSize) || I.CardSize.Small;
+		this.listSize = Number(props.listSize) || I.ListSize.Compact;
 		this.groupRelationKey = String(props.groupRelationKey || '');
 		this.endRelationKey = String(props.endRelationKey || '');
 		this.wrapContent = Boolean(props.wrapContent);
@@ -75,6 +77,7 @@ class View implements I.View {
 			coverRelationKey: observable,
 			coverFit: observable,
 			cardSize: observable,
+			listSize: observable,
 			hideIcon: observable,
 			groupRelationKey: observable,
 			endRelationKey: observable,

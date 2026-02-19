@@ -45,16 +45,26 @@ const ListRow = observer(forwardRef<I.RowRef, Props>((props, ref) => {
 	const cn = [ 'row' ];
 	const relations = view.getVisibleRelations();
 	const nameIndex = relations.findIndex(it => it.relationKey == 'name');
+	const isRegular = view.listSize == I.ListSize.Regular;
 	const selection = S.Common.getRef('selectionProvider');
 
 	const left = [];
 	const right = [];
 
 	relations.forEach((el, idx) => {
-		if (idx <= nameIndex) {
-			left.push(el);
+		if (isRegular) {
+			if (el.relationKey == 'name') {
+				left.push(el);
+			} else
+			if (el.relationKey != 'description') {
+				right.push(el);
+			};
 		} else {
-			right.push(el);
+			if (idx <= nameIndex) {
+				left.push(el);
+			} else {
+				right.push(el);
+			};
 		};
 	});
 
@@ -155,19 +165,43 @@ const ListRow = observer(forwardRef<I.RowRef, Props>((props, ref) => {
 
 	const lw = 50 + left.length * 5;
 
-	let content = (
-		<div className="sides">
-			<div
-				className={[ 'side', 'left', (left.length > 1 ? 's60' : '') ].join(' ')}
-				style={{ width: `${lw}%` }}
-			>
-				{left.map(mapper)}
+	let content = null;
+
+	if (isRegular) {
+		content = (
+			<div className="sides">
+				<div className="side left">
+					<div className="lines">
+						<div className="line first">
+							{left.map(mapper)}
+						</div>
+						{record.description ? (
+							<div className="line second">
+								<div className="description">{record.description}</div>
+							</div>
+						) : ''}
+					</div>
+				</div>
+				<div className="side right">
+					{right.map(mapper)}
+				</div>
 			</div>
-			<div className="side right">
-				{right.map(mapper)}
+		);
+	} else {
+		content = (
+			<div className="sides">
+				<div
+					className={[ 'side', 'left', (left.length > 1 ? 's60' : '') ].join(' ')}
+					style={{ width: `${lw}%` }}
+				>
+					{left.map(mapper)}
+				</div>
+				<div className="side right">
+					{right.map(mapper)}
+				</div>
 			</div>
-		</div>
-	);
+		);
+	};
 
 	if (!isInline) {
 		content = (

@@ -657,6 +657,13 @@ class Relation {
 		];
 	};
 
+	public getListSizeOptions () {
+		return [
+			{ id: I.ListSize.Compact, name: translate('libRelationCompact') },
+			{ id: I.ListSize.Regular, name: translate('libRelationRegular') },
+		];
+	};
+
 	/**
 	 * Gets cover options for a dataview.
 	 * @param {string} rootId - The root object ID.

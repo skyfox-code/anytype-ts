@@ -161,6 +161,29 @@
 			.cellContent.isEmpty:not(.editModeOn, .withMenu) { display: none; }
 
 			.loadMore { margin-top: 2px; }
+
+			&.isRegular {
+				.row { height: 52px !important; }
+				.row {
+					.sides { align-items: flex-start; padding-top: 4px; }
+
+					.side.left {
+						flex-direction: column;
+						.lines { width: 100%; display: flex; flex-direction: column; gap: 0px; }
+						.lines {
+							.line { display: flex; flex-direction: row; align-items: center; }
+							.line.second {
+								.description {
+									@include text-small; color: var(--color-text-secondary); @include text-overflow-nw;
+									line-height: 20px; height: 20px;
+								}
+							}
+						}
+					}
+				}
+
+				.row.add { height: 28px; }
+			}
         }
     }
 
@@ -176,6 +199,10 @@
 			}
 			.row.add:hover {
 				.cell.add { background-color: transparent; }
+			}
+
+			&.isRegular {
+				.row { height: 52px !important; }
 			}
 		}
 	}
