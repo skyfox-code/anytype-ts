@@ -49,7 +49,7 @@ const ChatAttachment = observer(forwardRef<RefProps, Props>((props, ref) => {
 		};
 
 		return (
-			<div className="clickable" onClick={onOpen}>
+			<div className="clickable" onClick={e => onOpen(e)}>
 				<div className="iconWrapper">
 					<IconObject object={object} size={48} iconSize={iconSize} />
 					<Icon onClick={onSyncStatusClick} className="syncStatus" />
@@ -190,7 +190,7 @@ const ChatAttachment = observer(forwardRef<RefProps, Props>((props, ref) => {
 		return <MediaAudio playlist={playlist} getScrollContainer={() => U.Common.getScrollContainer(isPopup)} />;
 	};
 
-	const onOpen = () => {
+	const onOpen = (e: any) => {
 		const syncStatus = Number(object.syncStatus) || I.SyncStatusObject.Synced;
 
 		if (isDownload && (syncStatus != I.SyncStatusObject.Synced)) {
@@ -218,7 +218,7 @@ const ChatAttachment = observer(forwardRef<RefProps, Props>((props, ref) => {
 
 			default: {
 				if (!object.isTmp) {
-					U.Object.openConfig(null, object, { onClose: updateAttachments });
+					U.Object.openConfig(e, object, { onClose: updateAttachments });
 				};
 				break;
 			};
