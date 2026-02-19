@@ -538,7 +538,7 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 	};
 
 	const checkUrls = () => {
-		const text = getTextValue();
+		let text = getTextValue();
 		const urls = U.String.getUrlsFromText(text);
 
 		if (!urls.length) {
@@ -546,6 +546,8 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 		};
 
 		removeBookmarks();
+
+		const toRemove = [];
 
 		for (const url of urls) {
 			const { from, to, isLocal, isUrl } = url;
@@ -567,24 +569,55 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 				};
 			};
 
+			// Internal object link: resolve as attachment and remove URL from text
+			if (type == I.MarkType.Object) {
+				addBookmark(value);
+				toRemove.push({ from, to });
+				continue;
+			};
+
 			if (Mark.getInRange(marks.current, I.MarkType.Link, { from, to })) {
 				continue;
 			};
 
-			marks.current.push({ 
-				type, 
-				range: { from, to }, 
+			marks.current.push({
+				type,
+				range: { from, to },
 				param: value,
 			});
 
 			setMarks(marks.current);
-			
+
 			if (isUrl) {
 				addBookmark(value, true);
 			};
 		};
 
-		updateMarkup(text, { from: range.current.to + 1, to: range.current.to + 1 });
+		// Remove internal object URLs from text in reverse order to preserve positions
+		let removed = 0;
+		if (toRemove.length) {
+			for (let i = toRemove.length - 1; i >= 0; i--) {
+				let { from, to } = toRemove[i];
+
+				// Remove one adjacent whitespace to prevent double spaces
+				if ((to < text.length) && /\s/.test(text[to])) {
+					to++;
+				} else
+				if ((from > 0) && /\s/.test(text[from - 1])) {
+					from--;
+				};
+
+				const length = to - from;
+				text = text.substring(0, from) + text.substring(to);
+				marks.current = Mark.adjust(marks.current, from, -length);
+				removed += length;
+			};
+
+			setMarks(marks.current);
+		};
+
+		const r = Math.min(text.length, Math.max(0, range.current.to + 1 - removed));
+		updateMarkup(text, { from: r, to: r });
 	};
 
 	const canDrop = (e: any): boolean => {
