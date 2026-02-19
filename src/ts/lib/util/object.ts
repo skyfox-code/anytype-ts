@@ -123,6 +123,7 @@ class UtilObject {
 
 	/**
 	 * Open an object based on keyboard modifiers in the event.
+	 * - Cmd/Ctrl+Shift: Opens in new window
 	 * - Shift or popup context: Opens in popup
 	 * - Cmd/Ctrl or middle mouse button: Opens in new tab
 	 * - Default: Opens via route navigation
@@ -149,6 +150,9 @@ class UtilObject {
 			return;
 		};
 
+		if ((e.shiftKey && (e.metaKey || e.ctrlKey))) {
+			this.openWindow(object);
+		} else
 		if (e.shiftKey || keyboard.isPopup()) {
 			this.openPopup(object, param);
 		} else
@@ -294,6 +298,11 @@ class UtilObject {
 	Opens object based on user setting 'Open objects in fullscreen mode'
 	*/
 	openConfig (e: any, object: any, param?: any) {
+		if (e && e.shiftKey && (e.metaKey || e.ctrlKey)) {
+			this.openWindow(object);
+			return;
+		};
+
 		if (e && ((e.metaKey || e.ctrlKey) || (e.button == 1))) {
 			this.openTab(object);
 			return;

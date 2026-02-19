@@ -450,12 +450,7 @@ class Keyboard {
 					Action[object.isArchived ? 'restore' : 'archive']([ rootId ], route);
 				});
 
-				// Add to favorites
-				this.shortcut('addFavorite', e, () => {
-					e.preventDefault();
-					Action.toggleWidgetsForObject(rootId, route);
-				});
-			};
+				};
 
 			// Switch space
 			for (let i = 1; i <= 9; i++) {
