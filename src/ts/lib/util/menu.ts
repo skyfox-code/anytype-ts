@@ -1021,7 +1021,7 @@ class UtilMenu {
 				};
 
 				case 'openNewTab': {
-					Action.openSpaceTab(targetSpaceId, uxType);
+					Action.openSpaceTab(targetSpaceId, uxType, route);
 					break;
 				};
 

@@ -336,7 +336,7 @@ $(() => {
 			const activeTab = tabsData.find(it => it.id == activeId);
 			const { isPinned, ...data } = activeTab?.data || {};
 
-			electron.Api(winId, 'openTab', data, { setActive: true });
+			electron.Api(winId, 'openTab', data, { setActive: true, fireAnalytics: true });
 		});
 
 		return tab;

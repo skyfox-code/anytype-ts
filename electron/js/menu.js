@@ -238,10 +238,11 @@ class MenuManager {
 				submenu: [
 					{ label: Util.translate('electronMenuNewWindow'), accelerator: this.getAccelerator('newWindow'), click: () => WindowManager.createMain({ isChild: true }) },
 					{ label: Util.translate('electronMenuNewTab'), accelerator: this.getAccelerator('newTab'), click: () => {
+						const Api = require('./api.js');
 						const activeView = Util.getActiveView(this.win);
 						const { isPinned, ...data } = activeView?.data || {};
 
-						WindowManager.createTab(this.win, data);
+						Api.openTab(this.win, data, { fireAnalytics: true });
 					}
 				},
 					{ label: Util.translate('electronMenuPrevTab'), accelerator: this.getAccelerator('prevTab'), click: () => WindowManager.prevTab(this.win) },

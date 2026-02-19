@@ -780,6 +780,11 @@ class Keyboard {
 				break;
 			};
 
+			case 'analyticsAddTab': {
+				analytics.event('AddTab', { route: analytics.route.navigation });
+				break;
+			};
+
 			case 'createObject': {
 				this.pageCreate({}, route, [ I.ObjectFlag.SelectTemplate, I.ObjectFlag.DeleteEmpty ]);
 				break;

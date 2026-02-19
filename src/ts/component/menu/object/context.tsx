@@ -471,7 +471,7 @@ const MenuObjectContext = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =>
 				const objects = slice.map(id => getObjectHandler(subId, getObject, id)).filter(it => it);
 
 				if (item.id == 'newTab') {
-					U.Object.openTabs(objects);
+					U.Object.openTabs(objects, route);
 				} else {
 					U.Object.openWindows(objects, S.Auth.token);
 				};

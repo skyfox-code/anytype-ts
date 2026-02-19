@@ -211,16 +211,16 @@ class UtilObject {
 		Renderer.send('openWindow', this.route(object), S.Auth.token);
 	};
 
-	openTab (object: any) {
+	openTab (object: any, analyticsRoute?: string) {
 		if (!object) {
 			return;
 		};
 
 		Renderer.send('openTab', this.getTabData(object), { setActive: false });
-		analytics.event('AddTab', { objectType: object.type });
+		analytics.event('AddTab', { objectType: object.type, route: analyticsRoute });
 	};
 
-	openTabs (objects: any[]) {
+	openTabs (objects: any[], analyticsRoute?: string) {
 		if (!objects || !objects.length) {
 			return;
 		};
@@ -239,7 +239,7 @@ class UtilObject {
 			Renderer.send('openTabs', tabs);
 
 			for (const object of filtered) {
-				analytics.event('AddTab', { objectType: object.type });
+				analytics.event('AddTab', { objectType: object.type, route: analyticsRoute });
 			};
 		};
 	};

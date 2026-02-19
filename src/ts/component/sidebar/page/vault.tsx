@@ -297,7 +297,7 @@ const SidebarPageVault = observer(forwardRef<{}, I.SidebarPageComponent>((props,
 
 	const onClick = (e: any, item: any) => {
 		if (e.ctrlKey || e.metaKey) {
-			Action.openSpaceTab(item.targetSpaceId, item.uxType);
+			Action.openSpaceTab(item.targetSpaceId, item.uxType, analytics.route.vault);
 			return;
 		};
 

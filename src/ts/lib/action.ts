@@ -1141,16 +1141,16 @@ class Action {
 		});
 	};
 
-	openSpaceTab (spaceId: string, uxType: I.SpaceUxType) {
-		const route = U.Router.build({ 
-			page: 'main', 
-			action: 'void', 
-			id: 'dashboard', 
+	openSpaceTab (spaceId: string, uxType: I.SpaceUxType, analyticsRoute?: string) {
+		const route = U.Router.build({
+			page: 'main',
+			action: 'void',
+			id: 'dashboard',
 			spaceId,
 		});
 
 		Renderer.send('openTab', { route }, { setActive: false });
-		analytics.event('AddTab', { route, uxType });
+		analytics.event('AddTab', { route: analyticsRoute, uxType });
 	};
 
 };
