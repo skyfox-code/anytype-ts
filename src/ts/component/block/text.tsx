@@ -601,10 +601,12 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 					let part = value.substring(filter.from, filter.from + d);
 
 					// Also include the word after cursor (for when @ is typed before existing text)
-					const textAfterCursor = value.substring(filter.from + d);
-					const wordMatch = textAfterCursor.match(/^([^\s\n]*)/);
-					if (wordMatch) {
-						part += wordMatch[1];
+					if (menuOpenMention) {
+						const textAfterCursor = value.substring(filter.from + d);
+						const wordMatch = textAfterCursor.match(/^([^\s\n]*)/);
+						if (wordMatch) {
+							part += wordMatch[1];
+						};
 					};
 
 					part = part.replace(/^\//, '');
