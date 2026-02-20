@@ -1,28 +1,15 @@
-import React, { forwardRef, useRef, useEffect } from 'react';
+import React, { forwardRef, useRef } from 'react';
 import { observer } from 'mobx-react';
 import { Title, Label, Icon, Button, IconObject, ObjectName } from 'Component';
 import { I, C, S, U, translate, Action, analytics, } from 'Lib';
-import { AutoSizer, WindowScroller, CellMeasurer, CellMeasurerCache, List } from 'react-virtualized';
-
-const HEIGHT = 64;
 
 const Members = observer(forwardRef<I.PageRef, I.PageSettingsComponent>((props, ref) => {
 
-	const { isPopup } = props;
 	const { space } = S.Common;
 	const spaceview = U.Space.getSpaceview();
 	const participant = U.Space.getParticipant();
 	const nodeRef = useRef(null);
-	const listRef = useRef(null);
-	const topRef = useRef(0);
 	const isOwner = U.Space.isMyOwner();
-	const cache = useRef(new CellMeasurerCache({ fixedWidth: true, defaultHeight: HEIGHT }));
-
-	const onScroll = ({ scrollTop }) => {
-		if (scrollTop) {
-			topRef.current = scrollTop;
-		};
-	};
 
 	const onUpgrade = (type: string) => {
 		Action.membershipUpgrade({ type, route: analytics.route.settingsSpaceShare });
@@ -140,10 +127,6 @@ const Members = observer(forwardRef<I.PageRef, I.PageSettingsComponent>((props, 
 		});
 	};
 
-	const resize = () => {
-		listRef.current?.recomputeRowHeights(0);
-	};
-
 	const members = getParticipantList();
 	const length = members.length;
 
@@ -160,7 +143,7 @@ const Members = observer(forwardRef<I.PageRef, I.PageSettingsComponent>((props, 
 	};
 
 	const Member = (item: any) => {
-		const { style, id, permissions, status, isActive, isDeclined, isRemoved, isJoining, globalName } = item;
+		const { id, permissions, status, isActive, isDeclined, isRemoved, isJoining, globalName } = item;
 		const isCurrent = id == participant?.id;
 
 		let button = null;
@@ -189,7 +172,7 @@ const Members = observer(forwardRef<I.PageRef, I.PageSettingsComponent>((props, 
 		};
 
 		return (
-			<div id={`item-${id}`} className={[ 'row', isJoining ? 'isNew' : '' ].join(' ')} style={style} >
+			<div id={`item-${id}`} className={[ 'row', isJoining ? 'isNew' : '' ].join(' ')}>
 				<div className="side left" onClick={e => U.Object.openEvent(e, item)}>
 					<IconObject size={48} object={item} />
 					<div className="text">
@@ -203,26 +186,6 @@ const Members = observer(forwardRef<I.PageRef, I.PageSettingsComponent>((props, 
 			</div>
 		);
 	};
-
-	const rowRenderer = (param: any) => {
-		const item: any = members[param.index];
-		return (
-			<CellMeasurer
-				key={param.key}
-				parent={param.parent}
-				cache={cache.current}
-				columnIndex={0}
-				rowIndex={param.index}
-				hasFixedWidth={() => {}}
-			>
-				<Member key={item.id} {...item} index={param.index} style={param.style} />
-			</CellMeasurer>
-		);
-	};
-
-	useEffect(() => {
-		resize();
-	}, [ length ]);
 
 	return (
 		<div
@@ -243,27 +206,9 @@ const Members = observer(forwardRef<I.PageRef, I.PageSettingsComponent>((props, 
 			) : ''}
 
 			<div id="list" className="rows">
-				<WindowScroller scrollElement={U.Common.getScrollContainer(isPopup).get(0)}>
-					{({ height, isScrolling, registerChild, scrollTop }) => (
-						<AutoSizer disableHeight={true} className="scrollArea">
-							{({ width }) => (
-								<List
-									ref={listRef}
-									autoHeight={true}
-									height={Number(height) || 0}
-									width={Number(width) || 0}
-									deferredMeasurmentCache={cache.current}
-									rowCount={length}
-									rowHeight={HEIGHT}
-									rowRenderer={rowRenderer}
-									onScroll={onScroll}
-									isScrolling={isScrolling}
-									scrollTop={scrollTop}
-								/>
-							)}
-						</AutoSizer>
-					)}
-				</WindowScroller>
+				{members.map((item: any) => (
+					<Member key={item.id} {...item} />
+				))}
 			</div>
 		</div>
 	);
