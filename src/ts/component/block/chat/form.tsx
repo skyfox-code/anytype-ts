@@ -1773,6 +1773,8 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 	}, []);
 
 	useEffect(() => {
+		editingId.current = '';
+		setReplyingId('');
 		init();
 	}, [ rootId ]);
 
