@@ -241,7 +241,14 @@ const ViewGallery = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref)
 		const items = getRows();
 		const length = items.length;
 
-		const estimatedRowSize = Math.max(J.Size.dataview.gallery.height, cardHeight);
+		let estimatedRowSize = cardHeight;
+		if (coverRelationKey && width) {
+			const cols = getColumnCount();
+			if (cols) {
+				estimatedRowSize += Math.round((width / cols) * 9 / 16);
+			};
+		};
+		estimatedRowSize = Math.max(J.Size.dataview.gallery.height, estimatedRowSize);
 
 		const rowRenderer = (param: any) => {
 			const item = items[param.index];
@@ -284,7 +291,7 @@ const ViewGallery = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref)
 								height={Number(height) || 0}
 								deferredMeasurementCache={cache.current}
 								rowCount={length}
-								rowHeight={param => Math.max(cache.current.rowHeight(param), cardHeight)}
+								rowHeight={param => cache.current.has(param.index, 0) ? cache.current.rowHeight(param) : estimatedRowSize}
 								estimatedRowSize={estimatedRowSize}
 								rowRenderer={rowRenderer}
 								overscanRowCount={10}
