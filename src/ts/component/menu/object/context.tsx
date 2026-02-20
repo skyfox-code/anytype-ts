@@ -50,7 +50,7 @@ const MenuObjectContext = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =>
 		let changeType = { id: 'changeType', icon: 'pencil', name: translate('blockFeaturedTypeMenuChangeType'), arrow: true };
 		let unlink = { id: 'unlink', icon: 'unlink', name: translate('menuObjectContextUnlinkFromCollection') };
 		let relation = { id: 'relation', icon: 'editRelation', name: translate('menuObjectContextEditRelations') };
-		let notification = { id: 'notification', icon: 'notification', name: translate('commonNotifications'), arrow: true };
+		let notification: any = { id: 'notification', icon: 'notification', name: translate('commonNotifications'), arrow: true };
 		let editChat = { id: 'editChat', name: translate('commonEditChat'), icon: 'editChat' };
 		let exportObject = { id: 'export', icon: 'export', name: translate('menuObjectExport') };
 		let newTab = { id: 'newTab', icon: 'newTab', name: translate('menuObjectOpenInNewTab') };
@@ -187,7 +187,19 @@ const MenuObjectContext = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =>
 		if (!allowedRelation)	 relation = null;
 		if (!allowedCollection)	 addCollection = null;
 		if (!allowedLink)		 pageLink = null;
-		if (!allowedNotification) notification = null;
+		if (!allowedNotification) {
+			notification = null;
+		} else
+		if (spaceview.isOneToOne || spaceview.isChat) {
+			const chatMode = (objectIds.length == 1) ? U.Object.getChatNotificationMode(spaceview, objectIds[0]) : I.NotificationMode.All;
+			const isMuted = chatMode != I.NotificationMode.All;
+
+			if (isMuted) {
+				notification = { id: 'unmute', name: translate('commonUnmute'), icon: 'unmute' };
+			} else {
+				notification = { id: 'mute', name: translate('commonMute'), icon: 'mute' };
+			};
+		};
 		if (!allowedEditChat)	 editChat = null;
 		if (!allowedExport)		 exportObject = null;
 		if (!allowedNewTab) {
@@ -479,6 +491,16 @@ const MenuObjectContext = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =>
 				} else {
 					U.Object.openWindows(objects, S.Auth.token);
 				};
+				break;
+			};
+
+			case 'mute':
+			case 'unmute': {
+				let mode = I.NotificationMode.All;
+				if (item.id == 'mute') {
+					mode = spaceview.isOneToOne ? I.NotificationMode.Nothing : I.NotificationMode.Mentions;
+				};
+				Action.setChatNotificationMode(space, objectIds, mode, route);
 				break;
 			};
 

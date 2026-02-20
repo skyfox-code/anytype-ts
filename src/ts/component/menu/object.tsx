@@ -75,7 +75,7 @@ const MenuObject = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		let advanced = { id: 'advanced', icon: 'advanced', name: translate('menuObjectAdvanced'), children:[], arrow: true };
 		let editType = { id: 'editType', name: translate('commonEditType'), icon: 'editType' };
 		let editChat = { id: 'editChat', name: translate('commonEditChat'), icon: 'editChat' };
-		let notification = { id: 'notification', name: translate('commonNotifications'), icon: 'notification', arrow: true };
+		let notification: any = { id: 'notification', name: translate('commonNotifications'), icon: 'notification', arrow: true };
 		let copyMedia = { id: 'copyMedia', name: translate('commonCopyMedia'), icon: 'copy' };
 		let sections = [];
 
@@ -160,7 +160,19 @@ const MenuObject = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		if (!allowedOpenObject)		 openObject = null;
 		if (!allowedEditType) 		 editType = null;
 		if (!allowedEditChat) 		 editChat = null;
-		if (!allowedNotification) 	 notification = null;
+		if (!allowedNotification) {
+			notification = null;
+		} else
+		if (spaceview.isOneToOne || spaceview.isChat) {
+			const chatMode = U.Object.getChatNotificationMode(spaceview, object.id);
+			const isMuted = chatMode != I.NotificationMode.All;
+
+			if (isMuted) {
+				notification = { id: 'unmute', name: translate('commonUnmute'), icon: 'unmute' };
+			} else {
+				notification = { id: 'mute', name: translate('commonMute'), icon: 'mute' };
+			};
+		};
 		if (!allowedCopyMedia)		 copyMedia = null;
 		if (!canWrite) {
 			template = null;
@@ -514,6 +526,16 @@ const MenuObject = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 						details: object,
 					},
 				}, route);
+				break;
+			};
+
+			case 'mute':
+			case 'unmute': {
+				let mode = I.NotificationMode.All;
+				if (item.id == 'mute') {
+					mode = spaceview.isOneToOne ? I.NotificationMode.Nothing : I.NotificationMode.Mentions;
+				};
+				Action.setChatNotificationMode(space, [ object.id ], mode, route);
 				break;
 			};
 		};

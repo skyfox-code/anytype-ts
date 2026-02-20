@@ -1733,14 +1733,20 @@ class UtilMenu {
 		].map(it => ({ ...it, name: translate(`spaceUxType${it.id}`) }));
 	};
 
-	notificationModeOptions (): I.Option[] {
+	notificationModeOptions (forSettings?: boolean): I.Option[] {
 		const spaceview = U.Space.getSpaceview();
 
 		let ret = [
 			{ id: I.NotificationMode.All },
 			{ id: I.NotificationMode.Mentions },
 			{ id: I.NotificationMode.Nothing },
-		].map(it => ({ ...it, name: translate(`notificationMode${it.id}`) }));
+		].map(it => {
+			let name = translate(`notificationMode${it.id}`);
+			if (forSettings && (it.id == I.NotificationMode.Nothing)) {
+				name = translate('notificationModeDisabled');
+			};
+			return { ...it, name };
+		});
 
 		if (spaceview.isOneToOne) {
 			ret = ret.filter(it => it.id != I.NotificationMode.Mentions);

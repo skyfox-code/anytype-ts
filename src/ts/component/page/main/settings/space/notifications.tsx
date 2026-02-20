@@ -16,7 +16,7 @@ const PageMainSettingsNotifications = observer(forwardRef<I.PageRef, I.PageSetti
 	const chatsRef = useRef([]);
 	const prevIds = useRef([]);
 	const [ dummy, setDummy ] = useState(0);
-	const notificationOptions = U.Menu.notificationModeOptions();
+	const notificationOptions = U.Menu.notificationModeOptions(true);
 
 	const load = () => {
 		const ids = [ ...allIds, ...mentionIds, ...muteIds ];
@@ -47,7 +47,7 @@ const PageMainSettingsNotifications = observer(forwardRef<I.PageRef, I.PageSetti
 	};
 
 	const onChatModeClick = (el: any) => {
-		const options: any[] = (U.Menu.notificationModeOptions() as any[]).concat([
+		const options: any[] = (U.Menu.notificationModeOptions(true) as any[]).concat([
 			{ isDiv: true },
 			{ id: 'reset', name: translate(`commonReset`) },
 		]);
