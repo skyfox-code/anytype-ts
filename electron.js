@@ -47,7 +47,13 @@ app.commandLine.appendSwitch('gtk-version', '3');
 app.commandLine.appendSwitch('js-flags', '--max-old-space-size=4096');
 
 if (Util.isWayland()) {
-	app.commandLine.appendSwitch('ozone-platform-hint', 'auto');
+	if (Util.isKDE()) {
+		// Force XWayland on KDE Plasma to fix global menu DBus integration
+		// Chromium's GlobalMenuBarX11 only works under X11, not native Wayland
+		app.commandLine.appendSwitch('ozone-platform', 'x11');
+	} else {
+		app.commandLine.appendSwitch('ozone-platform-hint', 'auto');
+	};
 };
 
 // GPU/Hardware acceleration settings

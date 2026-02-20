@@ -362,6 +362,11 @@ class Util {
 		return is.linux && (process.env.XDG_SESSION_TYPE === 'wayland');
 	};
 
+	isKDE () {
+		const desktop = (process.env.XDG_CURRENT_DESKTOP || '').toLowerCase();
+		return desktop.split(':').includes('kde');
+	};
+
 	getCss () {
 		const cssPath = path.join(this.userPath(), 'custom.css');
 		const css = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, 'utf8') : '';

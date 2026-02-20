@@ -211,7 +211,8 @@ class Api {
 	};
 
 	setBackground (win, theme) {
-		const bgColor = Util.isWayland() ? '#00000000' : Util.getBgColor(theme);
+		const useTransparent = Util.isWayland() && !Util.isKDE();
+		const bgColor = useTransparent ? '#00000000' : Util.getBgColor(theme);
 
 		BrowserWindow.getAllWindows().forEach(win => win && !win.isDestroyed() && win.setBackgroundColor(bgColor));
 	};
