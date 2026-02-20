@@ -1,5 +1,5 @@
 import React, { forwardRef, useRef, useState } from 'react';
-import { Title, Label, Select, Button, Error } from 'Component';
+import { Title, Label, Select, Switch, Button, Error } from 'Component';
 import { I, S, U, translate, Action, analytics, Renderer, Preview } from 'Lib';
 import { observer } from 'mobx-react';
 
@@ -204,6 +204,23 @@ const PopupSettingsOnboarding = observer(forwardRef<{}, I.Popup>((props, ref) =>
 							<Button className="c28" text={translate('commonChange')} onClick={onChangeStorage} />
 							{!isDefault ? <Button className="c28" text={translate('commonReset')} onClick={onResetStorage} /> : ''}
 						</div>
+					</div>
+
+					<div className="item">
+						<div>
+							<Label text={translate('popupSettingsPersonalAnalyticsDeviceId')} />
+							<Label className="small" text={translate('popupSettingsPersonalAnalyticsDeviceIdDescription')} />
+						</div>
+						<Switch
+							className="big"
+							value={S.Common.analyticsDeviceId}
+							onChange={(e: any, v: boolean) => {
+								S.Common.analyticsDeviceIdSet(v);
+								if (!v) {
+									analytics.clearAmplitudeStorage();
+								};
+							}}
+						/>
 					</div>
 				</div>
 

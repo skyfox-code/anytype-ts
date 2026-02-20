@@ -137,8 +137,7 @@ class Analytics {
 		const platform = U.Common.getPlatform();
 		const hasDefaultPath = electron.userPath() == electron.defaultPath();
 
-		this.instance = amplitude.getInstance();
-		this.instance.init(J.Constant.amplitude, null, Object.assign({
+		const initOptions: any = {
 			apiEndpoint: URL,
 			batchEvents: true,
 			saveEvents: true,
@@ -148,7 +147,15 @@ class Analytics {
 			trackingOptions: {
 				ipAddress: false,
 			},
-		}, options || {}));
+		};
+
+		if (!S.Common.analyticsDeviceId) {
+			initOptions.storage = 'none';
+			initOptions.saveEvents = false;
+		};
+
+		this.instance = amplitude.getInstance();
+		this.instance.init(J.Constant.amplitude, null, Object.assign(initOptions, options || {}));
 
 		const props: any = { 
 			deviceType: 'Desktop',
@@ -899,6 +906,17 @@ class Analytics {
 		args.splice(1, 0, 'font-weight: bold; color: #cc4506;');
 
 		console.log.apply(this, args);
+	};
+
+	clearAmplitudeStorage () {
+		const keys = [];
+		for (let i = 0; i < localStorage.length; i++) {
+			const key = localStorage.key(i);
+			if (key && (key.startsWith('amplitude_') || key.startsWith('amp_'))) {
+				keys.push(key);
+			};
+		};
+		keys.forEach(key => localStorage.removeItem(key));
 	};
 
 };
