@@ -356,7 +356,7 @@ const App: FC = () => {
 				U.Data.onAuthOnce();
 
 				const param = route ? U.Router.getParam(route) : {};
-				const spaceId = param.spaceId || Storage.get('spaceId');
+				const spaceId = param.spaceId || data.spaceId || Storage.get('spaceId');
 
 				if (spaceId) {
 					U.Router.switchSpace(spaceId, '', false, routeParam, true);

@@ -54,6 +54,7 @@ class Api {
 			isDark: Util.isDarkTheme(),
 			isChild: win.isChild,
 			route,
+			spaceId: tab?.data?.spaceId || '',
 			isPinChecked: this.isPinChecked,
 			isPinned: tab?.data?.isPinned || false,
 			languages: win.webContents.session.availableSpellCheckerLanguages,
