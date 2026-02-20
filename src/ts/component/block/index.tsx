@@ -73,9 +73,7 @@ const Block = observer(forwardRef<Ref, Props>((props, ref) => {
 		const selection = S.Common.getRef('selectionProvider');
 		const ids = selection?.get(I.SelectType.Block, false) || [];
 
-		if (!ids.length) {
-			ids.push(block.id);
-		};
+		ids.push(block.id);
 
 		const toggles = S.Block.getBlocks(rootId).filter(it => ids.includes(it.id) && it.canToggle());
 
