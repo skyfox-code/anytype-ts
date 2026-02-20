@@ -241,15 +241,6 @@ const ViewGallery = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref)
 		const items = getRows();
 		const length = items.length;
 
-		let estimatedRowSize = cardHeight;
-		if (coverRelationKey && width) {
-			const cols = getColumnCount();
-			if (cols) {
-				estimatedRowSize += Math.round((width / cols) * 9 / 16);
-			};
-		};
-		estimatedRowSize = Math.max(J.Size.dataview.gallery.height, estimatedRowSize);
-
 		const rowRenderer = (param: any) => {
 			const item = items[param.index];
 			const style = { ...param.style, gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` };
@@ -263,9 +254,9 @@ const ViewGallery = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref)
 					rowIndex={param.index}
 				>
 					{({ registerChild, measure }) => (
-						<div 
-							ref={registerChild} 
-							key={`gallery-row-${view.id + param.index}`} 
+						<div
+							ref={registerChild}
+							key={`gallery-row-${view.id + param.index}`}
 							className="row" style={style}
 						>
 							{item.children.map(id => cardItem(id))}
@@ -276,7 +267,7 @@ const ViewGallery = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref)
 		};
 
 		content = (
-			<WindowScroller 
+			<WindowScroller
 				scrollElement={U.Common.getScrollContainer(isPopup).get(0)}
 				onScroll={onScroll}
 				scrollTop={topRef.current}
@@ -291,10 +282,9 @@ const ViewGallery = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref)
 								height={Number(height) || 0}
 								deferredMeasurementCache={cache.current}
 								rowCount={length}
-								rowHeight={param => cache.current.has(param.index, 0) ? cache.current.rowHeight(param) : estimatedRowSize}
-								estimatedRowSize={estimatedRowSize}
+								rowHeight={param => Math.max(cache.current.rowHeight(param), cardHeight)}
 								rowRenderer={rowRenderer}
-								overscanRowCount={10}
+								overscanRowCount={length}
 								scrollToAlignment="start"
 							/>
 						)}
