@@ -390,6 +390,19 @@ class Keyboard {
 				U.Object.copyLink(object, space, 'deeplink', route);
 			});
 
+			// Copy object link when nothing is selected
+			this.shortcut(`${cmd}+c`, e, () => {
+				const tag = (document.activeElement?.tagName || '').toLowerCase();
+				if (['input', 'textarea'].includes(tag)) {
+					return;
+				};
+
+				if (!this.checkSelection()) {
+					e.preventDefault();
+					U.Object.copyLink(object, space, 'web', route);
+				};
+			});
+
 			// Settings
 			this.shortcut('settingsSpace', e, () => {
 				e.preventDefault();

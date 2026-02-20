@@ -1896,8 +1896,6 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			return;
 		};
 
-		e.preventDefault();
-
 		if (!ids.length) {
 			if (range.from != range.to) {
 				ids = [ focused ];
@@ -1905,6 +1903,12 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		} else {
 			ids = ids.concat(S.Block.getLayoutIds(rootId, ids));
 		};
+
+		if (!ids.length) {
+			return;
+		};
+
+		e.preventDefault();
 
 		if (isCut && (ids.length == 1) && (ids[0] == focused)) {
 			focusSet(focused, range.from, range.to, false);
