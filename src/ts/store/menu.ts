@@ -128,7 +128,8 @@ class MenuStore {
 		if (!id) {
 			let length = 0;
 			if (filter) {
-				length = this.menuList.filter(it => filter ? !filter.includes(it.id) && !filter.includes(it.param.component) : true).length;
+				const filterSet = new Set(filter);
+				length = this.menuList.filter(it => !filterSet.has(it.id) && !filterSet.has(it.param.component)).length;
 			} else {
 				length = this.menuList.length;
 			};

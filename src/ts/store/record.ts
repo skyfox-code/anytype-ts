@@ -197,14 +197,8 @@ class RecordStore {
 	viewsSort (rootId: string, blockId: string, ids: string[]) {
 		const views = this.getViews(rootId, blockId);
 
-		views.sort((c1: any, c2: any) => {
-			const i1 = ids.indexOf(c1.id);
-			const i2 = ids.indexOf(c2.id);
-
-			if (i1 > i2) return 1; 
-			if (i1 < i2) return -1;
-			return 0;
-		});
+		const orderMap = new Map(ids.map((id, i) => [id, i]));
+		views.sort((c1: any, c2: any) => (orderMap.get(c1.id) ?? Infinity) - (orderMap.get(c2.id) ?? Infinity));
 
 		this.viewsSet(rootId, blockId, views);
 	};
@@ -358,8 +352,9 @@ class RecordStore {
 	groupsAdd (rootId: string, blockId: string, groups: any[]) {
 		const list = this.getGroups(rootId, blockId);
 
+		const existingIds = new Set(list.map(it => it.id));
 		for (const group of groups) {
-			if (list.find(it => it.id == group.id)) {
+			if (existingIds.has(group.id)) {
 				continue;
 			};
 			list.push(group);
@@ -382,7 +377,8 @@ class RecordStore {
 			this.recordsClear(subId, '');
 		});
 
-		this.groupsSet(rootId, blockId, groups.filter(it => !ids.includes(it.id)));
+		const idsSet = new Set(ids);
+		this.groupsSet(rootId, blockId, groups.filter(it => !idsSet.has(it.id)));
 	};
 
 	/**

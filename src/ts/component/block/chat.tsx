@@ -329,15 +329,17 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 	const getSections = () => {
 		const sections = [];
 
+		const sectionMap = new Map();
 		messages.forEach(item => {
 			const key = U.Date.dateWithFormat(I.DateFormat.ShortUS, item.createdAt);
-			const section = sections.find(it => it.key == key);
+			let section = sectionMap.get(key);
 
 			if (!section) {
-				sections.push({ createdAt: item.createdAt, key, isSection: true, list: [ item ] });
-			} else {
-				section.list.push(item);
+				section = { createdAt: item.createdAt, key, isSection: true, list: [] };
+				sectionMap.set(key, section);
+				sections.push(section);
 			};
+			section.list.push(item);
 		});
 
 		// Message groups by author/time
