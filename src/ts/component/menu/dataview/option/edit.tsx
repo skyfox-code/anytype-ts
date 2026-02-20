@@ -1,7 +1,7 @@
 import React, { forwardRef, useRef, useEffect, useState, useImperativeHandle } from 'react';
 import $ from 'jquery';
 import { observer } from 'mobx-react';
-import { I, S, C, U, Relation, translate, keyboard } from 'Lib';
+import { I, S, C, U, J, Relation, translate, keyboard } from 'Lib';
 import { Filter, MenuItemVertical } from 'Component';
 
 const MenuOptionEdit = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
@@ -154,7 +154,14 @@ const MenuOptionEdit = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 			relationKey,
 			name: value,
 			relationOptionColor: getColor(),
-		}, S.Common.space);
+		}, S.Common.space, (message: any) => {
+			if (message.error.code || !message.details) {
+				return;
+			};
+
+			const globalSubId = U.Subscription.spaceSubId(J.Constant.subId.option);
+			S.Detail.update(globalSubId, { id: message.objectId, details: message.details }, false);
+		});
 
 		close();
 	};

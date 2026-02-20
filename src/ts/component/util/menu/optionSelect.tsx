@@ -374,6 +374,13 @@ const OptionSelect = observer(forwardRef<OptionSelectRefProps, Props>((props, re
 
 			const newOptionId = message.objectId;
 
+			// Ensure option details are available in the global option subscription store
+			// so that S.Record.getOption() can find them immediately
+			if (message.details) {
+				const globalSubId = U.Subscription.spaceSubId(J.Constant.subId.option);
+				S.Detail.update(globalSubId, { id: newOptionId, details: message.details }, false);
+			};
+
 			filterRef.current?.setValue('');
 			setFilter('');
 
@@ -383,13 +390,13 @@ const OptionSelect = observer(forwardRef<OptionSelectRefProps, Props>((props, re
 
 			if (maxCount) {
 				newValue = newValue.slice(newValue.length - maxCount, newValue.length);
-
-				if (maxCount == 1) {
-					onClose?.();
-				};
 			};
 
 			onChange(newValue);
+
+			if (maxCount == 1) {
+				onClose?.();
+			};
 
 			// Restore hover state on newly created option
 			window.setTimeout(() => {
