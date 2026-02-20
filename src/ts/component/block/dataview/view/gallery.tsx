@@ -241,14 +241,7 @@ const ViewGallery = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref)
 		const items = getRows();
 		const length = items.length;
 
-		let estimatedRowSize = cardHeight;
-		if (coverRelationKey && width) {
-			const cols = getColumnCount();
-			if (cols) {
-				estimatedRowSize += Math.round((width / cols) * 9 / 16);
-			};
-		};
-		estimatedRowSize = Math.max(J.Size.dataview.gallery.height, estimatedRowSize);
+		const estimatedRowSize = Math.max(J.Size.dataview.gallery.height, cardHeight);
 
 		const rowRenderer = (param: any) => {
 			const item = items[param.index];
