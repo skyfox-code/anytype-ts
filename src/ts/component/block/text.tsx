@@ -57,6 +57,7 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	const preventMenu = useRef(false);
 	const clickCnt = useRef(0);
 	const prevStyleRef = useRef(style);
+	const phantomNewlineRef = useRef(false);
 
 	useEffect(() => {
 		setValue(text);
@@ -164,8 +165,10 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		// Add extra <br/> at end for code blocks to ensure trailing newlines are visible
 		// (contenteditable collapses a single trailing <br/>)
 		// Only add when focused to avoid extra line when blurred
+		phantomNewlineRef.current = false;
 		if (block.isTextCode() && text.endsWith('\n') && (focused == block.id)) {
 			html += '<br/>';
+			phantomNewlineRef.current = true;
 		};
 
 		editableRef.current?.setValue(html);
@@ -212,7 +215,16 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	};
 
 	const getTextValue = (): string => {
-		return String(editableRef.current?.getTextValue() || '');
+		let value = String(editableRef.current?.getTextValue() || '');
+
+		// Strip phantom trailing newline: setValue() adds an extra <br/> after
+		// trailing newlines in code blocks so they remain visible in contenteditable.
+		// innerText includes that phantom <br/> as a real \n, so strip it here.
+		if (phantomNewlineRef.current && value.endsWith('\n')) {
+			value = value.slice(0, -1);
+		};
+
+		return value;
 	};
 
 	const getHtmlValue = (): string => {
