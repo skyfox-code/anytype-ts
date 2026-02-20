@@ -136,11 +136,12 @@ a { color: var(--color-text-primary); }
 .diffChange::after { background-color: var(--color-shape-highlight-change); }
 .diffRemove::after { background-color: var(--color-shape-highlight-remove); }
 
-.isSelectionSelected { position: relative; }
+.isSelectionSelected, .isKeyboardFocused { position: relative; }
 
-.selectionTarget.isSelectionSelected::after, 
-.block.isSelectionSelected > .wrapContent > .selectionTarget::after 
-{ 
+.selectionTarget.isSelectionSelected::after,
+.block.isSelectionSelected > .wrapContent > .selectionTarget::after,
+.selectionTarget.isKeyboardFocused::after
+{
 	display: block; position: absolute; left: -2px; top: 0px; width: calc(100% + 4px); height: 100%; background-color: var(--color-system-selection);
 	pointer-events: none; z-index: 10; content: ""; border-radius: 2px;
 }

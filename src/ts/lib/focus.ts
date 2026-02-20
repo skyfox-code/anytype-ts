@@ -92,9 +92,14 @@ class Focus {
 			keyboard.setFocus(false);
 		};
 
+		// Clear selection overlay for non-text blocks
+		if (focused) {
+			$(`#selectionTarget-${U.Common.esc(focused)}`).removeClass('isKeyboardFocused');
+		};
+
 		$('.focusable.isFocused').removeClass('isFocused');
 	};
-	
+
 	/**
 	 * Applies the current focus state to the DOM.
 	 * @returns {Focus} The Focus instance.
@@ -106,6 +111,7 @@ class Focus {
 		};
 
 		$('.focusable.isFocused').removeClass('isFocused');
+		$('.selectionTarget.isKeyboardFocused').removeClass('isKeyboardFocused');
 
 		const node = $(`.focusable.c${U.Common.esc(focused)}`);
 		if (!node.length) {
@@ -116,6 +122,13 @@ class Focus {
 
 		const el = node.get(0);
 		el.focus({ preventScroll: true });
+
+		// Show selection overlay for non-text blocks.
+		// Must be after el.focus() because the previous text block's
+		// blur handler calls focus.clear() which would remove the class.
+		if (!node.hasClass('value')) {
+			$(`#selectionTarget-${U.Common.esc(focused)}`).addClass('isKeyboardFocused');
+		};
 
 		if (node.hasClass('input')) {
 			window.setTimeout(() => {

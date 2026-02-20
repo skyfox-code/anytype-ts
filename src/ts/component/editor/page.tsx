@@ -733,11 +733,10 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		const selection = S.Common.getRef('selectionProvider');
 		const block = S.Block.getLeaf(rootId, focused);
 
-		if (!block || !keyboard.isFocused) {
+		if (!block) {
 			return;
 		};
 
-		const readonly = isReadonly();
 		const styleParam = getStyleParam();
 		const cmd = keyboard.cmdKey();
 
