@@ -93,7 +93,7 @@ const ViewGallery = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref)
 		if (ids.length) {
 			selection?.renderSelection();
 		};
-	});
+	}, [ records ]);
 
 	const getColumnCount = () => {
 		const { margin, card } = J.Size.dataview.gallery;
@@ -284,7 +284,7 @@ const ViewGallery = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref)
 								rowCount={length}
 								rowHeight={param => Math.max(cache.current.rowHeight(param), cardHeight)}
 								rowRenderer={rowRenderer}
-								overscanRowCount={length}
+								overscanRowCount={10}
 								scrollToAlignment="start"
 							/>
 						)}

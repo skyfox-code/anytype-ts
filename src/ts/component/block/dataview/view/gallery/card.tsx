@@ -1,5 +1,4 @@
 import React, { forwardRef, useRef, useState, useEffect, useImperativeHandle, memo, MouseEvent } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import $ from 'jquery';
 import { observer } from 'mobx-react';
 import { Cell, DropTarget, SelectionTarget, ObjectCover, Icon } from 'Component';
@@ -145,30 +144,25 @@ const GalleryCard = observer(forwardRef<I.RowRef, Props>((props, ref) => {
 
 	useEffect(() => {
 		resize();
-	});
+	}, [ relations.length ]);
 
 	useImperativeHandle(ref, () => ({
 		setIsEditing,
 	}));
 
 	return (
-		<AnimatePresence mode="popLayout">
-			<motion.div
-				id={`record-${record.id}`}
-				ref={nodeRef}
-				className={cn.join(' ')} 
-				style={style}
-				draggable={!isInline}
-				onClick={onClick}
-				onContextMenu={(e: any) => onContext(e, record.id)}
-				onDragStart={onDragStart}
-				{...U.Common.animationProps({
-					transition: { duration: 0.2, delay: 0.1 },
-				})}
-			>
-				{content}
-			</motion.div>
-		</AnimatePresence>
+		<div
+			id={`record-${record.id}`}
+			ref={nodeRef}
+			className={cn.join(' ')}
+			style={style}
+			draggable={!isInline}
+			onClick={onClick}
+			onContextMenu={(e: any) => onContext(e, record.id)}
+			onDragStart={onDragStart}
+		>
+			{content}
+		</div>
 	);
 
 }));
