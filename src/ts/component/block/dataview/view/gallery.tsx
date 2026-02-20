@@ -138,13 +138,6 @@ const ViewGallery = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref)
 
 		let ret = padding * 2 + margin - 4;
 
-		if (coverRelationKey && width) {
-			const cols = getColumnCount();
-			if (cols) {
-				ret += Math.round((width / cols) * 9 / 16);
-			};
-		};
-
 		relations.forEach((it: any) => {
 			if (it.relationKey == 'name') {
 				ret += 24;
@@ -248,6 +241,15 @@ const ViewGallery = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref)
 		const items = getRows();
 		const length = items.length;
 
+		let estimatedRowSize = cardHeight;
+		if (coverRelationKey && width) {
+			const cols = getColumnCount();
+			if (cols) {
+				estimatedRowSize += Math.round((width / cols) * 9 / 16);
+			};
+		};
+		estimatedRowSize = Math.max(J.Size.dataview.gallery.height, estimatedRowSize);
+
 		const rowRenderer = (param: any) => {
 			const item = items[param.index];
 			const style = { ...param.style, gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` };
@@ -289,7 +291,8 @@ const ViewGallery = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref)
 								height={Number(height) || 0}
 								deferredMeasurementCache={cache.current}
 								rowCount={length}
-								rowHeight={param => cache.current.has(param.index, 0) ? cache.current.rowHeight(param) : cardHeight}
+								rowHeight={param => Math.max(cache.current.rowHeight(param), cardHeight)}
+								estimatedRowSize={estimatedRowSize}
 								rowRenderer={rowRenderer}
 								overscanRowCount={10}
 								scrollToAlignment="start"
