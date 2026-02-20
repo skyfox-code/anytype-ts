@@ -2367,9 +2367,8 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			mode = I.BlockSplitMode.Top;
 		};
 
-		if ((isCallout || isQuote) && !isShift) {
-			mode = I.BlockSplitMode.Inner;
-			style = I.TextStyle.Paragraph;
+		if (isCallout || isQuote) {
+			style = content.style;
 		};
 
 		C.BlockSplit(rootId, focused.id, range, style, mode, (message: any) => {
