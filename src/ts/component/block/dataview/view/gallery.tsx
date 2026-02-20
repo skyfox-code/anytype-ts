@@ -289,7 +289,7 @@ const ViewGallery = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref)
 								height={Number(height) || 0}
 								deferredMeasurementCache={cache.current}
 								rowCount={length}
-								rowHeight={param => Math.max(cache.current.rowHeight(param), cardHeight)}
+								rowHeight={param => cache.current.has(param.index, 0) ? cache.current.rowHeight(param) : cardHeight}
 								rowRenderer={rowRenderer}
 								overscanRowCount={10}
 								scrollToAlignment="start"
