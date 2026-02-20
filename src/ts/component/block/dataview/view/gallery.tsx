@@ -138,6 +138,13 @@ const ViewGallery = observer(forwardRef<I.ViewRef, I.ViewComponent>((props, ref)
 
 		let ret = padding * 2 + margin - 4;
 
+		if (coverRelationKey && width) {
+			const cols = getColumnCount();
+			if (cols) {
+				ret += Math.round((width / cols) * 9 / 16);
+			};
+		};
+
 		relations.forEach((it: any) => {
 			if (it.relationKey == 'name') {
 				ret += 24;
