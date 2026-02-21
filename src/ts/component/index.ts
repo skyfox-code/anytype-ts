@@ -74,6 +74,7 @@ import EditorControls from './page/elements/head/controls';
 import Pager from './util/pager';
 import Dimmer from './util/dimmer';
 import Error from './util/error';
+import ErrorBoundary from './util/errorBoundary';
 import Toast from './util/toast';
 import Marker from './util/marker';
 import Sync from './util/sync';
@@ -178,6 +179,7 @@ export {
 	Title,
 	Label,
 	Error,
+	ErrorBoundary,
 	Notification,
 	Banner,
 	UpdateBanner,
