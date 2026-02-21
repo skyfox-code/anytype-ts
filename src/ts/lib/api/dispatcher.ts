@@ -938,8 +938,8 @@ class Dispatcher {
 					if (!windowIsFocused && S.Common.isActiveTab) {
 						Renderer.send('notification', {
 							id: item.id,
-							title: item.title,
-							text: item.text,
+							title: U.String.stripTags(item.title),
+							text: U.String.stripTags(item.text),
 						});
 					};
 					break;
