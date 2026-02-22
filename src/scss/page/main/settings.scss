@@ -615,7 +615,7 @@
 
             .rows { flex-grow: 1; }
 
-            .row { border-bottom: 0px solid; padding: 0; display: grid; grid-template-columns: 1fr 120px; }
+            .row { border-bottom: 0px solid; padding: 8px 0px; display: grid; grid-template-columns: 1fr 120px; }
             .row.payment { grid-template-columns: 1fr auto; @include text-small; margin: 0px 0px 14px 0px; }
 
             .row {

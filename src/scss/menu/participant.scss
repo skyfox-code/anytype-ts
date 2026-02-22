@@ -5,6 +5,19 @@
 	.menu.menuParticipant {
 		.content { display: flex; flex-direction: column; align-items: center; padding: 0px 24px 24px 24px; gap: 4px 0px; }
 
+		.iconWrapper { position: relative; width: 128px; height: 128px; }
+		.iconWrapper {
+			.loaderWrapper {
+				position: absolute; left: 0px; top: 0px; width: 128px; height: 128px; border-radius: 100%;
+				background: var(--color-shape-tertiary);
+			}
+			.iconObject { position: relative; z-index: 1; }
+
+			&.isLoaded {
+				.loaderWrapper { display: none; }
+			}
+		}
+
 		.head { padding: 16px 0px 12px 0px; }
 		.head {
 			.label { 
