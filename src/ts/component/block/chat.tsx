@@ -299,13 +299,29 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 			return;
 		};
 
-		U.Subscription.subscribeIds({
-			subId: getSubId(),
-			ids,
+		const subId = getSubId();
+		const depsSubId = `${subId}-deps`;
+		const keys = U.Subscription.chatRelationKeys();
+
+		U.Subscription.subscribe({
+			subId: depsSubId,
+			filters: [
+				{ relationKey: 'id', condition: I.FilterCondition.In, value: ids },
+			],
+			keys,
 			noDeps: true,
-			keys: U.Subscription.chatRelationKeys(),
-			updateDetails: true,
-		}, callBack);
+			crossSpace: true,
+		}, (message: any) => {
+			if (!message.error.code) {
+				const records = (message.records || []).concat(message.dependencies || []);
+
+				for (const record of records) {
+					S.Detail.update(subId, { id: record.id, details: record }, true);
+				};
+			};
+
+			callBack?.();
+		});
 	};
 
 	const loadReplies = (ids: string[], callBack?: () => void) => {
