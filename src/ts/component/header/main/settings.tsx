@@ -14,7 +14,7 @@ const HeaderMainSettings = observer(forwardRef<{}, I.HeaderComponent>((props, re
 	const globalName = Relation.getStringValue(participant?.globalName);
 	const space = U.Space.getSpaceview();
 	const isOwner = U.Space.isMyOwner();
-	const showTransfer = U.Space.canTransferOwnership();
+	const showTransfer = (id == 'spaceIndex') && U.Space.canTransferOwnership();
 
 	const init = () => {
 		if (space.isShared && (!invite.cid || !invite.key)) {
