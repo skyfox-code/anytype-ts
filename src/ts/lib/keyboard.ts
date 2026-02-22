@@ -2120,6 +2120,9 @@ class Keyboard {
 		if (vaultIsMinimal) {
 			cn.push('vaultIsMinimal');
 		};
+		if (!config.showMenuBar) {
+			cn.push('noMenuBar');
+		};
 
 		$('html').attr({ class: cn.join(' ') });
 	};
