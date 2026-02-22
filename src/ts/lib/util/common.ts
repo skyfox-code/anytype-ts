@@ -1374,11 +1374,12 @@ class UtilCommon {
 		return ret;
 	};
 
-	getLinkParamFromUrl (url: string): { route: string; target: string; spaceId: string; isInside: boolean; } {
+	getLinkParamFromUrl (url: string): { route: string; target: string; spaceId: string; messageId: string; isInside: boolean; } {
 		const ret = {
 			route: '',
 			target: '',
 			spaceId: '',
+			messageId: '',
 			isInside: U.String.urlScheme(url) == J.Constant.protocol,
 		};
 
@@ -1391,11 +1392,13 @@ class UtilCommon {
 
 				ret.target = searchParam.objectId;
 				ret.spaceId = searchParam.spaceId;
+				ret.messageId = searchParam.messageId;
 			} else {
 				const routeParam = U.Router.getParam(ret.route);
 
 				ret.target = routeParam.id;
 				ret.spaceId = routeParam.spaceId;
+				ret.messageId = routeParam.messageId;
 			};
 		} else {
 			ret.target = url;

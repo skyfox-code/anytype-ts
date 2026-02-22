@@ -440,11 +440,14 @@ const Block = observer(forwardRef<Ref, Props>((props, ref) => {
 
 				const item = $(e.currentTarget);
 				const url = String(item.attr('href') || '');
-				const { isInside, target, spaceId } = U.Common.getLinkParamFromUrl(url);
+				const { isInside, target, spaceId, messageId } = U.Common.getLinkParamFromUrl(url);
 
 				const openObject = (id: string, spaceId: string) => {
 					const cb = (object) => {
 						if (object) {
+							if (messageId) {
+								object = { ...object, _routeParam_: { messageId } };
+							};
 							U.Object.openEvent(e, object);
 						};
 					};
