@@ -862,11 +862,18 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 		const { isInside, target, spaceId } = U.Common.getLinkParamFromUrl(url);
 
 		if (isInside) {
-			U.Object.getById(target, { spaceId }, object => {
-				if (object) {
-					addAttachments([ object ]);
-				};
-			});
+			if (spaceId && (spaceId != S.Common.space)) {
+				// Cross-space: create temp bookmark so a local object is created on send
+				U.Object.getById(target, { spaceId }, object => {
+					add({ title: object ? object.name : '', description: object ? object.description : '', url });
+				});
+			} else {
+				U.Object.getById(target, { spaceId }, object => {
+					if (object) {
+						addAttachments([ object ]);
+					};
+				});
+			};
 		} else {
 			isLoading.current.push(url);
 
@@ -1029,7 +1036,15 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 
 			let n = 0;
 			for (const item of bookmarks) {
-				C.ObjectCreateBookmark({ source: item.source, createdInContext: rootId, createdInContextRef: '' }, S.Common.space, bookmark.defaultTemplateId, (message: any) => {
+				const details: any = { source: item.source, createdInContext: rootId, createdInContextRef: '' };
+				if (item.name) {
+					details.name = item.name;
+				};
+				if (item.description) {
+					details.description = item.description;
+				};
+
+				C.ObjectCreateBookmark(details, S.Common.space, bookmark.defaultTemplateId, (message: any) => {
 					n++;
 
 					if (message.objectId) {
