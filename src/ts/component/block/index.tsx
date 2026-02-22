@@ -443,6 +443,17 @@ const Block = observer(forwardRef<Ref, Props>((props, ref) => {
 				const { isInside, target, spaceId, messageId } = U.Common.getLinkParamFromUrl(url);
 
 				const openObject = (id: string, spaceId: string) => {
+					// Cross-space: delegate to PageMainObject which handles space switching before resolution
+					if (spaceId && (spaceId != S.Common.space)) {
+						const param: any = { page: 'main', action: 'object', id, spaceId };
+						if (messageId) {
+							param.messageId = messageId;
+						};
+						U.Router.go(U.Router.build(param), {});
+						return;
+					};
+
+					// Same-space: resolve directly (preserves modifier key handling)
 					const cb = (object) => {
 						if (object) {
 							if (messageId) {
