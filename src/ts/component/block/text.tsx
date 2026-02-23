@@ -396,8 +396,16 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			ret = true;
 		});
 
-		keyboard.shortcut('arrowleft, arrowright, arrowdown, arrowup', e, () => {
+		keyboard.shortcut('arrowleft, arrowright, arrowdown, arrowup', e, (pressed: string) => {
 			keyboard.disableContextClose(false);
+
+			// When cursor is at model boundary but DOM has ZWS to traverse, let browser handle natively
+			if ((pressed == 'arrowright') && (range.to == value.length) && !editableRef.current?.isAtDomEnd()) {
+				ret = true;
+			} else
+			if ((pressed == 'arrowleft') && !range.from && !editableRef.current?.isAtDomStart()) {
+				ret = true;
+			};
 		});
 
 		saveKeys.forEach((item: any) => {

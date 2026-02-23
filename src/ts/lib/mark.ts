@@ -77,7 +77,7 @@ const Order = [
  * to produce correct nested HTML output.
  */
 const ZWS = '\u200B';
-const ZWS_TYPES = [ I.MarkType.Mention, I.MarkType.Emoji, I.MarkType.Link ];
+const ZWS_TYPES = [ ...Order ];
 
 class Mark {
 
@@ -661,7 +661,9 @@ class Mark {
 			const length = symbol.length;
 			const from = o + p1l;
 			const to = from + p2l - length * 2;
-			const replace = p2.replace(new RegExp(U.String.regexEscape(symbol), 'g'), '') + ' ';
+			const hasZws = ZWS_TYPES.includes(type);
+			const suffix = hasZws ? '' : ' ';
+			const replace = p2.replace(new RegExp(U.String.regexEscape(symbol), 'g'), '') + suffix;
 
 			let check = true;
 			for (const mark of checked) {
@@ -677,7 +679,7 @@ class Mark {
 			};
 
 			marks = this.adjust(marks, from, -length);
-			marks = this.adjust(marks, to, -length + 1);
+			marks = this.adjust(marks, to, -length + (hasZws ? 0 : 1));
 			marks.push({ type, range: { from, to }, param: '' });
 
 			text = U.String.insert(text, replace, o + p1l, o + p1l + p2l);
@@ -940,7 +942,6 @@ class Mark {
 			I.MarkType.Search,
 			I.MarkType.Change,
 			I.MarkType.Highlight,
-			I.MarkType.Code,
 		].includes(t);
 	};
 
