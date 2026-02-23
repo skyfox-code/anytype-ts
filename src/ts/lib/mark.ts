@@ -1047,6 +1047,66 @@ class Mark {
 		return text.includes(ZWS);
 	};
 
+	/**
+	 * After setRange places the cursor, it may land at a ZWS/mark boundary
+	 * (before a markup element rather than inside it). This method detects
+	 * that case and moves the cursor inside the mark's first text node.
+	 */
+	adjustSelectionForMarkBoundary (): void {
+		const sel = window.getSelection();
+		if (!sel || !sel.rangeCount) {
+			return;
+		};
+
+		const range = sel.getRangeAt(0);
+		const adjustedStart = this.adjustRangeEndpoint(range, true);
+		const adjustedEnd = this.adjustRangeEndpoint(range, false);
+		const adjusted = adjustedStart || adjustedEnd;
+
+		if (adjusted) {
+			sel.removeAllRanges();
+			sel.addRange(range);
+		};
+	};
+
+	/**
+	 * Adjusts a single endpoint (start or end) of a Range if it is positioned
+	 * immediately before a markup element. Moves it to offset 0 of the first
+	 * text node inside that element.
+	 */
+	private adjustRangeEndpoint (range: Range, isStart: boolean): boolean {
+		const container = isStart ? range.startContainer : range.endContainer;
+		const offset = isStart ? range.startOffset : range.endOffset;
+
+		if (container.nodeType !== Node.ELEMENT_NODE) {
+			return false;
+		};
+
+		const child = container.childNodes[offset];
+		if (!child || (child.nodeType !== Node.ELEMENT_NODE)) {
+			return false;
+		};
+
+		const tag = (child as Element).tagName.toLowerCase();
+		if (!tag.startsWith('markup')) {
+			return false;
+		};
+
+		const walker = document.createTreeWalker(child, NodeFilter.SHOW_TEXT);
+		const textNode = walker.nextNode();
+		if (!textNode) {
+			return false;
+		};
+
+		if (isStart) {
+			range.setStart(textNode, 0);
+		} else {
+			range.setEnd(textNode, 0);
+		};
+
+		return true;
+	};
+
 };
 
 export default new Mark();

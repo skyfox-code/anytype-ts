@@ -150,6 +150,7 @@ class Focus {
 				const domTo = Mark.modelToDom(range.to, el);
 
 				setRange(el, { start: domFrom, end: domTo });
+				Mark.adjustSelectionForMarkBoundary();
 			} else {
 				setRange(el, { start: range.from, end: range.to });
 			};

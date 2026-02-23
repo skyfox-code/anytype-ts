@@ -159,6 +159,7 @@ const Editable = forwardRef<EditableRefProps, Props>(({
 			const domTo = Mark.modelToDom(range.to, editableRef.current);
 
 			setRange(editableRef.current, { start: domFrom, end: domTo });
+			Mark.adjustSelectionForMarkBoundary();
 		} else {
 			setRange(editableRef.current, { start: range.from, end: range.to });
 		};
