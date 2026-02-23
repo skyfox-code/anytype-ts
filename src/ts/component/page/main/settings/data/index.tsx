@@ -11,12 +11,12 @@ const PageMainSettingsDataIndex = observer(forwardRef<I.PageRef, I.PageSettingsC
 	const suffix = isLocalNetwork ? 'LocalOnly' : '';
 	const MiB = 1048576;
 	const autoDownloadOptions = [
-		{ id: '0', name: translate('commonOff') },
+		{ id: '-1', name: translate('commonOff') },
 		{ id: '20', name: U.File.size(20 * MiB) },
 		{ id: '100', name: U.File.size(100 * MiB) },
 		{ id: '250', name: U.File.size(250 * MiB) },
 		{ id: '1024', name: U.File.size(1024 * MiB) },
-		{ id: '-1', name: translate('commonUnlimited') },
+		{ id: '0', name: translate('commonUnlimited') },
 	];
 
 	const onOffload = (e: any) => {
@@ -95,7 +95,13 @@ const PageMainSettingsDataIndex = observer(forwardRef<I.PageRef, I.PageSettingsC
 								const num = Number(v);
 
 								S.Common.autoDownloadSet(num);
-								C.FileAutoDownloadSetLimit(num);
+
+								if (num < 0) {
+									C.FileSetAutoDownload(false, false);
+								} else {
+									C.FileSetAutoDownload(true, false);
+									C.FileAutoDownloadSetLimit(num);
+								};
 							}}
 							arrowClassName="black"
 							menuParam={{ horizontal: I.MenuDirection.Right }}

@@ -323,11 +323,12 @@ class CommonStore {
 				ret = 20;
 			} else
 			if ((ret === false) || (ret === undefined)) {
-				ret = 0;
+				ret = -1;
 			};
 		};
 
-		return Number(ret) || 0;
+		const n = Number(ret);
+		return isNaN(n) ? -1 : n;
 	};
 
 	get chatCmdSend (): boolean {
@@ -699,7 +700,8 @@ class CommonStore {
 	};
 
 	autoDownloadSet (v: number) {
-		v = Number(v) || 0;
+		const n = Number(v);
+		v = isNaN(n) ? -1 : n;
 		this.autoDownloadValue = v;
 		Storage.set('autoDownload', v);
 	};
