@@ -67,6 +67,10 @@ const ChatCounter = observer(forwardRef<HTMLDivElement, Props>((props, ref) => {
 		cnMessage.push('isMuted');
 	};
 
+	if (!showMention && !showMessage) {
+		return null;
+	};
+
 	return (
 		<div className={cn.join(' ')}>
 			{showMention ? <Icon className={cnMention.join(' ')} /> : ''}

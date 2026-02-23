@@ -381,13 +381,13 @@ const SidebarPageVault = observer(forwardRef<{}, I.SidebarPageComponent>((props,
 			...item.style,
 		};
 		const cn = [ 'item', U.Data.spaceClass(item.uxType) ];
-		const icons = [];
 		const iconSize = vaultMessages && !vaultIsMinimal ? 48 : 32;
+		const counter = <ChatCounter spaceId={targetSpaceId} disableMention={vaultIsMinimal} />;
 
 		let chatName = null;
 		let time = null;
 		let last = null;
-		let counter = null;
+		let icons = [];
 
 		if (targetSpaceId == space) {
 			cn.push('active');
@@ -401,7 +401,7 @@ const SidebarPageVault = observer(forwardRef<{}, I.SidebarPageComponent>((props,
 			cn.push('isLoading');
 		};
 
-		if (item.isPinned && !item.counters?.mentionCounter && !item.counters?.messageCounter) {
+		if (!item.hasCounter && item.isPinned) {
 			cn.push('isPinned');
 			icons.push('pin');
 		};
@@ -419,7 +419,6 @@ const SidebarPageVault = observer(forwardRef<{}, I.SidebarPageComponent>((props,
 			time = <Label className="time" text={U.Date.timeAgo(createdAt)} />;
 			last = <Label className="lastMessage" text={S.Chat.getMessageSimpleText(targetSpaceId, lastMessage, !isOneToOne)} />;
 			chatName = <Label className="chatName" text={U.Object.name(item.chat)} />;
-			counter = <ChatCounter spaceId={targetSpaceId} disableMention={vaultIsMinimal} />;
 
 			if ((creator == S.Auth.account.id) && !isSynced) {
 				cn.push('isSyncing');
