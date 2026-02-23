@@ -327,8 +327,23 @@ class CommonStore {
 		return this.boolGet('hideSidebar');
 	};
 
-	get autoDownload (): boolean {
-		return this.boolGet('autoDownload');
+	get autoDownload (): number {
+		let ret = this.autoDownloadValue;
+
+		if (ret === null) {
+			ret = Storage.get('autoDownload');
+
+			// Migration: old boolean → new number
+			if (ret === true) {
+				ret = 20;
+			} else
+			if ((ret === false) || (ret === undefined)) {
+				ret = -1;
+			};
+		};
+
+		const n = Number(ret);
+		return isNaN(n) ? -1 : n;
 	};
 
 	get chatCmdSend (): boolean {
@@ -703,8 +718,11 @@ class CommonStore {
 		this.boolSet('hideSidebar', v);
 	};
 
-	autoDownloadSet (v: boolean) {
-		this.boolSet('autoDownload', v);
+	autoDownloadSet (v: number) {
+		const n = Number(v);
+		v = isNaN(n) ? -1 : n;
+		this.autoDownloadValue = v;
+		Storage.set('autoDownload', v);
 	};
 
 	/**
