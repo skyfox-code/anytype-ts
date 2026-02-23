@@ -237,6 +237,14 @@ const OptionSelect = observer(forwardRef<OptionSelectRefProps, Props>((props, re
 		};
 	};
 
+	const sortByInitialValue = (items: SelectItem[]): SelectItem[] => {
+		const iv = initialValueRef.current;
+		return [
+			...items.filter(it => iv.includes(it.id)),
+			...items.filter(it => !iv.includes(it.id)),
+		];
+	};
+
 	const getObjectItems = (): SelectItem[] => {
 		if (!searchParam) {
 			return [];
@@ -266,10 +274,7 @@ const OptionSelect = observer(forwardRef<OptionSelectRefProps, Props>((props, re
 				};
 			};
 		} else {
-			const iv = initialValueRef.current;
-			const selected = items.filter(it => iv.includes(it.id));
-			const unselected = items.filter(it => !iv.includes(it.id));
-			items = selected.concat(unselected);
+			items = sortByInitialValue(items);
 		};
 
 		return items.concat(ret);
@@ -304,10 +309,7 @@ const OptionSelect = observer(forwardRef<OptionSelectRefProps, Props>((props, re
 				});
 			};
 		} else {
-			const iv = initialValueRef.current;
-			const selected = items.filter(it => iv.includes(it.id));
-			const unselected = items.filter(it => !iv.includes(it.id));
-			items = selected.concat(unselected);
+			items = sortByInitialValue(items);
 		};
 
 		return items.concat(ret);
