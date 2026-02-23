@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/browser';
 import $ from 'jquery';
 import { arrayMove } from '@dnd-kit/sortable';
-import { observable, set } from 'mobx';
+import { observable, set, runInAction } from 'mobx';
 import Commands from 'dist/lib/pb/protos/commands_pb';
 import Events from 'dist/lib/pb/protos/events_pb';
 import Service from 'dist/lib/pb/protos/service/service_grpc_web_pb';
@@ -47,6 +47,9 @@ class Dispatcher {
 	timeoutStream = 0;
 	timeoutEvent: any = {};
 	reconnects = 0;
+	eventBuffer: { event: Events.Event, skipDebug: boolean }[] = [];
+	flushScheduled = false;
+	rafId = 0;
 
 	/**
 	 * Initialize the gRPC client with the middleware server address.
@@ -88,10 +91,11 @@ class Dispatcher {
 		this.stream = this.service.listenSessionEvents(request, null);
 
 		this.stream.on('data', (event) => {
-			try {
-				this.event(event, false, false);
-			} catch (e) {
-				console.error(e);
+			this.eventBuffer.push({ event, skipDebug: false });
+
+			if (!this.flushScheduled) {
+				this.flushScheduled = true;
+				this.rafId = requestAnimationFrame(() => this.flushEvents());
 			};
 		});
 
@@ -113,6 +117,12 @@ class Dispatcher {
 	 * Cancels the stream and clears the reference.
 	 */
 	stopStream () {
+		if (this.rafId) {
+			cancelAnimationFrame(this.rafId);
+		};
+
+		this.flushEvents();
+
 		if (this.stream) {
 			this.stream.cancel();
 			this.stream = null;
@@ -135,10 +145,37 @@ class Dispatcher {
 		};
 
 		window.clearTimeout(this.timeoutStream);
-		this.timeoutStream = window.setTimeout(() => { 
-			this.startStream(); 
+		this.timeoutStream = window.setTimeout(() => {
+			this.startStream();
 			this.reconnects++;
 		}, t * 1000);
+	};
+
+	/**
+	 * Flush all buffered stream events in a single MobX transaction.
+	 * Events arriving within one animation frame are processed together,
+	 * so MobX reactions fire only once at the end of the batch.
+	 */
+	flushEvents () {
+		this.flushScheduled = false;
+		this.rafId = 0;
+
+		const buffer = this.eventBuffer;
+		this.eventBuffer = [];
+
+		if (!buffer.length) {
+			return;
+		};
+
+		runInAction(() => {
+			for (const item of buffer) {
+				try {
+					this.event(item.event, false, item.skipDebug);
+				} catch (e) {
+					console.error(e);
+				};
+			};
+		});
 	};
 
 	/**
@@ -182,6 +219,7 @@ class Dispatcher {
 
 		messages.sort((c1: any, c2: any) => this.sort(c1, c2));
 
+		runInAction(() => {
 		for (const message of messages) {
 			const type = Mapper.Event.Type(message.getValueCase());
 			const { spaceId, data } = Mapper.Event.Data(message);
@@ -1161,6 +1199,7 @@ class Dispatcher {
 				log(rootId, type, spaceId, data, message.getValueCase());
 			};
 		};
+		});
 
 		window.setTimeout(() => {
 			if (updateParents) {
@@ -1458,7 +1497,7 @@ class Dispatcher {
 				};
 
 				if (message.event) {
-					this.event(message.event, true, true);
+					runInAction(() => this.event(message.event, true, true));
 				};
 
 				const middleTime = Math.ceil(t1 - t0);
