@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useState, useRef, useImperativeHandle } from 'react';
+import React, { forwardRef, useEffect, useLayoutEffect, useState, useRef, useImperativeHandle } from 'react';
 import $ from 'jquery';
 import raf from 'raf';
 import { observer } from 'mobx-react';
@@ -20,6 +20,7 @@ const PageMainSet = observer(forwardRef<I.PageRef, I.PageComponent>((props, ref)
 	const check = U.Data.checkDetails(rootId, rootId, [ 'layout' ]);
 	const idRef = useRef('');
 	const scrollTopRef = useRef(0);
+	const isClosingRef = useRef(false);
 
 	const unbind = () => {
 		const ns = U.Common.getEventNamespace(isPopup);
@@ -82,10 +83,28 @@ const PageMainSet = observer(forwardRef<I.PageRef, I.PageComponent>((props, ref)
 			resize();
 
 			if (scrollTopRef.current) {
-				window.setTimeout(() => {
-					U.Common.getScrollContainer(isPopup).scrollTop(scrollTopRef.current);
-					scrollTopRef.current = 0;
-				}, 10);
+				const target = scrollTopRef.current;
+				scrollTopRef.current = 0;
+
+				let cnt = 0;
+				const restore = () => {
+					cnt++;
+
+					const container = U.Common.getScrollContainer(isPopup);
+					const el = container.get(0);
+
+					if (!el) {
+						return;
+					};
+
+					if ((el.scrollHeight > target) || (cnt >= 30)) {
+						container.scrollTop(target);
+					} else {
+						window.setTimeout(restore, 50);
+					};
+				};
+
+				window.setTimeout(restore, 50);
 			};
 
 			if (U.Object.isTypeLayout(object.layout)) {
@@ -102,6 +121,10 @@ const PageMainSet = observer(forwardRef<I.PageRef, I.PageComponent>((props, ref)
 
 	const onScroll = () => {
 		if (!isPopup && keyboard.isPopup()) {
+			return;
+		};
+
+		if (isClosingRef.current) {
 			return;
 		};
 
@@ -248,6 +271,13 @@ const PageMainSet = observer(forwardRef<I.PageRef, I.PageComponent>((props, ref)
 			</>
 		);
 	};
+
+	useLayoutEffect(() => {
+		isClosingRef.current = false;
+		return () => {
+			isClosingRef.current = true;
+		};
+	}, []);
 
 	useEffect(() => {
 		open();
