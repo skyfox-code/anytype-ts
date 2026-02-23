@@ -121,7 +121,7 @@
 
 	.menu.menuDataviewFilterValues { width: var(--menu-width-value); }
 	.menu.menuDataviewFilterValues {
-		.content { padding: 8px 0px 8px 0px; overflow: hidden; max-height: unset; }
+		.content { padding: 8px 0px 0px 0px; overflow: hidden; max-height: unset; }
 
 		&.compact {
 			.content { padding-bottom: 0px; }

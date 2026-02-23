@@ -119,6 +119,11 @@ const OptionSelect = observer(forwardRef<OptionSelectRefProps, Props>((props, re
 	const [ filter, setFilter ] = useState('');
 	const [ activeId, setActiveId ] = useState<string | null>(null);
 	const [ isLoading, setIsLoading ] = useState(false);
+	const offsetRef = useRef(0);
+	const itemsRef = useRef<any[]>([]);
+	const hasMoreRef = useRef(true);
+	const timeoutFilterRef = useRef(0);
+	const objectFilterRef = useRef('');
 
 	const isObjectMode = !!searchParam;
 
@@ -133,6 +138,7 @@ const OptionSelect = observer(forwardRef<OptionSelectRefProps, Props>((props, re
 
 		return () => {
 			U.Subscription.destroyList([ subId ]);
+			window.clearTimeout(timeoutFilterRef.current);
 		};
 	}, []);
 
@@ -149,7 +155,7 @@ const OptionSelect = observer(forwardRef<OptionSelectRefProps, Props>((props, re
 		resize();
 	});
 
-	const loadObjects = (): void => {
+	const loadObjects = (clear: boolean = true, callBack?: () => void): void => {
 		if (!searchParam) {
 			return;
 		};
@@ -165,15 +171,35 @@ const OptionSelect = observer(forwardRef<OptionSelectRefProps, Props>((props, re
 			};
 		};
 
-		U.Subscription.subscribe({
-			subId,
+		const pageSize = searchParam.limit || J.Constant.limit.menuRecords;
+
+		U.Subscription.search({
 			filters,
 			sorts: searchParam.sorts || [
 				{ relationKey: 'lastModifiedDate', type: I.SortType.Desc },
 			],
 			keys: searchParam.keys || J.Relation.default,
-			limit: searchParam.limit || LIMIT,
-		}, () => setIsLoading(false));
+			fullText: objectFilterRef.current,
+			offset: offsetRef.current,
+			limit: pageSize,
+		}, (message: any) => {
+			if (message.error.code) {
+				setIsLoading(false);
+				callBack?.();
+				return;
+			};
+
+			const records = message.records || [];
+
+			if (clear) {
+				itemsRef.current = [];
+			};
+
+			itemsRef.current = itemsRef.current.concat(records);
+			hasMoreRef.current = records.length >= pageSize;
+			setIsLoading(false);
+			callBack?.();
+		});
 	};
 
 	const loadOptions = (): void => {
@@ -198,9 +224,16 @@ const OptionSelect = observer(forwardRef<OptionSelectRefProps, Props>((props, re
 
 		setIsLoading(true);
 
-		U.Subscription.destroyList([ subId ], false, () => {
-			isObjectMode ? loadObjects() : loadOptions();
-		});
+		if (isObjectMode) {
+			offsetRef.current = 0;
+			itemsRef.current = [];
+			hasMoreRef.current = true;
+			loadObjects();
+		} else {
+			U.Subscription.destroyList([ subId ], false, () => {
+				loadOptions();
+			});
+		};
 	};
 
 	const getObjectItems = (): SelectItem[] => {
@@ -208,11 +241,10 @@ const OptionSelect = observer(forwardRef<OptionSelectRefProps, Props>((props, re
 			return [];
 		};
 
-		const keys = searchParam.keys || J.Relation.default;
 		const skip = Relation.getArrayValue(skipIds);
 		const ret: SelectItem[] = [];
 
-		let items = S.Record.getRecords(subId, keys);
+		let items = [...itemsRef.current];
 		items = items.filter(it => !it._empty_ && !it.isArchived && !it.isDeleted && !skip.includes(it.id));
 
 		if (filterMapper) {
@@ -290,8 +322,26 @@ const OptionSelect = observer(forwardRef<OptionSelectRefProps, Props>((props, re
 		return HEIGHT;
 	};
 
+	const loadMoreRows = (): Promise<void> => {
+		return new Promise((resolve) => {
+			offsetRef.current += J.Constant.limit.menuRecords;
+			loadObjects(false, resolve);
+		});
+	};
+
 	const onFilterChange = (v: string): void => {
 		setFilter(v);
+
+		if (isObjectMode) {
+			objectFilterRef.current = v;
+			window.clearTimeout(timeoutFilterRef.current);
+			timeoutFilterRef.current = window.setTimeout(() => {
+				offsetRef.current = 0;
+				hasMoreRef.current = true;
+				setIsLoading(true);
+				loadObjects();
+			}, J.Constant.delay.keyboard);
+		};
 	};
 
 	const onClick = (e: MouseEvent | { stopPropagation: () => void }, item: SelectItem): void => {
@@ -764,9 +814,9 @@ const OptionSelect = observer(forwardRef<OptionSelectRefProps, Props>((props, re
 
 		const list = (
 			<InfiniteLoader
-				rowCount={items.length}
-				loadMoreRows={() => {}}
-				isRowLoaded={() => true}
+				rowCount={(isObjectMode && hasMoreRef.current) ? items.length + 1 : items.length}
+				loadMoreRows={isObjectMode ? loadMoreRows : () => {}}
+				isRowLoaded={isObjectMode ? ({ index }) => !!items[index] : () => true}
 				threshold={LIMIT}
 			>
 				{({ onRowsRendered }) => (
