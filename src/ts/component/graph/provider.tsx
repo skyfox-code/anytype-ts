@@ -153,8 +153,8 @@ const Graph = observer(forwardRef<GraphRefProps, Props>(({
 		worker.current.onerror = (e: any) => console.log(e);
 		worker.current.addEventListener('message', onMessage);
 
-		send('init', { 
-			canvas: transfer, 
+		send('init', {
+			canvas: transfer,
 			width,
 			height,
 			density,
