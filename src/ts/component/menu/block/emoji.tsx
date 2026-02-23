@@ -47,7 +47,7 @@ const MenuBlockEmoji = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 
 	useEffect(() => {
 		rebind();
-		resize();
+		position();
 
 		return () => {
 			unbind();
@@ -56,7 +56,7 @@ const MenuBlockEmoji = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 
 	useEffect(() => {
 		rebind();
-		resize();
+		position();
 
 		const items = getItems();
 		if (filterText && !items.length) {
@@ -271,7 +271,7 @@ const MenuBlockEmoji = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		close();
 	};
 
-	const resize = () => {
+	const beforePosition = () => {
 		const items = getItems();
 		const obj = $(`#${props.getId()} .content`);
 
@@ -281,7 +281,6 @@ const MenuBlockEmoji = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		};
 
 		obj.css({ height });
-		position();
 	};
 
 	const items = getItems();
@@ -321,6 +320,7 @@ const MenuBlockEmoji = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		getListRef: () => listRef.current,
 		onClick,
 		onOver,
+		beforePosition,
 	}), []);
 
 	return (

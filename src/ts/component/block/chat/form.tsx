@@ -1470,27 +1470,25 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 
 		const param = caretMenuParam();
 
-		raf(() => {
-			S.Menu.open('blockEmoji', {
-				element: `#button-${U.Common.esc(block.id)}-${I.ChatButton.Emoji}`,
-				...param,
-				className: [ 'single', param.className ].join(' '),
-				data: {
-					rootId,
-					blockId: block.id,
-					marks: marks.current,
-					onChange: (native: string, newMarks: I.Mark[], from: number, to: number) => {
-						if (S.Menu.isAnimating('blockEmoji')) {
-							return;
-						};
+		S.Menu.open('blockEmoji', {
+			element: `#button-${U.Common.esc(block.id)}-${I.ChatButton.Emoji}`,
+			...param,
+			className: [ 'single', param.className ].join(' '),
+			data: {
+				rootId,
+				blockId: block.id,
+				marks: marks.current,
+				onChange: (native: string, newMarks: I.Mark[], from: number, to: number) => {
+					if (S.Menu.isAnimating('blockEmoji')) {
+						return;
+					};
 
-						setMarks(newMarks);
-						value = U.String.insert(value, ' ', from, from);
+					setMarks(newMarks);
+					value = U.String.insert(value, ' ', from, from);
 
-						updateMarkup(value, { from: to, to });
-					},
+					updateMarkup(value, { from: to, to });
 				},
-			});
+			},
 		});
 	};
 

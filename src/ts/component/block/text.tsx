@@ -981,38 +981,37 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 
 		S.Common.filterSet(range.from - 1, '');
 
-		raf(() => {
-			S.Menu.open('blockEmoji', {
-				classNameWrap: 'fromBlock',
-				element: `#block-${U.Common.esc(block.id)}`,
-				recalcRect: () => {
-					const rect = U.Common.getSelectionRect();
-					return rect ? { ...rect, y: rect.y + win.scrollTop() } : null;
-				},
-				offsetX: () => {
-					const rect = U.Common.getSelectionRect();
-					return rect ? 0 : J.Size.blockMenu;
-				},
-				noFlipX: false,
-				noFlipY: false,
-				data: {
-					rootId,
-					blockId: block.id,
-					marks: marksRef.current,
-					onChange: (native: string, marks: I.Mark[], from: number, to: number) => {
-						if (S.Menu.isAnimating('blockEmoji')) {
-							return;
-						};
+		S.Menu.open('blockEmoji', {
+			classNameWrap: 'fromBlock',
+			element: `#block-${U.Common.esc(block.id)}`,
+			recalcRect: () => {
+				const rect = U.Common.getSelectionRect();
+				console.log('RECT', JSON.stringify(rect));
+				return rect ? { ...rect, y: rect.y + win.scrollTop() } : null;
+			},
+			offsetX: () => {
+				const rect = U.Common.getSelectionRect();
+				return rect ? 0 : J.Size.blockMenu;
+			},
+			noFlipX: false,
+			noFlipY: false,
+			data: {
+				rootId,
+				blockId: block.id,
+				marks: marksRef.current,
+				onChange: (native: string, marks: I.Mark[], from: number, to: number) => {
+					if (S.Menu.isAnimating('blockEmoji')) {
+						return;
+					};
 
-						marksRef.current = marks;
-						value = U.String.insert(value, ' ', from, from);
+					marksRef.current = marks;
+					value = U.String.insert(value, ' ', from, from);
 
-						U.Data.blockSetText(rootId, block.id, value, marks, true, () => {
-							focus.setWithTimeout(block.id, { from: to, to }, 30);
-						});
-					},
+					U.Data.blockSetText(rootId, block.id, value, marks, true, () => {
+						focus.setWithTimeout(block.id, { from: to, to }, 30);
+					});
 				},
-			});
+			},
 		});
 	};
 
