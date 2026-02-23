@@ -1028,14 +1028,6 @@ class Mark {
 			dom++;
 		};
 
-		// Skip ZWS boundary anchors at the target position so the cursor
-		// lands inside the mark content rather than on the invisible boundary.
-		// This fixes cursor placement at the first character of inline marks
-		// (e.g. inline code) where the DOM has ZWS before the opening tag.
-		while ((dom < text.length) && (text[dom] === ZWS)) {
-			dom++;
-		};
-
 		return dom;
 	};
 
