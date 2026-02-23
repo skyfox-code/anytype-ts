@@ -1,4 +1,4 @@
-import React, { forwardRef, useRef, MouseEvent } from 'react';
+import React, { forwardRef, useRef, useImperativeHandle, MouseEvent } from 'react';
 import { observer } from 'mobx-react';
 import { Icon, Label } from 'Component';
 import { I, U, translate, S, Relation, C, Dataview, analytics } from 'Lib';
@@ -185,6 +185,21 @@ const BlockDataviewFilters = observer(forwardRef<{}, Props>((props, ref) => {
 			}
 		});
 	};
+
+	useImperativeHandle(ref, () => ({
+		openFilterMenu: (filterId: string) => {
+			const item = items.find(it => it.id == filterId);
+			if (!item) {
+				return;
+			};
+
+			if (Dataview.isAdvancedFilter(item)) {
+				onAdvancedClick(null, item);
+			} else {
+				onClick(null, item);
+			};
+		},
+	}));
 
 	const { config } = S.Common;
 	const sorts = view.sorts || [];
