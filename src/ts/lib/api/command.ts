@@ -384,6 +384,14 @@ export const FileSetAutoDownload = (enabled: boolean, wifiOnly: boolean, callBac
 	dispatcher.request(FileSetAutoDownload.name, request, callBack);
 };
 
+export const FileAutoDownloadSetLimit = (sizeLimitMib: number, callBack?: (message: any) => void) => {
+	const request = new Rpc.File.AutoDownloadSetLimit.Request();
+
+	request.setSizelimitmebibytes(sizeLimitMib);
+
+	dispatcher.request(FileAutoDownloadSetLimit.name, request, callBack);
+};
+
 // ---------------------- NAVIGATION ---------------------- //
 
 export const NavigationGetObjectInfoWithLinks = (pageId: string, callBack?: (message: any) => void) => {
