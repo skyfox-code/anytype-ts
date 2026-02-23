@@ -3,7 +3,7 @@ import $ from 'jquery';
 import raf from 'raf';
 import { observer } from 'mobx-react';
 import { Header, Footer, Loader, Block, Deleted, HeadSimple, EditorControls } from 'Component';
-import { I, M, C, S, U, J, Action, keyboard, Dataview, analytics, sidebar, Onboarding } from 'Lib';
+import { I, M, C, S, U, J, Action, keyboard, Dataview, analytics, sidebar, Onboarding, Storage } from 'Lib';
 
 const PageMainSet = observer(forwardRef<I.PageRef, I.PageComponent>((props, ref) => {
 
@@ -19,6 +19,7 @@ const PageMainSet = observer(forwardRef<I.PageRef, I.PageComponent>((props, ref)
 	const rootId = keyboard.getRootId(isPopup);
 	const check = U.Data.checkDetails(rootId, rootId, [ 'layout' ]);
 	const idRef = useRef('');
+	const scrollTopRef = useRef(0);
 
 	const unbind = () => {
 		const ns = U.Common.getEventNamespace(isPopup);
@@ -55,6 +56,7 @@ const PageMainSet = observer(forwardRef<I.PageRef, I.PageComponent>((props, ref)
 
 	const open = () => {
 		idRef.current = rootId;
+		scrollTopRef.current = Storage.getScroll('set', rootId, isPopup);
 		setIsDeleted(false);
 		setIsLoading(true);
 
@@ -79,6 +81,13 @@ const PageMainSet = observer(forwardRef<I.PageRef, I.PageComponent>((props, ref)
 
 			resize();
 
+			if (scrollTopRef.current) {
+				window.setTimeout(() => {
+					U.Common.getScrollContainer(isPopup).scrollTop(scrollTopRef.current);
+					scrollTopRef.current = 0;
+				}, 10);
+			};
+
 			if (U.Object.isTypeLayout(object.layout)) {
 				window.setTimeout(() => Onboarding.start('typeResetLayout', isPopup), 50);
 				analytics.event('ScreenType', { objectType: object.id });
@@ -96,6 +105,10 @@ const PageMainSet = observer(forwardRef<I.PageRef, I.PageComponent>((props, ref)
 			return;
 		};
 
+		const container = U.Common.getScrollContainer(isPopup);
+		const top = container.scrollTop();
+
+		Storage.setScroll('set', rootId, top, isPopup);
 		S.Common.getRef('selectionProvider')?.renderSelection();
 	};
 
