@@ -1626,6 +1626,15 @@ class UtilCommon {
 		});
 	};
 
+	applyAutoDownload (value: number) {
+		if (value < 0) {
+			C.FileSetAutoDownload(false, false);
+		} else {
+			C.FileSetAutoDownload(true, false);
+			C.FileAutoDownloadSetLimit(value);
+		};
+	};
+
 	getSpaceSettingsPages (): string[] {
 		return [
 			'spaceIndex', 'spaceIndexEmpty', 'spaceStorage', 'spaceShare', 'spaceNotifications',

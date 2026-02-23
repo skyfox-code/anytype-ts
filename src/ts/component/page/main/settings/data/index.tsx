@@ -95,13 +95,7 @@ const PageMainSettingsDataIndex = observer(forwardRef<I.PageRef, I.PageSettingsC
 								const num = Number(v);
 
 								S.Common.autoDownloadSet(num);
-
-								if (num < 0) {
-									C.FileSetAutoDownload(false, false);
-								} else {
-									C.FileSetAutoDownload(true, false);
-									C.FileAutoDownloadSetLimit(num);
-								};
+								U.Common.applyAutoDownload(num);
 							}}
 							arrowClassName="black"
 							menuParam={{ horizontal: I.MenuDirection.Right }}

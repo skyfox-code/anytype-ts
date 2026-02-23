@@ -369,14 +369,7 @@ class UtilData {
 			};
 		});
 
-		const autoDownload = S.Common.autoDownload;
-
-		if (autoDownload < 0) {
-			C.FileSetAutoDownload(false, false);
-		} else {
-			C.FileSetAutoDownload(true, false);
-			C.FileAutoDownloadSetLimit(autoDownload);
-		};
+		U.Common.applyAutoDownload(S.Common.autoDownload);
 
 		this.getMembershipData();
 
