@@ -86,8 +86,6 @@ const ChatMessage = observer(forwardRef<ChatMessageRefProps, I.ChatMessageCompon
 
 	const onReactionAdd = () => {
 		const node = $(nodeRef.current);
-		const container = U.Common.getScrollContainer(isPopup);
-
 		let menuContext = null;
 
 		S.Menu.open('smile', {
@@ -97,12 +95,10 @@ const ChatMessage = observer(forwardRef<ChatMessageRefProps, I.ChatMessageCompon
 			noFlipX: true,
 			onOpen: context => {
 				node.addClass('hover');
-				container.addClass('over');
 				menuContext = context;
 			},
 			onClose: () => {
 				node.removeClass('hover');
-				container.removeClass('over');
 			},
 			data: {
 				noHead: true,
