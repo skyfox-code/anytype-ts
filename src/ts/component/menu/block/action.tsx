@@ -283,7 +283,7 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 					menuParam.vertical = I.MenuDirection.Center;
 				};
 
-				ids = selection?.getForClick(blockId, true, false);
+				ids = selection?.getForClick(blockId, false, false);
 				if (!ids.length) {
 					break;
 				};
@@ -297,10 +297,6 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 								I.TextStyle.ToggleHeader2, 
 								I.TextStyle.ToggleHeader3,
 							].includes(item.itemId);
-
-							if (isToggle) {
-								ids = selection?.getForClick(blockId, false, false);
-							};
 
 							C.BlockListTurnInto(rootId, ids, item.itemId, () => {
 								setFocus(ids[0]);
