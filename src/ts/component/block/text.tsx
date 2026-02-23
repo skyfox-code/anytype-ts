@@ -270,6 +270,7 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		const menuOpen = S.Menu.isOpen('', '', [ 'onboarding', 'searchText' ]);
 		const menuOpenAdd = S.Menu.isOpen('blockAdd');
 		const menuOpenMention = S.Menu.isOpen('blockMention');
+		const menuOpenEmoji = S.Menu.isOpen('blockEmoji');
 		const menuOpenSmile = S.Menu.isOpen('smile');
 		const saveKeys: any[] = [
 			{ key: 'moveSelectionUp', preventDefault: true },
@@ -526,7 +527,7 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 					ret = true;
 				};
 			} else 
-			if (!menuOpenAdd && !menuOpenMention && !range.to) {
+			if (!menuOpenAdd && !menuOpenMention && !menuOpenEmoji && !range.to) {
 				if (block.canHaveMarks()) {
 					const parsed = getMarksFromHtml();
 
@@ -545,6 +546,10 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 
 			if (menuOpenMention && ((oneSymbolBefore == '@') || (oneSymbolBefore == '['))) {
 				S.Menu.close('blockMention');
+			};
+
+			if (menuOpenEmoji && (oneSymbolBefore == ':')) {
+				S.Menu.close('blockEmoji');
 			};
 		});
 
@@ -664,6 +669,7 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 
 		const menuOpenAdd = S.Menu.isOpen('blockAdd');
 		const menuOpenMention = S.Menu.isOpen('blockMention');
+		const menuOpenEmoji = S.Menu.isOpen('blockEmoji');
 		const oneSymbolBefore = range ? value[range.from - 1] : '';
 		const twoSymbolBefore = range ? value[range.from - 2] : '';
 
@@ -674,6 +680,7 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		const canOpenMenuAdd = !menuOpenAdd && (oneSymbolBefore == '/') && isAllowedMenu;
 		const canOpenMenuMention = !menuOpenMention && (oneSymbolBefore == '@') && isAllowedMenu;
 		const canOpenMenuLink = !menuOpenMention && (oneSymbolBefore == '[') && (twoSymbolBefore == '[') && isAllowedMenu;
+		const canOpenMenuEmoji = !menuOpenEmoji && (oneSymbolBefore == ':') && isAllowedMenu;
 
 		preventMenu.current = false;
 
@@ -715,6 +722,28 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			return;
 		};
 
+		if (menuOpenEmoji) {
+			window.clearTimeout(timeoutFilter.current);
+			timeoutFilter.current = window.setTimeout(() => {
+				if (!range) {
+					return;
+				};
+
+				const d = range.from - filter.from;
+
+				if (d >= 0) {
+					const part = value.substring(filter.from, filter.from + d).replace(/^:/, '');
+
+					if (part.includes(' ')) {
+						S.Menu.close('blockEmoji');
+					} else {
+						S.Common.filterSetText(part);
+					};
+				};
+			}, 30);
+			return;
+		};
+
 		// Open add menu
 		if (canOpenMenuAdd && (!isInsideTable && !block.isTextCode())) { 
 			U.Data.blockSetText(rootId, block.id, value, marksRef.current, true, () => {
@@ -732,6 +761,12 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		// Open link menu
 		if (canOpenMenuLink) {
 			U.Data.blockSetText(rootId, block.id, value, marksRef.current, true, () => onMention(2));
+			return;
+		};
+
+		// Open emoji menu
+		if (canOpenMenuEmoji) {
+			U.Data.blockSetText(rootId, block.id, value, marksRef.current, true, () => onEmojiSearch());
 			return;
 		};
 
@@ -925,6 +960,55 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 						U.Data.blockSetText(rootId, block.id, value, marks, true, () => {
 							// Try to fix async detailsUpdate event
 							focus.setWithTimeout(block.id, { from: to, to }, 500);
+						});
+					},
+				},
+			});
+		});
+	};
+
+	const onEmojiSearch = () => {
+		const range = getRange();
+		if (!range) {
+			return;
+		};
+
+		const win = $(window);
+
+		let value = getTextValue();
+
+		value = U.String.cut(value, range.from - 1, range.from);
+
+		S.Common.filterSet(range.from - 1, '');
+
+		raf(() => {
+			S.Menu.open('blockEmoji', {
+				classNameWrap: 'fromBlock',
+				element: `#block-${U.Common.esc(block.id)}`,
+				recalcRect: () => {
+					const rect = U.Common.getSelectionRect();
+					return rect ? { ...rect, y: rect.y + win.scrollTop() } : null;
+				},
+				offsetX: () => {
+					const rect = U.Common.getSelectionRect();
+					return rect ? 0 : J.Size.blockMenu;
+				},
+				noFlipX: false,
+				noFlipY: false,
+				data: {
+					rootId,
+					blockId: block.id,
+					marks: marksRef.current,
+					onChange: (native: string, marks: I.Mark[], from: number, to: number) => {
+						if (S.Menu.isAnimating('blockEmoji')) {
+							return;
+						};
+
+						marksRef.current = marks;
+						value = U.String.insert(value, ' ', from, from);
+
+						U.Data.blockSetText(rootId, block.id, value, marks, true, () => {
+							focus.setWithTimeout(block.id, { from: to, to }, 30);
 						});
 					},
 				},
