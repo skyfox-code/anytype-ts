@@ -937,6 +937,8 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 
 	const init = () => {
 		setLoaded(false);
+		setIsBottom(false);
+		setFirstUnreadOrderId('');
 		loadState(() => {
 			const subId = getSubId();
 			const match = keyboard.getMatch(isPopup);
