@@ -124,6 +124,7 @@ const OptionSelect = observer(forwardRef<OptionSelectRefProps, Props>((props, re
 	const hasMoreRef = useRef(true);
 	const timeoutFilterRef = useRef(0);
 	const objectFilterRef = useRef('');
+	const initialValueRef = useRef<string[]>([...value]);
 
 	const isObjectMode = !!searchParam;
 
@@ -264,6 +265,11 @@ const OptionSelect = observer(forwardRef<OptionSelectRefProps, Props>((props, re
 					});
 				};
 			};
+		} else {
+			const iv = initialValueRef.current;
+			const selected = items.filter(it => iv.includes(it.id));
+			const unselected = items.filter(it => !iv.includes(it.id));
+			items = selected.concat(unselected);
 		};
 
 		return items.concat(ret);
@@ -297,6 +303,11 @@ const OptionSelect = observer(forwardRef<OptionSelectRefProps, Props>((props, re
 					name: U.String.sprintf(isSelect && !noSelect ? translate('menuDataviewOptionListSetStatus') : translate('menuDataviewOptionListCreateOption'), filter),
 				});
 			};
+		} else {
+			const iv = initialValueRef.current;
+			const selected = items.filter(it => iv.includes(it.id));
+			const unselected = items.filter(it => !iv.includes(it.id));
+			items = selected.concat(unselected);
 		};
 
 		return items.concat(ret);
@@ -723,7 +734,7 @@ const OptionSelect = observer(forwardRef<OptionSelectRefProps, Props>((props, re
 				{canSort && !isReadonly ? <Icon className="dnd" /> : ''}
 
 				<div className="clickable" onClick={e => onClick(e, item)}>
-					{!noSelect && isSelected ? <Icon className="chk" /> : ''}
+					{!noSelect ? <Icon className={[ 'checkbox', (isSelected ? 'active' : '') ].join(' ')} /> : ''}
 					{isObjectMode ? (
 						<>
 							{icon}
@@ -768,7 +779,7 @@ const OptionSelect = observer(forwardRef<OptionSelectRefProps, Props>((props, re
 			>
 				{canSort && !isReadonly ? <Icon className="dnd" /> : ''}
 				<div className="clickable">
-					{!noSelect ? <Icon className={isSelected ? 'chk' : 'chk empty'} /> : ''}
+					{!noSelect ? <Icon className={[ 'checkbox', (isSelected ? 'active' : '') ].join(' ')} /> : ''}
 					{isObjectMode ? (
 						<>
 							<IconObject object={item} />
