@@ -80,7 +80,7 @@ body.platform-win32.showMenuBar {
 
 .container { padding: 8px; }
 
-#tabsWrapper { position: relative; transition: opacity 0.15s ease-in-out; width: 100%; }
+#tabsWrapper { position: relative; transition: opacity 0.15s ease-in-out; width: 100%; overflow: hidden; }
 #tabsWrapper.isHidden { opacity: 0; pointer-events: none; -webkit-app-region: no-drag; }
 
 #tabs {
