@@ -1524,7 +1524,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		const isShift = !!pressed.match('shift');
 		const length = block.getLength();
 		const parent = S.Block.getParentLeaf(rootId, block.id);
-		const replace = !range.to && block.isTextList() && !length;
+		const replace = !range.to && (block.isTextList() || block.isTextQuote() || block.isTextCallout()) && !length;
 		const canToggle = block.canToggle();
 
 		if (block.isTextCode() && isEnter) {

@@ -395,7 +395,7 @@ class Block implements I.Block {
 	};
 
 	isTextList (): boolean {
-		return (this.isText() && (this.content.style == I.TextStyle.Toggle)) || this.isTextNumbered() || this.isTextBulleted() || this.isTextCheckbox();
+		return (this.isText() && (this.isTextToggle() || this.isTextToggleHeader() || this.isTextNumbered() || this.isTextBulleted() || this.isTextCheckbox()));
 	};
 	
 	isTextToggle (): boolean {
