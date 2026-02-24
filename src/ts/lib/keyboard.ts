@@ -1137,8 +1137,6 @@ class Keyboard {
 		const isPopup = this.isPopup();
 		const html = $('html');
 		const body = $('body');
-		const theme = S.Common.getThemeClass();
-
 		html.addClass('printMedia');
 
 		if (isPopup) {
@@ -1154,7 +1152,7 @@ class Keyboard {
 		};
 
 		// Set background color for dark mode to ensure it's captured in PDF
-		if (theme && !clearTheme) {
+		if (html.hasClass('themeDark') && !clearTheme) {
 			const bgColor = getComputedStyle(document.body).getPropertyValue('--color-bg-primary').trim();
 			if (bgColor) {
 				html.css('background-color', bgColor);
@@ -1244,6 +1242,9 @@ class Keyboard {
 		if (isDark) {
 			options.printBackground = true;
 			options.margins = { top: 0, bottom: 0, left: 0, right: 0 };
+
+			// Temporarily apply dark theme so CSS variables are active for PDF capture
+			U.Common.addBodyClass('theme', 'dark');
 		};
 
 		this.printApply('print', !isDark);
