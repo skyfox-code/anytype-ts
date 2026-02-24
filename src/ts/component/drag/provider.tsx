@@ -1037,7 +1037,6 @@ const DragProvider = observer(forwardRef<I.DragProviderRefProps, Props>((props, 
 		lastValidTarget.current = null;
 		canDrop.current = false;
 		dragActive.current = false;
-		origin.current = null;
 	};
 
 	const setHoverData = (v: any) => {

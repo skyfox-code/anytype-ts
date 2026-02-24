@@ -197,7 +197,7 @@ export interface ViewComponent {
 	onRecordAdd?: (e: any, dir: number, groupId?: string) => void;
 	onTemplateAdd?: () => void;
 	onSortAdd?: (item: any, callBack?: () => void) => void;
-	onFilterAdd?: (item: any, callBack?: () => void) => void;
+	onFilterAdd?: (item: any, callBack?: (message: any) => void) => void;
 	onFilterAddClick?: (menuParam: I.MenuParam) => void;
 	toggleFilters?: () => void;
 	closeFilters?: () => void;
