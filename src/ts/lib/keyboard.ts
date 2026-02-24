@@ -1239,14 +1239,14 @@ class Keyboard {
 	onPrintToPDF (options: any) {
 		const rootId = this.getRootId();
 		const object = S.Detail.get(rootId, rootId);
-		const theme = S.Common.getThemeClass();
+		const isDark = options.background === 'dark';
 
-		if (theme) {
+		if (isDark) {
 			options.printBackground = true;
 			options.margins = { top: 0, bottom: 0, left: 0, right: 0 };
 		};
 
-		this.printApply('print', false);
+		this.printApply('print', !isDark);
 
 		// Wait for styles to be applied before capturing PDF
 		requestAnimationFrame(() => {
