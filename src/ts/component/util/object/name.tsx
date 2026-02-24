@@ -36,7 +36,7 @@ const ObjectName: FC<Props> = ({
 		const spaceview = U.Space.getSpaceview();
 		const chatMode = U.Object.getChatNotificationMode(spaceview, object.id);
 
-		if (chatMode != I.NotificationMode.All) {
+		if (chatMode == I.NotificationMode.Nothing) {
 			cn.push('isMuted');
 		};
 	};

@@ -243,7 +243,7 @@ const Graph = observer(forwardRef<GraphRefProps, Props>(({
 			const spaceview = U.Space.getSpaceview();
 			const chatMode = U.Object.getChatNotificationMode(spaceview, d.id);
 
-			d.isMuted = chatMode != I.NotificationMode.All;
+			d.isMuted = chatMode == I.NotificationMode.Nothing;
 		};
 
 		return d;
