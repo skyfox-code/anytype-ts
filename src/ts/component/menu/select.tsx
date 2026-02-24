@@ -199,22 +199,18 @@ const MenuSelect = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		const mh = useMaxWindowHeight ? getMaxHeight?.(keyboard.isPopup()) || 0 : maxHeight;
 
 		if (!noScroll) {
-			let height = 0;
-			if (withFilter) {
-				height += 52;
-			};
-			if (!withFilter) {
-				height += 16;
-			};
-
+			let height = withFilter ? 52 : 16;
 			if (!items.length) {
 				height += HEIGHT_ITEM;
 			} else {
 				height = items.reduce((res: number, current: any) => res + getRowHeight(current), height);
 			};
 
+			height += buttons.length ? 16 : 0;
+			height = buttons.reduce((res: number, current: any) => res + getRowHeight(current), height);
+
 			height = Math.min(mh || 370, height);
-			height = Math.max(44, height);
+			height = Math.max(80, height);
 
 			content.css({ height });
 		};
