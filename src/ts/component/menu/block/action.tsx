@@ -190,8 +190,7 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 				caption: (I.TextStyle[style] ? translate(U.String.toCamelCase(`blockName-${I.TextStyle[style]}`)) : ''),
 			};
 
-			const c1 = hasAction ? U.Menu.getActions(actionParam) : [];
-			const c2: any[] = [
+			const c1: any[] = [
 				hasLink ? { id: 'linkSettings', icon: `linkStyle${content.cardStyle}`, name: translate('commonPreview'), arrow: true } : null,
 				hasTurnFile ? { id: 'turnStyle', icon: 'customize', name: translate('commonAppearance'), arrow: true, isBlockFile: true } : null,
 				hasTurnFile ? changeFile : null,
@@ -200,9 +199,11 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 				hasAlign ? { id: 'align', icon: U.Data.alignHIcon(hAlign), name: translate('commonAlign'), arrow: true } : null,
 				hasColor ? { id: 'color', icon: 'color', name: translate('commonColor'), arrow: true, isTextColor: true, value: (color || 'default') } : null,
 				hasBg ? { id: 'background', icon: 'color', name: translate('commonBackground'), arrow: true, isBgColor: true, value: (bgColor || 'default') } : null,
+				hasText ? { id: 'clear', icon: 'clear', name: translate('libMenuClearStyle') } : null,
 			].filter(it => it);
+			const c2 = hasAction ? U.Menu.getActions(actionParam) : [];
 
-			sections = [ { children: c1 }, { children: c2 } ];
+			sections = [ { name: translate('commonText'), children: c1 }, { children: c2 } ];
 		};
 
 		return U.Menu.sectionsMap(sections);

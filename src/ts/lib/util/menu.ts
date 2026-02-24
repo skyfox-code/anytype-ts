@@ -328,10 +328,6 @@ class UtilMenu {
 			items.push({ id: 'turnObject', icon: 'object', name: translate('commonTurnIntoObject'), arrow: true });
 		};
 		
-		if (hasText) {
-			items.push({ id: 'clear', icon: 'clear', name: translate('libMenuClearStyle') });
-		};
-		
 		if (hasFile) {
 			items.push({ id: 'download', icon: 'download', name: translate('commonDownload') });
 		};

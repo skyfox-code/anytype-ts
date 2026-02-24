@@ -252,6 +252,7 @@
 	"commonOptions": "Options",
 	"commonShare": "Share",
 	"commonOpenInNewTab": "Open in New Tab",
+	"commonText": "Text",
 
 	"pluralDay": "day|days",
 	"pluralObject": "Object|Objects",
