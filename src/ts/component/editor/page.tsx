@@ -1439,7 +1439,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				if (block.isTextList() || block.isTextParagraph()) {
 					const parent = S.Block.getParentLeaf(rootId, block.id);
 					const parentElement = S.Block.getParentMapElement(rootId, block.id);
-					const canOutdent = parent && parentElement && parent.canHaveChildren() && block.isIndentable();
+					const canOutdent = parent && parentElement && parent.canHaveChildren() && block.isIndentable() && !parent.canToggle();
 
 					if (canOutdent) {
 						onTabBlock(e, range, true);	
@@ -1498,17 +1498,30 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			return;
 		};
 
-		Action.move(rootId, rootId, obj.id, [ block.id ], (isShift ? I.BlockPosition.Bottom : I.BlockPosition.Inner), () => {
-			if (isShift) {
+		if (isShift) {
+			Action.move(rootId, rootId, obj.id, [ block.id ], I.BlockPosition.Bottom, () => {
 				Action.move(rootId, rootId, block.id, parentElement.childrenIds.slice(idx), I.BlockPosition.Inner);
+				focus.setWithTimeout(block.id, { from: range.from, to: range.to }, 50);
+			});
+		} else {
+			const childrenIds = S.Block.getChildrenIds(rootId, block.id);
+
+			const doIndent = () => {
+				Action.move(rootId, rootId, obj.id, [ block.id ], I.BlockPosition.Inner, () => {
+					focus.setWithTimeout(block.id, { from: range.from, to: range.to }, 50);
+
+					if (next && next.canToggle()) {
+						S.Block.toggle(rootId, next.id, true);
+					};
+				});
 			};
 
-			focus.setWithTimeout(block.id, { from: range.from, to: range.to }, 50);
-
-			if (next && next.canToggle()) {
-				S.Block.toggle(rootId, next.id, true);
+			if (childrenIds.length) {
+				Action.move(rootId, rootId, block.id, childrenIds, I.BlockPosition.Bottom, doIndent);
+			} else {
+				doIndent();
 			};
-		});
+		};
 	};
 
 	// Split
@@ -1571,6 +1584,9 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				type: I.BlockType.Text,
 				style: I.TextStyle.Paragraph,
 			});
+		} else
+		if (block.isTextParagraph() && !length && parent && parent.canToggle()) {
+			Action.move(rootId, rootId, parent.id, [ block.id ], I.BlockPosition.Bottom);
 		} else {
 			blockSplit(block, range, isShift);
 		};
@@ -2271,9 +2287,31 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	
 	const blockMerge = (focused: I.Block, dir: number, length: number) => {
 		const { rootId } = props;
-		const next = S.Block.getNextBlock(rootId, focused.id, dir, it => it.isFocusable());
+		let next = S.Block.getNextBlock(rootId, focused.id, dir, it => it.isFocusable());
 		if (!next) {
 			return;
+		};
+
+		// When backspacing, if the target is inside a closed toggle, redirect to the toggle header
+		if (dir < 0) {
+			let parent = S.Block.getParentLeaf(rootId, next.id);
+			while (parent && !parent.isPage() && !parent.isLayoutDiv()) {
+				if (parent.canToggle() && !Storage.checkToggle(rootId, parent.id)) {
+					next = parent;
+					break;
+				};
+				parent = S.Block.getParentLeaf(rootId, parent.id);
+			};
+		};
+
+		// When deleting at end of a closed toggle, skip its descendants
+		if ((dir > 0) && focused.canToggle() && !Storage.checkToggle(rootId, focused.id)) {
+			next = S.Block.getNextBlock(rootId, focused.id, dir, it => {
+				return it.isFocusable() && !S.Block.checkIsChild(rootId, focused.id, it.id);
+			});
+			if (!next) {
+				return;
+			};
 		};
 
 		let blockId = '';
@@ -2299,11 +2337,6 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			// For delete (dir > 0): current block survives (focused), focus on it
 			const focusBlockId = dir < 0 ? next.id : focused.id;
 			focusSet(focusBlockId, to, to, true);
-
-			const parent = S.Block.getHighestParent(rootId, next.id);
-			if (parent && parent.canToggle() && !Storage.checkToggle(rootId, parent.id)) {
-				S.Block.toggle(rootId, parent.id, true);
-			};
 
 			analytics.event('DeleteBlock', { count: 1 });
 		};
@@ -2370,7 +2403,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			mode = I.BlockSplitMode.Top;
 		};
 
-		if (isCallout || isQuote) {
+		if (isCallout || isQuote || (isHeader && !isToggle)) {
 			style = content.style;
 		};
 
