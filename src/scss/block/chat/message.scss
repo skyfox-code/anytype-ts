@@ -51,7 +51,7 @@
 		.text { user-select: text !important; display: inline; }
 		.time { 
 			@include text-very-small; line-height: 14px; letter-spacing: -0.07px; color: var(--color-text-secondary); float: right; padding: 4px 0px 0px 4px;
-			display: flex; align-items: center; gap: 0px 4px;
+			display: flex; align-items: center; gap: 0px 4px; white-space: nowrap;
 		}
 
 		.attachments { padding: 4px; }

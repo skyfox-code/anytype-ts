@@ -403,7 +403,7 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 		const subId = getSubId();
 
 		if (subIds.includes(subId)) {
-			loadDepsAndReplies(S.Chat.getList(subId), () => scrollToBottomCheck());
+			loadDepsAndReplies(S.Chat.getList(subId).concat(message), () => scrollToBottomCheck());
 		};
 	};
 

@@ -575,8 +575,8 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 
 	const checkUrls = () => {
 		let text = getTextValue();
-		const urls = U.String.getUrlsFromText(text);
 
+		const urls = U.String.getUrlsFromText(text);
 		if (!urls.length) {
 			return;
 		};
@@ -594,18 +594,21 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 
 			let value = U.String.urlFix(url.value || '');
 			let type = I.MarkType.Link;
+			let fromAnotherSpace = false;
 
 			const route = U.Common.getRouteFromUrl(value);
 			if (route) {
 				const routeParam = U.Router.getParam(route);
 
-				if (routeParam.action == 'object') {
+				if (routeParam.spaceId != space) {
+					fromAnotherSpace = true;
+				};
+
+				if ((routeParam.action == 'object') && (routeParam.spaceId == space)) {
 					value = `${J.Constant.protocol}://${route}`;
 					type = I.MarkType.Object;
 				};
 			};
-
-			console.log(route, type, value);
 
 			// Internal object link: resolve as attachment and remove URL from text
 			if (type == I.MarkType.Object) {
@@ -626,7 +629,7 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 
 			setMarks(marks.current);
 
-			if (isUrl) {
+			if (isUrl && !fromAnotherSpace) {
 				addBookmark(value, true);
 			};
 		};
@@ -841,47 +844,10 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 
 		saveState([ ...attachments, ...list ]);
 		historySaveState();
-
-		/*
-		let cnt = 0;
-
-		const preloadIds = new Map<string, string>();
-		const cb = () => {
-			cnt++;
-			if (cnt == list.length) {
-				preloadIds.forEach((preloadId, itemId) => {
-					const item = list.find(it => it.id == itemId);
-
-					if (item) {
-						item.preloadId = preloadId;
-					};
-				});
-
-				saveState([ ...attachments, ...list ]);
-				historySaveState();
-			};
-		};
-
-		list.forEach(item => {
-			if (item.isTmp && U.Object.isFileLayout(item.layout) && item.path) {
-				preloadFile(item, (preloadId: string) => {
-					if (preloadId) {
-						preloadIds.set(item.id, preloadId);
-					};
-					cb();
-				});
-			} else {
-				cb()
-			};
-		});
-		*/
-	};
-
-	const preloadFile = (item: any, callBack: (preloadId: string) => void) => {
-		C.FileUpload(S.Common.space, '', item.path, I.FileType.None, {}, true, '', 0, rootId, '', (message: any) => callBack(message.preloadFileId));
 	};
 
 	const addBookmark = (url: string, fromText?: boolean) => {
+		console.trace();
 		const add = (param: any) => {
 			const { title, description, url } = param;
 			const item = {
