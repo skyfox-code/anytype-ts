@@ -469,6 +469,10 @@ class UtilObject {
 			param.ignoreHidden = false;
 		};
 
+		if (undefined === param.ignoreChat) {
+			param.ignoreChat = false;
+		};
+
 		U.Subscription.search(param, (message: any) => {
 			callBack?.((message.records || []).filter(it => !it._empty_));
 		});

@@ -994,7 +994,6 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			element: `#block-${U.Common.esc(block.id)}`,
 			recalcRect: () => {
 				const rect = U.Common.getSelectionRect();
-				console.log('RECT', JSON.stringify(rect));
 				return rect ? { ...rect, y: rect.y + win.scrollTop() } : null;
 			},
 			offsetX: () => {

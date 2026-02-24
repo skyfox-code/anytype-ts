@@ -87,8 +87,13 @@ class UtilSubscription {
 		const filters = U.Common.objectCopy(param.filters || []);
 		
 		let skipLayouts = [];
+		let ignoreChat = param.ignoreChat;
 
-		if (spaceview.isChat || spaceview.isOneToOne) {
+		if (undefined === ignoreChat) {
+			ignoreChat = spaceview.isChat || spaceview.isOneToOne;
+		};
+
+		if (ignoreChat) {
 			skipLayouts = skipLayouts.concat([ I.ObjectLayout.Chat, I.ObjectLayout.ChatOld ]);
 		};
 

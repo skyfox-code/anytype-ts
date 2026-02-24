@@ -604,6 +604,8 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 				};
 			};
 
+			console.log(route, type, value);
+
 			// Internal object link: resolve as attachment and remove URL from text
 			if (type == I.MarkType.Object) {
 				addBookmark(value);
