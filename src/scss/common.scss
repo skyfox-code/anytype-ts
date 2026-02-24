@@ -98,6 +98,7 @@ input, textarea, select { font-family: 'Inter'; }
 .over, .overPopup { overflow: hidden !important; }
 .empty, .emptyText { color: var(--color-text-tertiary); }
 .isDone { color: var(--color-text-secondary); }
+.isMuted { color: var(--color-text-secondary); }
 .placeholder { 
 	pointer-events: none; color: var(--color-text-tertiary); position: absolute; left: 0px; top: 0px; z-index: 0; width: 100%; height: 100%; cursor: text; 
 	overflow: hidden; white-space: nowrap; text-overflow: ellipsis;

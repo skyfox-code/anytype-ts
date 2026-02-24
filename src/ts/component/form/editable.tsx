@@ -42,6 +42,8 @@ interface EditableRefProps {
 	setRange: (range: I.TextRange) => void;
 	getNode: () => JQuery;
 	isFocused: () => boolean;
+	isAtDomEnd: () => boolean;
+	isAtDomStart: () => boolean;
 };
 
 const Editable = forwardRef<EditableRefProps, Props>(({
@@ -295,6 +297,32 @@ const Editable = forwardRef<EditableRefProps, Props>(({
 		};
 	}, []);
 
+	const isAtDomEnd = (): boolean => {
+		if (!editableRef.current || !Mark.hasZws(editableRef.current)) {
+			return true;
+		};
+
+		const range = getRange(editableRef.current);
+		if (!range) {
+			return true;
+		};
+
+		return range.end >= (editableRef.current.textContent || '').length;
+	};
+
+	const isAtDomStart = (): boolean => {
+		if (!editableRef.current || !Mark.hasZws(editableRef.current)) {
+			return true;
+		};
+
+		const range = getRange(editableRef.current);
+		if (!range) {
+			return true;
+		};
+
+		return range.start <= 0;
+	};
+
 	useImperativeHandle(ref, () => ({
 		placeholderCheck,
 		placeholderSet,
@@ -309,6 +337,8 @@ const Editable = forwardRef<EditableRefProps, Props>(({
 		setRange: setRangeHandler,
 		getNode: () => $(nodeRef.current),
 		isFocused: () => isFocused.current,
+		isAtDomEnd,
+		isAtDomStart,
 	}), []);
 
 	return (

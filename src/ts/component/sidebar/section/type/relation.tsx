@@ -20,7 +20,7 @@ const SidebarSectionTypeRelation = observer(forwardRef<I.SidebarSectionRef, I.Si
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     );
 
-	const skipKeys = [ 'name', 'description' ];
+	const skipKeys = [ 'name', 'description', 'setOf' ];
 	const filterMapper = it => it && !it.isArchived && !skipKeys.includes(it.relationKey);
 
 	const lists: any[] = [

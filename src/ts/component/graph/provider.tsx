@@ -153,8 +153,8 @@ const Graph = observer(forwardRef<GraphRefProps, Props>(({
 		worker.current.onerror = (e: any) => console.log(e);
 		worker.current.addEventListener('message', onMessage);
 
-		send('init', { 
-			canvas: transfer, 
+		send('init', {
+			canvas: transfer,
 			width,
 			height,
 			density,
@@ -237,6 +237,13 @@ const Graph = observer(forwardRef<GraphRefProps, Props>(({
 		if (U.Object.isTaskLayout(d.layout)) {
 			d.iconImage = '';
 			d.iconEmoji = '';
+		};
+
+		if (U.Object.isChatLayout(d.layout)) {
+			const spaceview = U.Space.getSpaceview();
+			const chatMode = U.Object.getChatNotificationMode(spaceview, d.id);
+
+			d.isMuted = chatMode == I.NotificationMode.Nothing;
 		};
 
 		return d;

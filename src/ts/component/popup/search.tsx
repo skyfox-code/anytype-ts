@@ -30,6 +30,7 @@ const PopupSearch = observer(forwardRef<{}, I.Popup>((props, ref) => {
 	const cacheRef = useRef({});
 	const itemsRef = useRef([]);
 	const nRef = useRef(0);
+	const [ activeIndex, setActiveIndex ] = useState(0);
 	const topRef = useRef(0);
 	const offsetRef = useRef(0);
 	const rangeRef = useRef<I.TextRange>({ from: 0, to: 0 });
@@ -163,8 +164,38 @@ const PopupSearch = observer(forwardRef<{}, I.Popup>((props, ref) => {
 			return;
 		};
 
-		listRef.current.scrollToRow(Math.max(0, nRef.current));
+		scrollToRow(items, nRef.current);
 		setActive(item);
+	};
+
+	const scrollToRow = (items: any[], index: number) => {
+		if (!listRef.current || !items.length) {
+			return;
+		};
+
+		const listHeight = listRef.current.props.height;
+		const rowH = getRowHeight(items[index], index);
+
+		let offset = 0;
+		let total = 0;
+
+		for (let i = 0; i < items.length; ++i) {
+			const h = getRowHeight(items[i], i);
+
+			if (i < index) {
+				offset += h;
+			};
+			total += h;
+		};
+
+		if (offset + rowH < listHeight) {
+			offset = 0;
+		} else {
+			offset -= listHeight / 2 - rowH / 2;
+		};
+
+		offset = Math.min(offset, total - listHeight + 16);
+		listRef.current.scrollToPosition(offset);
 	};
 
 	const setActive = (item: any) => {
@@ -175,6 +206,7 @@ const PopupSearch = observer(forwardRef<{}, I.Popup>((props, ref) => {
 		const node = $(nodeRef.current);
 
 		nRef.current = getItems().findIndex(it => it.id == item.id);
+		setActiveIndex(nRef.current);
 		unsetActive();
 
 		node.find(`#item-${U.Common.esc(item.id)}`).addClass('active');
@@ -835,8 +867,6 @@ const PopupSearch = observer(forwardRef<{}, I.Popup>((props, ref) => {
 					<>
 						<Shortcut keys={[ 'enter' ]} label={translate('popupSearchShortcutOpen')} />
 						<Shortcut keys={[ cmd, 'l' ]} label={translate('popupSearchShortcutCopyLink')} />
-						<Shortcut keys={[ cmd, 'enter' ]} label={translate('popupSearchShortcutNewTab')} />
-						<Shortcut keys={[ cmd, 'shift', 'enter' ]} label={translate('popupSearchShortcutNewWindow')} />
 					</>
 				) : ''}
 				{isAction ? (
@@ -901,7 +931,7 @@ const PopupSearch = observer(forwardRef<{}, I.Popup>((props, ref) => {
 				</div>
 			) : ''}
 
-			<Footer items={items} n={nRef.current} />
+			<Footer items={items} n={activeIndex} />
 		</div>
 	);
 

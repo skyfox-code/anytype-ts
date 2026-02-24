@@ -77,7 +77,7 @@ const Order = [
  * to produce correct nested HTML output.
  */
 const ZWS = '\u200B';
-const ZWS_TYPES = [ I.MarkType.Mention, I.MarkType.Emoji, I.MarkType.Link ];
+const ZWS_TYPES = [ ...Order ];
 
 class Mark {
 
@@ -661,7 +661,9 @@ class Mark {
 			const length = symbol.length;
 			const from = o + p1l;
 			const to = from + p2l - length * 2;
-			const replace = p2.replace(new RegExp(U.String.regexEscape(symbol), 'g'), '') + ' ';
+			const hasZws = ZWS_TYPES.includes(type);
+			const suffix = hasZws ? '' : ' ';
+			const replace = p2.replace(new RegExp(U.String.regexEscape(symbol), 'g'), '') + suffix;
 
 			let check = true;
 			for (const mark of checked) {
@@ -677,7 +679,7 @@ class Mark {
 			};
 
 			marks = this.adjust(marks, from, -length);
-			marks = this.adjust(marks, to, -length + 1);
+			marks = this.adjust(marks, to, -length + (hasZws ? 0 : 1));
 			marks.push({ type, range: { from, to }, param: '' });
 
 			text = U.String.insert(text, replace, o + p1l, o + p1l + p2l);
@@ -778,10 +780,6 @@ class Mark {
 	 * @returns {string} The attribute string.
 	 */
 	paramToAttr(type: I.MarkType, param: string): string {
-		if (!param) {
-			return '';
-		};
-
 		param = String(param || '');
 		param = param.replace(/\r?\n/g, '');
 		param = param.replace(/</g, '&lt;');
@@ -809,6 +807,11 @@ class Mark {
 
 			case I.MarkType.BgColor: {
 				attr = `class="bgColor bgColor-${param}"`;
+				break;
+			};
+
+			case I.MarkType.Code: {
+				attr = 'spellcheck="false"';
 				break;
 			};
 
@@ -874,29 +877,29 @@ class Mark {
 		if (a.from == b.from && a.to == b.to) {
 			return I.MarkOverlap.Equal;
 		} else
-			if (a.to < b.from) {
-				return I.MarkOverlap.Before;
-			} else
-				if (a.from > b.to) {
-					return I.MarkOverlap.After;
-				} else
-					if ((a.from <= b.from) && (a.to >= b.to)) {
-						return I.MarkOverlap.Outer;
-					} else
-						if ((a.from > b.from) && (a.to < b.to)) {
-							return I.MarkOverlap.Inner;
-						} else
-							if ((a.from == b.from) && (a.to < b.to)) {
-								return I.MarkOverlap.InnerLeft;
-							} else
-								if ((a.from > b.from) && (a.to == b.to)) {
-									return I.MarkOverlap.InnerRight;
-								} else
-									if ((a.from < b.from) && (a.to >= b.from)) {
-										return I.MarkOverlap.Left;
-									} else {
-										return I.MarkOverlap.Right;
-									};
+		if (a.to < b.from) {
+			return I.MarkOverlap.Before;
+		} else
+		if (a.from > b.to) {
+			return I.MarkOverlap.After;
+		} else
+		if ((a.from <= b.from) && (a.to >= b.to)) {
+			return I.MarkOverlap.Outer;
+		} else
+		if ((a.from > b.from) && (a.to < b.to)) {
+			return I.MarkOverlap.Inner;
+		} else
+		if ((a.from == b.from) && (a.to < b.to)) {
+			return I.MarkOverlap.InnerLeft;
+		} else
+		if ((a.from > b.from) && (a.to == b.to)) {
+			return I.MarkOverlap.InnerRight;
+		} else
+		if ((a.from < b.from) && (a.to >= b.from)) {
+			return I.MarkOverlap.Left;
+		} else {
+			return I.MarkOverlap.Right;
+		};
 	};
 
 	/**
@@ -940,7 +943,6 @@ class Mark {
 			I.MarkType.Search,
 			I.MarkType.Change,
 			I.MarkType.Highlight,
-			I.MarkType.Code,
 		].includes(t);
 	};
 

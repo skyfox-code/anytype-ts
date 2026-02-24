@@ -297,7 +297,9 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 		const oneSymbolBefore = range.current ? value[range.current.from - 1] : '';
 		const twoSymbolBefore = range.current ? value[range.current.from - 2] : '';
 		const menuOpenMention = S.Menu.isOpen('blockMention');
+		const menuOpenEmoji = S.Menu.isOpen('blockEmoji');
 		const canOpenMenuMention = !spaceview.isOneToOne && !menuOpenMention && (oneSymbolBefore == '@') && (!twoSymbolBefore || [ ' ', '\n', '(', '[', '"', '\'' ].includes(twoSymbolBefore));
+		const canOpenMenuEmoji = !menuOpenEmoji && (oneSymbolBefore == ':') && (!twoSymbolBefore || [ ' ', '\n', '(', '[', '"', '\'' ].includes(twoSymbolBefore));
 
 		let cleanedMarks = Mark.checkRanges(parsed.text, parsed.marks);
 
@@ -331,6 +333,10 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 			onMention(true);
 		};
 
+		if (canOpenMenuEmoji) {
+			onEmojiSearch();
+		};
+
 		if (menuOpenMention) {
 			window.clearTimeout(timeoutFilter.current);
 			timeoutFilter.current = window.setTimeout(() => {
@@ -349,6 +355,35 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 			keyboard.shortcut('backspace', e, () => {
 				if (!value.match('@')) {
 					S.Menu.close('blockMention');
+				};
+			});
+
+			return;
+		};
+
+		if (menuOpenEmoji) {
+			window.clearTimeout(timeoutFilter.current);
+			timeoutFilter.current = window.setTimeout(() => {
+				if (!range.current) {
+					return;
+				};
+
+				const d = range.current.from - filter.from;
+
+				if (d >= 0) {
+					const part = value.substring(filter.from, filter.from + d).replace(/^:/, '');
+
+					if (part.includes(' ')) {
+						S.Menu.close('blockEmoji');
+					} else {
+						S.Common.filterSetText(part);
+					};
+				};
+			}, 30);
+
+			keyboard.shortcut('backspace', e, () => {
+				if (!value.match(':')) {
+					S.Menu.close('blockEmoji');
 				};
 			});
 
@@ -409,8 +444,9 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 			content: res,
 		});
 
-		U.Common.clipboardCopy({ 
-			text: str, 
+		U.Common.clipboardCopy({
+			text: str,
+			html: Mark.toHtml(res.text, res.marks),
 			anytype: {
 				range,
 				blocks: [ block ],
@@ -568,6 +604,8 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 					type = I.MarkType.Object;
 				};
 			};
+
+			console.log(route, type, value);
 
 			// Internal object link: resolve as attachment and remove URL from text
 			if (type == I.MarkType.Object) {
@@ -1417,6 +1455,43 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 					},
 				},
 			});
+		});
+	};
+
+	const onEmojiSearch = () => {
+		if (!range) {
+			return;
+		};
+
+		let value = editableRef.current?.getTextValue();
+		let from = range.current.from;
+
+		value = U.String.cut(value, from - 1, from);
+		from--;
+
+		S.Common.filterSet(from, '');
+
+		const param = caretMenuParam();
+
+		S.Menu.open('blockEmoji', {
+			element: `#button-${U.Common.esc(block.id)}-${I.ChatButton.Emoji}`,
+			...param,
+			className: [ 'single', param.className ].join(' '),
+			data: {
+				rootId,
+				blockId: block.id,
+				marks: marks.current,
+				onChange: (native: string, newMarks: I.Mark[], from: number, to: number) => {
+					if (S.Menu.isAnimating('blockEmoji')) {
+						return;
+					};
+
+					setMarks(newMarks);
+					value = U.String.insert(value, ' ', from, from);
+
+					updateMarkup(value, { from: to, to });
+				},
+			},
 		});
 	};
 

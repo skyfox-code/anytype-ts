@@ -1484,11 +1484,8 @@ const BlockDataview = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				obj.toggleClass('isVertical', node.width() <= getWrapperWidth() / 2);
 			};
 
-			controlsRef.current?.resize();
-
-			if (viewRef.current && viewRef.current.resize) {
-				viewRef.current.resize();
-			};
+			controlsRef.current?.resize?.();
+			viewRef.current?.resize?.();
 		});
 	};
 

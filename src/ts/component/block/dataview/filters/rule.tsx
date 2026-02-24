@@ -106,18 +106,19 @@ const DataviewFilterRule = observer(forwardRef<{}, Props>((props, ref) => {
 				if (quickOption == I.FilterQuickOption.ExactDate) {
 					let mask = '';
 					let ph = '';
+					let inputFormat = '';
 
 					switch (dateFormat) {
-						case I.DateFormat.ISO: { mask = '9999.99.99'; ph = 'yyyy.mm.dd'; break; };
-						case I.DateFormat.ShortUS: { mask = '99.99.9999'; ph = 'mm.dd.yyyy'; break; };
-						default: { mask = '99.99.9999'; ph = 'dd.mm.yyyy'; break; };
+						case I.DateFormat.ISO: { mask = '9999.99.99'; ph = 'yyyy.mm.dd'; inputFormat = 'Y.m.d'; break; };
+						case I.DateFormat.ShortUS: { mask = '99.99.9999'; ph = 'mm.dd.yyyy'; inputFormat = 'm.d.Y'; break; };
+						default: { mask = '99.99.9999'; ph = 'dd.mm.yyyy'; inputFormat = 'd.m.Y'; break; };
 					};
 
 					dateValue = (
 						<Input
 							key={`${nodeId}-date-${quickOption}`}
 							ref={inputRef}
-							value={value ? U.Date.date('d.m.Y', value) : ''}
+							value={value ? U.Date.date(inputFormat, value) : ''}
 							className="round c36"
 							placeholder={ph}
 							maskOptions={{
@@ -142,7 +143,7 @@ const DataviewFilterRule = observer(forwardRef<{}, Props>((props, ref) => {
 										canClear: true,
 										onChange: (v: number) => {
 											onUpdate(index, { value: v });
-											inputRef.current?.setValue(v ? U.Date.date('d.m.Y', v) : '');
+											inputRef.current?.setValue(v ? U.Date.date(inputFormat, v) : '');
 										},
 									},
 								});

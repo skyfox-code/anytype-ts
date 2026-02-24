@@ -134,7 +134,7 @@ const MenuFilterList = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 				const filterOption: any = filterOptions.find(it => it.id == quickOption) || {};
 
 				if (quickOption == I.FilterQuickOption.ExactDate) {
-					return value !== null ? U.Date.date('d.m.Y', value) : '';
+					return value !== null ? U.Date.dateWithFormat(S.Common.dateFormat, value) : '';
 				} else
 				if ([ I.FilterQuickOption.NumberOfDaysAgo, I.FilterQuickOption.NumberOfDaysNow ].includes(quickOption)) {
 					const v = Number(value) || 0;

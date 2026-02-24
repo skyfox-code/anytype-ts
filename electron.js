@@ -201,6 +201,7 @@ function createWindow () {
 	MenuManager.setWindow(mainWindow);
 	MenuManager.initMenu();
 	MenuManager.initTray();
+	MenuManager.initDock();
 
 	installNativeMessagingHost();
 	Util.registerLinuxProtocolHandler();

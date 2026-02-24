@@ -1,9 +1,9 @@
-import React, { forwardRef, useEffect, useState, useRef, useImperativeHandle } from 'react';
+import React, { forwardRef, useEffect, useLayoutEffect, useState, useRef, useImperativeHandle } from 'react';
 import $ from 'jquery';
 import raf from 'raf';
 import { observer } from 'mobx-react';
 import { Header, Footer, Loader, Block, Deleted, HeadSimple, EditorControls } from 'Component';
-import { I, M, C, S, U, J, Action, keyboard, Dataview, analytics, sidebar, Onboarding } from 'Lib';
+import { I, M, C, S, U, J, Action, keyboard, Dataview, analytics, sidebar, Onboarding, Storage } from 'Lib';
 
 const PageMainSet = observer(forwardRef<I.PageRef, I.PageComponent>((props, ref) => {
 
@@ -19,6 +19,8 @@ const PageMainSet = observer(forwardRef<I.PageRef, I.PageComponent>((props, ref)
 	const rootId = keyboard.getRootId(isPopup);
 	const check = U.Data.checkDetails(rootId, rootId, [ 'layout' ]);
 	const idRef = useRef('');
+	const scrollTopRef = useRef(0);
+	const isClosingRef = useRef(false);
 
 	const unbind = () => {
 		const ns = U.Common.getEventNamespace(isPopup);
@@ -55,6 +57,7 @@ const PageMainSet = observer(forwardRef<I.PageRef, I.PageComponent>((props, ref)
 
 	const open = () => {
 		idRef.current = rootId;
+		scrollTopRef.current = Storage.getScroll('set', rootId, isPopup);
 		setIsDeleted(false);
 		setIsLoading(true);
 
@@ -79,6 +82,31 @@ const PageMainSet = observer(forwardRef<I.PageRef, I.PageComponent>((props, ref)
 
 			resize();
 
+			if (scrollTopRef.current) {
+				const target = scrollTopRef.current;
+				scrollTopRef.current = 0;
+
+				let cnt = 0;
+				const restore = () => {
+					cnt++;
+
+					const container = U.Common.getScrollContainer(isPopup);
+					const el = container.get(0);
+
+					if (!el) {
+						return;
+					};
+
+					if ((el.scrollHeight > target) || (cnt >= 30)) {
+						container.scrollTop(target);
+					} else {
+						window.setTimeout(restore, 50);
+					};
+				};
+
+				window.setTimeout(restore, 50);
+			};
+
 			if (U.Object.isTypeLayout(object.layout)) {
 				window.setTimeout(() => Onboarding.start('typeResetLayout', isPopup), 50);
 				analytics.event('ScreenType', { objectType: object.id });
@@ -96,6 +124,14 @@ const PageMainSet = observer(forwardRef<I.PageRef, I.PageComponent>((props, ref)
 			return;
 		};
 
+		if (isClosingRef.current) {
+			return;
+		};
+
+		const container = U.Common.getScrollContainer(isPopup);
+		const top = container.scrollTop();
+
+		Storage.setScroll('set', rootId, top, isPopup);
 		S.Common.getRef('selectionProvider')?.renderSelection();
 	};
 
@@ -235,6 +271,13 @@ const PageMainSet = observer(forwardRef<I.PageRef, I.PageComponent>((props, ref)
 			</>
 		);
 	};
+
+	useLayoutEffect(() => {
+		isClosingRef.current = false;
+		return () => {
+			isClosingRef.current = true;
+		};
+	}, []);
 
 	useEffect(() => {
 		open();

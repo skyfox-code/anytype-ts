@@ -68,7 +68,7 @@ const DataviewFilterItem = observer(forwardRef<{}, Props>((props, ref) => {
 			let filterName = String(filterOption.name || '').toLowerCase();
 
 			if (quickOption == I.FilterQuickOption.ExactDate) {
-				v.push(value !== null ? U.Date.date('d.m.Y', value) : '');
+				v.push(value !== null ? U.Date.dateWithFormat(S.Common.dateFormat, value) : '');
 			} else
 			if ([ I.FilterQuickOption.NumberOfDaysAgo, I.FilterQuickOption.NumberOfDaysNow ].includes(quickOption)) {
 				value = Number(value) || 0;

@@ -2,7 +2,7 @@ import React, { forwardRef, useRef, useState, useEffect, useImperativeHandle, us
 import $ from 'jquery';
 import { observer } from 'mobx-react';
 import { Footer, Header, ListObjectManager, Icon, Title } from 'Component';
-import { I, U, J, translate, Action, analytics, keyboard } from 'Lib';
+import { I, U, J, translate, Action, analytics, keyboard, sidebar } from 'Lib';
 
 const PageMainArchive = observer(forwardRef<I.PageRef, I.PageComponent>((props, ref) => {
 
@@ -63,6 +63,7 @@ const PageMainArchive = observer(forwardRef<I.PageRef, I.PageComponent>((props, 
 
 	useEffect(() => {
 		analytics.event('ScreenBin');
+		sidebar.rightPanelClose(isPopup, false);
 	}, []);
 
 	useEffect(() => {

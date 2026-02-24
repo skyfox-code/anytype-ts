@@ -227,15 +227,15 @@ const WidgetObject = observer(forwardRef<{}, I.WidgetComponent>((props, ref) => 
 				</div>
 				<div className="side right">
 					{isChat && (!hasUnreadSection || isUnread) ? <ChatCounter chatId={item.id} /> : ''}
-					<div className="buttons">
-						{canAdd ? (
+					{canAdd ? (
+						<div className="buttons">
 							<Icon
 								className="plus"
 								tooltipParam={{ text: translate('commonCreateNewObject') }}
 								onClick={e => onCreate(e, item)}
 							/>
-						) : ''}
-					</div>
+						</div>
+					) : ''}
 				</div>
 			</div>
 		);

@@ -83,7 +83,7 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 		unbind();
 
 		win.on(`messageAdd.${ns}`, (e, message, subIds) => onMessageAdd(message, subIds));
-		win.on(`messageUpdate.${ns}`, (e, message, subIds) => onMessageUpdate(message, subIds));
+		win.on(`messageUpdate.${ns}`, (e, message, subIds) => onMessageAdd(message, subIds));
 		win.on(`reactionUpdate.${ns}`, () => scrollToBottomCheck());
 		win.on(`focus.${ns}`, () => readScrolledMessages());
 
@@ -303,24 +303,26 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 		const depsSubId = `${subId}-deps`;
 		const keys = U.Subscription.chatRelationKeys();
 
-		U.Subscription.subscribe({
-			subId: depsSubId,
-			filters: [
-				{ relationKey: 'id', condition: I.FilterCondition.In, value: ids },
-			],
-			keys,
-			noDeps: true,
-			crossSpace: true,
-		}, (message: any) => {
-			if (!message.error.code) {
-				const records = (message.records || []).concat(message.dependencies || []);
+		U.Subscription.destroyList([ depsSubId ], false, () => {
+			U.Subscription.subscribe({
+				subId: depsSubId,
+				filters: [
+					{ relationKey: 'id', condition: I.FilterCondition.In, value: ids },
+				],
+				keys,
+				noDeps: true,
+				crossSpace: true,
+			}, (message: any) => {
+				if (!message.error.code) {
+					const records = (message.records || []).concat(message.dependencies || []);
 
-				for (const record of records) {
-					S.Detail.update(subId, { id: record.id, details: record }, true);
+					for (const record of records) {
+						S.Detail.update(subId, { id: record.id, details: record }, true);
+					};
 				};
-			};
 
-			callBack?.();
+				callBack?.();
+			});
 		});
 	};
 
@@ -398,12 +400,6 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 	};
 
 	const onMessageAdd = (message: I.ChatMessage, subIds: string[]) => {
-		if (subIds.includes(getSubId())) {
-			loadDepsAndReplies([ message ], () => scrollToBottomCheck());
-		};
-	};
-
-	const onMessageUpdate = (message: I.ChatMessage, subIds: string[]) => {
 		const subId = getSubId();
 
 		if (subIds.includes(subId)) {
@@ -417,17 +413,13 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 		};
 
 		const message = `#block-${U.Common.esc(block.id)} #item-${U.Common.esc(item.id)}`;
-		const container = U.Common.getScrollContainer(isPopup);
-
 		const menuParam: Partial<I.MenuParam> = {
 			classNameWrap: 'fromBlock',
 			onOpen: () => {
 				$(message).addClass('hover');
-				container.addClass('over');
 			},
 			onClose: () => {
 				$(message).removeClass('hover');
-				container.removeClass('over');
 			},
 			data: {
 				options: getMessageMenuOptions(item, onMore),

@@ -588,6 +588,10 @@ $(() => {
 	electron.on('enter-full-screen', () => body.addClass('isFullScreen'));
 	electron.on('leave-full-screen', () => body.removeClass('isFullScreen'));
 	win.off('resize.tabs').on('resize.tabs', resize);
+	container.on('scroll', () => {
+		updateMarkerPosition(activeId);
+		updateBackgroundPosition();
+	});
 
 	function ucFirst (str) {
 		return String(str || '').charAt(0).toUpperCase() + str.slice(1).toLowerCase();

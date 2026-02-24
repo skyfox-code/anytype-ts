@@ -112,6 +112,11 @@ html.themeDark {
 		.icon.search { background-image: url('#{$themePath}/icon/menu/action/search0.svg'); }
 	}
 
+	.utilOptionSelect {
+		.icon.checkbox { background-image: url('#{$themePath}/icon/menu/checkbox0.svg'); }
+		.icon.checkbox.active { background-image: url('#{$themePath}/icon/menu/checkbox1.svg'); }
+	}
+
 	#root-loader {
 		.logo { background-image: url('~img/logo/white.svg'); }
 	}
