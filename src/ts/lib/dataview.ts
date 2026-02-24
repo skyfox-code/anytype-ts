@@ -1168,7 +1168,7 @@ class Dataview {
 	 * @param {any} filter - The filter to add.
 	 * @param {function} [callBack] - Optional callback after adding.
 	 */
-	addFilter (rootId: string, blockId: string, viewId: string, filter: any, callBack?: () => void) {
+	addFilter (rootId: string, blockId: string, viewId: string, filter: any, callBack?: (message: any) => void) {
 		Storage.toggleViewFilter(rootId, viewId, true);
 
 		C.BlockDataviewFilterAdd(rootId, blockId, viewId, filter, callBack);

@@ -1065,12 +1065,24 @@ const BlockDataview = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				onFilterAdd({
 					relationKey: item.relationKey || item.id,
 					...Dataview.getDefaultFilterValues(item),
+				}, (message: any) => {
+					onFilterOpen(message.filterId);
 				});
 			},
 			onAdvancedFilterAdd: () => {
-				onFilterAdd(Dataview.getDefaultAdvancedFilter());
+				onFilterAdd(Dataview.getDefaultAdvancedFilter(), (message: any) => {
+					onFilterOpen(message.filterId);
+				});
 			},
 		});
+	};
+
+	const onFilterOpen = (filterId: string) => {
+		if (!filterId) {
+			return;
+		};
+
+		window.setTimeout(() => filtersRef.current?.openFilterMenu(filterId), J.Constant.delay.menu);
 	};
 
 	const closeFilters = () => {
@@ -1084,13 +1096,13 @@ const BlockDataview = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		setDummy(dummy + 1);
 	};
 
-	const onFilterAdd = (item: any, callBack?: () => void) => {
+	const onFilterAdd = (item: any, callBack?: (message: any) => void) => {
 		const view = getView();
 		const object = getTarget();
 		const relation = S.Record.getRelationByKey(item.relationKey);
 
-		Dataview.addFilter(rootId, block.id, view.id, item, () => {
-			callBack?.();
+		Dataview.addFilter(rootId, block.id, view.id, item, (message: any) => {
+			callBack?.(message);
 
 			analytics.event('AddFilter', {
 				condition: item.condition,
