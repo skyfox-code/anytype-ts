@@ -329,13 +329,21 @@ const App: FC = () => {
 
 		const onObtainToken = (token: string) => {
 			if (!token) {
+				S.Common.redirectSet(route);
+				U.Router.go('/auth/setup/init', routeParam);
 				return;
 			};
 
+			const { dataPath } = S.Common;
+			const { networkConfig } = S.Auth;
+			const { mode, path: networkPath } = networkConfig;
+
 			S.Auth.tokenSet(token);
-			C.AccountSelect(accountId, '', 0, '', (message: any) => {
+			C.AccountSelect(accountId, dataPath, mode, networkPath, (message: any) => {
 				if (message.error.code) {
 					console.error('[App.onInit]:', message.error.description);
+					S.Common.redirectSet(route);
+					U.Router.go('/auth/setup/init', routeParam);
 					return;
 				};
 
@@ -343,6 +351,8 @@ const App: FC = () => {
 
 				if (!account) {
 					console.error('[App.onInit]: Account not found');
+					S.Common.redirectSet(route);
+					U.Router.go('/auth/setup/init', routeParam);
 					return;
 				};
 
