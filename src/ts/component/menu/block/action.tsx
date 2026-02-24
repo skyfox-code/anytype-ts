@@ -376,37 +376,37 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 				break;
 			};
 
-			case 'color': {
-				menuId = 'blockColor';
-
-				menuParam.data = Object.assign(menuParam.data, {
-					value: color,
-					onChange: (color: string) => {
-						C.BlockTextListSetColor(rootId, blockIds, color, (message: any) => {
-							setFocus(blockIds[0]);
-							analytics.event('ChangeBlockColor', { color, count: blockIds.length });
-						});
-
-						close();
-					}
-				});
-				break;
-			};
-				
+			case 'color':
 			case 'background': {
 				ids = selection?.getForClick(blockId, false, false);
-				menuId = 'blockBackground';
+
+				let cmd = '';
+				let event = '';
+				let value = '';
+
+				if (item.itemId == 'color') {
+					menuId = 'blockColor';
+					cmd = 'BlockTextListSetColor';
+					event = 'ChangeBlockColor';
+					value = color;
+				};
+				if (item.itemId == 'background') {
+					menuId = 'blockBackground';
+					cmd = 'BlockListSetBackgroundColor';
+					event = 'ChangeBlockBackground';
+					value = bgColor;
+				};
 
 				menuParam.data = Object.assign(menuParam.data, {
-					value: bgColor,
+					value,
 					onChange: (color: string) => {
-						C.BlockListSetBackgroundColor(rootId, ids, color, (message: any) => {
-							setFocus(blockIds[0]);
-							analytics.event('ChangeBlockBackground', { color, count: blockIds.length });
+						C[cmd](rootId, ids, color, () => {
+							setFocus(ids[0]);
+							analytics.event(event, { color: value, count: ids.length });
 						});
 
 						close();
-					}
+					},
 				});
 				break;
 			};
