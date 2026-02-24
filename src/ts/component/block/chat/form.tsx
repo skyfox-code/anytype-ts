@@ -444,8 +444,9 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 			content: res,
 		});
 
-		U.Common.clipboardCopy({ 
-			text: str, 
+		U.Common.clipboardCopy({
+			text: str,
+			html: Mark.toHtml(res.text, res.marks),
 			anytype: {
 				range,
 				blocks: [ block ],
