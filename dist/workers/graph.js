@@ -1375,7 +1375,7 @@ drawNode = (d) => {
 		const labelScale = 1 / transform.k;
 		label.scale.set(labelScale);
 		label.position.set(d.x, d.y + radius + 4 / transform.k);
-		label.style.fill = io || isSelected ? (isSelected ? parseColor(data.colors.selected) : parseColor(data.colors.highlight)) : parseColor(data.colors.text);
+		label.style.fill = io || isSelected ? (isSelected ? parseColor(data.colors.selected) : parseColor(data.colors.highlight)) : parseColor(d.isMuted ? data.colors.muted : data.colors.text);
 		label.text = d.shortName || '';
 		label.visible = true;
 		label.alpha = alpha;

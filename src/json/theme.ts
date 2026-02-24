@@ -56,6 +56,7 @@ export default {
 			arrow: '#b6b6b6',
 			node: '#b6b6b6',
 			text: '#b6b6b6',
+			muted: '#828282',
 			highlight: '#ffb522',
 			selected: '#2aa7ee',
 			iconBg: '#000000'
@@ -140,6 +141,7 @@ export default {
 			arrow: '#555555',
 			node: '#ababab',
 			text: '#ababab',
+			muted: '#ababab',
 			highlight: '#ffb522',
 			selected: '#2aa7ee',
 			iconBg: '#252525'

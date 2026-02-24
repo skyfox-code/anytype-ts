@@ -239,6 +239,13 @@ const Graph = observer(forwardRef<GraphRefProps, Props>(({
 			d.iconEmoji = '';
 		};
 
+		if (U.Object.isChatLayout(d.layout)) {
+			const spaceview = U.Space.getSpaceview();
+			const chatMode = U.Object.getChatNotificationMode(spaceview, d.id);
+
+			d.isMuted = chatMode != I.NotificationMode.All;
+		};
+
 		return d;
 	};
 
