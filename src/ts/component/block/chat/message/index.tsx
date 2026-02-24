@@ -232,7 +232,7 @@ const ChatMessage = observer(forwardRef<ChatMessageRefProps, I.ChatMessageCompon
 	const cnBubble = [ 'bubble' ];
 	const editedLabel = modifiedAt ? translate('blockChatMessageEdited') : '';
 	const controls = [];
-	const text = U.String.sanitize(U.String.lbBr(Mark.toHtml(content.text, content.marks)));
+	const text = U.String.sanitize(U.String.lbBr(Mark.toHtml(content.text, content.marks))).replace(/\u200B/g, '');
 	const cns = [ 'status', 'syncing' ];
 
 	if (attachmentsLayout) {
