@@ -439,6 +439,18 @@ class MenuManager {
 		Menu.setApplicationMenu(this.menu);
 	};
 
+	initDock () {
+		if (!is.macos) {
+			return;
+		};
+
+		const WindowManager = require('./window.js');
+
+		app.dock.setMenu(Menu.buildFromTemplate([
+			{ label: Util.translate('electronMenuNewWindow'), click: () => WindowManager.createMain({ isChild: true }) },
+		]));
+	};
+
 	initTray () {
 		const { config } = ConfigManager;
 		const WindowManager = require('./window.js');
