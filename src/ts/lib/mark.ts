@@ -780,10 +780,6 @@ class Mark {
 	 * @returns {string} The attribute string.
 	 */
 	paramToAttr(type: I.MarkType, param: string): string {
-		if (!param) {
-			return '';
-		};
-
 		param = String(param || '');
 		param = param.replace(/\r?\n/g, '');
 		param = param.replace(/</g, '&lt;');
@@ -811,6 +807,11 @@ class Mark {
 
 			case I.MarkType.BgColor: {
 				attr = `class="bgColor bgColor-${param}"`;
+				break;
+			};
+
+			case I.MarkType.Code: {
+				attr = 'spellcheck="false"';
 				break;
 			};
 
@@ -876,29 +877,29 @@ class Mark {
 		if (a.from == b.from && a.to == b.to) {
 			return I.MarkOverlap.Equal;
 		} else
-			if (a.to < b.from) {
-				return I.MarkOverlap.Before;
-			} else
-				if (a.from > b.to) {
-					return I.MarkOverlap.After;
-				} else
-					if ((a.from <= b.from) && (a.to >= b.to)) {
-						return I.MarkOverlap.Outer;
-					} else
-						if ((a.from > b.from) && (a.to < b.to)) {
-							return I.MarkOverlap.Inner;
-						} else
-							if ((a.from == b.from) && (a.to < b.to)) {
-								return I.MarkOverlap.InnerLeft;
-							} else
-								if ((a.from > b.from) && (a.to == b.to)) {
-									return I.MarkOverlap.InnerRight;
-								} else
-									if ((a.from < b.from) && (a.to >= b.from)) {
-										return I.MarkOverlap.Left;
-									} else {
-										return I.MarkOverlap.Right;
-									};
+		if (a.to < b.from) {
+			return I.MarkOverlap.Before;
+		} else
+		if (a.from > b.to) {
+			return I.MarkOverlap.After;
+		} else
+		if ((a.from <= b.from) && (a.to >= b.to)) {
+			return I.MarkOverlap.Outer;
+		} else
+		if ((a.from > b.from) && (a.to < b.to)) {
+			return I.MarkOverlap.Inner;
+		} else
+		if ((a.from == b.from) && (a.to < b.to)) {
+			return I.MarkOverlap.InnerLeft;
+		} else
+		if ((a.from > b.from) && (a.to == b.to)) {
+			return I.MarkOverlap.InnerRight;
+		} else
+		if ((a.from < b.from) && (a.to >= b.from)) {
+			return I.MarkOverlap.Left;
+		} else {
+			return I.MarkOverlap.Right;
+		};
 	};
 
 	/**
