@@ -134,6 +134,7 @@
 	}
 
 	/* Shortcut conflict */
+	.menu.menuSelect.shortcutConflict { width: var(--menu-width-set); }
 	.menu.menuSelect.shortcutConflict {
 		.content { height: unset !important; }
 	}

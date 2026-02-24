@@ -465,6 +465,13 @@ class Keyboard {
 
 				};
 
+			// Pin/Unpin Tab
+			this.shortcut('pinTab', e, () => {
+				e.preventDefault();
+
+				Renderer.send(S.Common.isPinned ? 'unpinTab' : 'pinTab', S.Common.tabId);
+			});
+
 			// Switch space
 			for (let i = 1; i <= 9; i++) {
 				const id = Number(i) - 1;
