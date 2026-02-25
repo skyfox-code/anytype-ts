@@ -298,15 +298,16 @@ class UtilMenu {
 	getActions (param: ActionMenuParam) {
 		const { rootId, blockId, hasText, hasFile, hasCommon, hasCopyMedia, hasBookmark, hasDataview, hasTurnObject, hasClipboard, count } = param;
 		const cmd = keyboard.cmdSymbol();
-		const copyName = `${translate('commonDuplicate')} ${U.Common.plural(count, translate('pluralBlock'))}`;
+		const copyName = `${translate('commonDuplicate')} ${U.Common.plural(count, translate('pluralLCBlock'))}`;
 
 		let items: any[] = [];
 
+		if (hasTurnObject) {
+			items.push({ id: 'turnObject', icon: 'object', name: translate('commonTurnIntoObject'), arrow: true });
+		};
+
 		if (hasCommon) {
-			items = items.concat([
-				{ id: 'remove', icon: 'remove', name: `${translate('commonDelete')} ${U.Common.plural(count, translate('pluralLCBlock'))}`, caption: 'Del' },
-				{ id: 'copy', icon: 'copy', name: copyName, caption: keyboard.getCaption('duplicate') },
-			]);
+			items.push({ id: 'move', icon: 'move', name: translate('commonMoveTo'), arrow: true });
 		};
 
 		if (hasClipboard) {
@@ -315,17 +316,6 @@ class UtilMenu {
 				{ id: 'clipboardCut', icon: 'clipboard-cut', name: translate('commonCut'), caption: `${cmd} + X` },
 				{ id: 'clipboardPaste', icon: 'clipboard-paste', name: translate('commonPaste'), caption: `${cmd} + V` },
 			]);
-		};
-
-		if (hasCommon) {
-			items = items.concat([
-				{ isDiv: true },
-				{ id: 'move', icon: 'move', name: translate('commonMoveTo'), arrow: true },
-			]);
-		};
-
-		if (hasTurnObject) {
-			items.push({ id: 'turnObject', icon: 'object', name: translate('commonTurnIntoObject'), arrow: true });
 		};
 		
 		if (hasFile) {
@@ -349,6 +339,13 @@ class UtilMenu {
 
 		if (hasFile || hasBookmark || hasDataview) {
 			items.push({ id: 'openAsObject', icon: 'expand', name: translate('commonOpenObject') });
+		};
+
+		if (hasCommon) {
+			items = items.concat([
+				{ id: 'copy', icon: 'copy', name: copyName, caption: keyboard.getCaption('duplicate') },
+				{ id: 'remove', icon: 'remove', name: `${translate('commonDelete')} ${U.Common.plural(count, translate('pluralLCBlock'))}`, caption: 'Del' },
+			]);
 		};
 
 		return items.map(it => ({ ...it, isAction: true }));
