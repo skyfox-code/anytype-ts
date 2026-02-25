@@ -480,7 +480,7 @@ class WindowManager {
 		Util.send(win, 'remove-tab', id);
 		this.updateTabBarVisibility(win);
 
-		if (updateActive) {
+		if (updateActive && (win.activeTabId == id)) {
 			const newIndex = index < win.views.length ? index : index - 1;
 			this.setActiveTab(win, win.views[newIndex]?.id);
 		};
