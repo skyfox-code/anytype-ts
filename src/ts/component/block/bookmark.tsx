@@ -45,6 +45,7 @@ const BlockBookmark = observer(forwardRef<I.BlockRef, I.BlockComponent>((props, 
 			return;
 		};
 
+		e.stopPropagation();
 		open();
 	};
 

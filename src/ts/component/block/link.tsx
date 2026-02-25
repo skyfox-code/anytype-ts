@@ -61,6 +61,7 @@ const BlockLink = observer(forwardRef<I.BlockRef, I.BlockComponent>((props, ref)
 			return;
 		};
 
+		e.stopPropagation();
 		U.Object.openEvent(e, object);
 	};
 	
@@ -199,11 +200,11 @@ const BlockLink = observer(forwardRef<I.BlockRef, I.BlockComponent>((props, ref)
 			<div 
 				ref={cardRef}
 				className={cnc.join(' ')}
-				onClick={onCardClick}
+				onMouseDown={onCardClick}
 			>
 				<div id="sides" className={cns.join(' ')}>
 					<div key="sideLeft" className={cnl.join(' ')}>
-						<div className="relationItem cardName" onClick={onNameClick}>
+						<div className="relationItem cardName" onMouseDown={onNameClick}>
 							{icon}
 							<ObjectName 
 								object={object} 
