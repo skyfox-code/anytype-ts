@@ -249,6 +249,8 @@ const SidebarPageVault = observer(forwardRef<{}, I.SidebarPageComponent>((props,
 	const listRef = useRef<List>(null);
 	const filterRef = useRef(null);
 	const timeout = useRef(0);
+	const scrollTopRef = useRef(0);
+	const prevItemsRef = useRef<{ id: string; height: number }[]>([]);
 	const cache = new CellMeasurerCache({
 		defaultHeight: HEIGHT_ITEM,
 		fixedWidth: true,
@@ -604,6 +606,33 @@ const SidebarPageVault = observer(forwardRef<{}, I.SidebarPageComponent>((props,
 		};
 	}, []);
 
+	useEffect(() => {
+		const prev = prevItemsRef.current;
+		const currentIds = new Set(items.map(it => it.id));
+
+		if (prev.length && (prev.length > items.length) && (scrollTopRef.current > 0)) {
+			let removedHeightAbove = 0;
+			let accHeight = 0;
+
+			for (const p of prev) {
+				if (p.id && !currentIds.has(p.id) && (accHeight < scrollTopRef.current)) {
+					removedHeightAbove += p.height;
+				};
+				accHeight += p.height;
+			};
+
+			if (removedHeightAbove > 0) {
+				const newTop = Math.max(0, scrollTopRef.current - removedHeightAbove);
+				scrollTopRef.current = newTop;
+
+				const node = getNode();
+				node.find('.ReactVirtualized__Grid').scrollTop(newTop);
+			};
+		};
+
+		prevItemsRef.current = items.map(it => ({ id: it.id, height: getRowHeight(it) }));
+	});
+
 	return (
 		<>
 			<div onContextMenu={onVaultContext} id="head" className={cnh.join(' ')}>
@@ -682,7 +711,7 @@ const SidebarPageVault = observer(forwardRef<{}, I.SidebarPageComponent>((props,
 											onRowsRendered={onRowsRendered}
 											overscanRowCount={10}
 											scrollToAlignment="center"
-											onScroll={() => {}}
+											onScroll={({ scrollTop }) => scrollTopRef.current = scrollTop}
 										/>
 									</SortableContext>
 								</DndContext>
