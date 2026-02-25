@@ -9,7 +9,6 @@ import { Popup } from './popup';
 import { Notification } from './notification';
 import { Extension } from './extension';
 import { Chat } from './chat';
-import { Comment } from './comment';
 import { Progress } from './progress';
 import { SparkOnboarding } from './sparkOnboarding';
 
@@ -25,7 +24,6 @@ export {
 	Notification,
 	Extension,
 	Chat,
-	Comment,
 	Progress,
 	SparkOnboarding,
 };

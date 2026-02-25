@@ -3,7 +3,6 @@ import Block from './block';
 import BlockStructure from './blockStructure';
 import Notification from './notification';
 import ChatMessage from './chatMessage';
-import CommentMessage from './commentMessage';
 
 import View from './view';
 import ViewRelation from './viewRelation';
@@ -22,7 +21,6 @@ export {
 	Notification,
 
 	ChatMessage,
-	CommentMessage,
 
 	View,
 	ViewRelation,

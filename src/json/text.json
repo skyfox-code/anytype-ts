@@ -2807,15 +2807,5 @@
 	"paymentProvider2": "Crypto",
 	"paymentProvider3": "Billing", 
 	"paymentProvider4": "App Store",
-	"paymentProvider5": "Google Play",
-
-	"commentPlaceholder": "Write a comment...",
-	"commentReplyPlaceholder": "Write a reply...",
-	"commentLoadMore": "Load more comments",
-	"commentLoadMoreReplies": "Load more replies",
-	"commentEdited": "edited",
-	"commentReply": "Reply",
-	"commentEdit": "Edit",
-	"commentDelete": "Delete",
-	"commentSend": "Send"
+	"paymentProvider5": "Google Play"
 }
