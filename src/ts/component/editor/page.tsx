@@ -1546,7 +1546,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		if (!block.isText() && keyboard.isFocused) {
 			return;
 		};
-		if (block.isText() && !(block.isTextCode() || block.isTextCallout() || block.isTextQuote()) && isShift) {
+		if (block.isText() && !block.isTextCode() && isShift) {
 			return;
 		};
 

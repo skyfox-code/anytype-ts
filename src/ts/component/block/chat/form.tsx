@@ -847,7 +847,6 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 	};
 
 	const addBookmark = (url: string, fromText?: boolean) => {
-		console.trace();
 		const add = (param: any) => {
 			const { title, description, url } = param;
 			const item = {

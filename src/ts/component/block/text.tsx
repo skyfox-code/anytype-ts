@@ -381,10 +381,6 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			if (block.isText() && !block.isTextCode() && pressed.match('shift')) {
 				pd = false;
 			};
-			if (block.isTextCallout() || block.isTextQuote()) {
-				pd = true;
-			};
-
 			if (pd) {
 				e.preventDefault();
 			};
