@@ -176,7 +176,7 @@ const WidgetObject = observer(forwardRef<{}, I.WidgetComponent>((props, ref) => 
 
 		if (isBin) {
 			U.Menu.widgetSectionContext(I.WidgetSection.Bin, {
-				element: more,
+				element,
 				horizontal: I.MenuDirection.Center,
 				className: 'fixed',
 				classNameWrap: 'fromSidebar',
