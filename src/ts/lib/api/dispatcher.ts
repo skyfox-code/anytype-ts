@@ -1286,8 +1286,9 @@ class Dispatcher {
 
 			if (U.Object.isSetLayout(object.layout) || U.Object.isCollectionLayout(object.layout)) {
 				S.Block.updateWidgetData(rootId);
-				$(window).trigger('updateDataviewData');
 			};
+
+			$(window).trigger('updateDataviewData');
 		};
 	};
 
