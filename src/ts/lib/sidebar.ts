@@ -56,8 +56,14 @@ class Sidebar {
 			const data = stored?.[panel] || {};
 			const param = this.getSizeParam(panel);
 			const width = this.limitWidth(panel, data.width || param.default);
-			const isClosed = (undefined !== data.isClosed) && (panel != I.SidebarPanel.Right) ? Boolean(data.isClosed) : true;
 			const savedClosed = Boolean(data.savedClosed);
+
+			let isClosed = (undefined !== data.isClosed) && (panel != I.SidebarPanel.Right) ? Boolean(data.isClosed) : true;
+
+			// When auto-hide is enabled, start with left panels closed to prevent flicker on new tab
+			if (S.Common.hideSidebar && (panel != I.SidebarPanel.Right)) {
+				isClosed = true;
+			};
 
 			this.setData(panel, isPopup, { width, isClosed, savedClosed }, false);
 			this.setStyle(panel, isPopup, { width, isClosed });
