@@ -843,7 +843,7 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 		let isMultiple: boolean = false;
 
 		if (content.text) {
-			text = U.String.sanitize(Mark.toHtml(content.text, content.marks));
+			text = U.String.sanitize(Mark.toHtml(content.text, content.marks)).replace(/\u200B/g, '');
 			text = text.replace(/\n\r?/g, ' ');
 		};
 
