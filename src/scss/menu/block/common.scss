@@ -12,6 +12,10 @@
 	.menu.menuBlockAction { width: var(--menu-width-icon); }
 	.menu.menuBlockAction {
 		.content { padding-top: 12px; max-height: 450px; }
+
+		.colorMark { width: 16px; height: 16px; border-radius: 100%; flex-shrink: 0; }
+		.colorMark.textColor { background: currentColor; }
+		.colorMark.bgColor-default { box-shadow: 0px 0px 0px 1px var(--color-shape-secondary) inset; background: var(--color-bg-primary); }
 	}
 
 	.menu.menuObject { width: var(--menu-width-icon); }

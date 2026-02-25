@@ -186,24 +186,24 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 			sections = U.Menu.sectionsFilter(sections, filter);
 		} else {
 			const turnText = { 
-				id: 'turnStyle', icon: U.Data.styleIcon(I.BlockType.Text, style), name: translate('menuBlockActionsSectionsTextStyle'), arrow: true,
+				id: 'turnStyle', name: translate('menuBlockActionsSectionsTextStyle'), arrow: true,
 				caption: (I.TextStyle[style] ? translate(U.String.toCamelCase(`blockName-${I.TextStyle[style]}`)) : ''),
 			};
 
 			const c1: any[] = [
-				hasLink ? { id: 'linkSettings', icon: `linkStyle${content.cardStyle}`, name: translate('commonPreview'), arrow: true } : null,
-				hasTurnFile ? { id: 'turnStyle', icon: 'customize', name: translate('commonAppearance'), arrow: true, isBlockFile: true } : null,
+				hasLink ? { id: 'linkSettings', name: translate('commonPreview'), arrow: true } : null,
+				hasTurnFile ? { id: 'turnStyle', name: translate('commonAppearance'), arrow: true, isBlockFile: true } : null,
 				hasTurnFile ? changeFile : null,
 				hasTurnText ? turnText : null,
 				hasTurnDiv ? { id: 'turnStyle', icon: U.Data.styleIcon(I.BlockType.Div, style), name: translate('menuBlockActionsSectionsDividerStyle'), arrow: true, isBlockDiv: true } : null,
-				hasAlign ? { id: 'align', icon: U.Data.alignHIcon(hAlign), name: translate('commonAlign'), arrow: true } : null,
-				hasColor ? { id: 'color', icon: 'color', name: translate('commonColor'), arrow: true, isTextColor: true, value: (color || 'default') } : null,
-				hasBg ? { id: 'background', icon: 'color', name: translate('commonBackground'), arrow: true, isBgColor: true, value: (bgColor || 'default') } : null,
-				hasText ? { id: 'clear', icon: 'clear', name: translate('libMenuClearStyle') } : null,
+				hasAlign ? { id: 'align', name: translate('commonAlign'), caption: I.BlockHAlign[hAlign], arrow: true } : null,
+				hasColor ? { id: 'color', name: translate('commonColor'), arrow: true, isTextColor: true, value: (color || 'default') } : null,
+				hasBg ? { id: 'background', name: translate('commonBackground'), arrow: true, isBgColor: true, value: (bgColor || 'default') } : null,
+				hasText ? { id: 'clear', name: translate('libMenuClearStyle') } : null,
 			].filter(it => it);
 			const c2 = hasAction ? U.Menu.getActions(actionParam) : [];
 
-			sections = [ { name: translate('commonText'), children: c1 }, { children: c2 } ];
+			sections = [ { name: translate('commonText'), className: 'settingsText', children: c1 }, { children: c2 } ];
 		};
 
 		return U.Menu.sectionsMap(sections);
@@ -647,26 +647,24 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		focus.apply();
 	};
 
+	const colorMark = (value: string, isBg?: boolean) => {
+		const prefix = isBg ? 'bgColor' : 'textColor';
+		return <div className={`colorMark ${prefix} ${prefix}-${value || 'default'}`} />;
+	};
+
 	const sections = getSections();
-	
+
 	const Section = (item: any) => (
-		<div className="section">
+		<div className={[ 'section', item.className ? item.className : '' ].join(' ')}>
 			{item.name ? <div className="name">{item.name}</div> : ''}
 			<div className="items">
 				{item.children.map((action: any, i: number) => {
-					const icn: string[] = [ 'inner' ];
-					
 					if (action.isTextColor) {
-						icn.push(`textColor textColor-${action.value || 'default'}`);
+						action.caption = colorMark(action.value);
 					};
 
 					if (action.isBgColor) {
-						icn.push(`bgColor bgColor-${action.value || 'default'}`);
-					};
-
-					if (action.isTextColor || action.isBgColor) {
-						action.icon = 'color';
-						action.inner = <div className={icn.join(' ')} />;
+						action.caption = colorMark(action.value, true);
 					};
 
 					if (action.isObject) {
