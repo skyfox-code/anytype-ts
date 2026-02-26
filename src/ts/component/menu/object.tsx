@@ -291,6 +291,7 @@ const MenuObject = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 					filters: [
 						{ relationKey: 'resolvedLayout', condition: I.FilterCondition.In, value: layouts },
 						{ relationKey: 'isReadonly', condition: I.FilterCondition.NotEqual, value: true },
+						{ relationKey: 'links', condition: I.FilterCondition.NotIn, value: [ rootId ] },
 					],
 					onSelect: () => close(),
 					skipIds: [ rootId ],

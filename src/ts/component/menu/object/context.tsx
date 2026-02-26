@@ -300,12 +300,18 @@ const MenuObjectContext = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =>
 				if (isSingle) layouts = layouts.concat(U.Object.getPageLayouts());
 				if (showCollections) layouts.push(I.ObjectLayout.Collection);
 
+				const filters: any[] = [
+					{ relationKey: 'resolvedLayout', condition: I.FilterCondition.In, value: layouts },
+					{ relationKey: 'isReadonly', condition: I.FilterCondition.NotEqual, value: true },
+				];
+
+				if (isSingle) {
+					filters.push({ relationKey: 'links', condition: I.FilterCondition.NotIn, value: [ itemId ] });
+				};
+
 				menuId = 'searchObject';
 				menuParam.data = Object.assign(menuParam.data, {
-					filters: [
-						{ relationKey: 'resolvedLayout', condition: I.FilterCondition.In, value: layouts },
-						{ relationKey: 'isReadonly', condition: I.FilterCondition.NotEqual, value: true },
-					],
+					filters,
 					rootId: itemId,
 					blockId: itemId,
 					blockIds: [ itemId ],
