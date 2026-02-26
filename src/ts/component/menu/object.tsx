@@ -27,7 +27,7 @@ const MenuObject = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 	const isTypeOrRelation = U.Object.isTypeOrRelationLayout(object.layout);
 	const isRelation = U.Object.isRelationLayout(object.layout);
 	const isType = U.Object.isTypeLayout(object.layout);
-	const isVideo = U.Object.isVideoLayout(object.layout);
+	const isVideoOrAudio = U.Object.isVideoOrAudioLayout(object.layout);
 	const canWrite = U.Space.canMyParticipantWrite();
 	const canDelete = S.Block.checkFlags(rootId, rootId, [ I.RestrictionObject.Delete ]);
 	const route = analytics.route.menuObject;
@@ -122,7 +122,7 @@ const MenuObject = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		const allowedReload = canWrite && object.source && isBookmark;
 		const allowedTemplate = canWrite && !U.Object.getLayoutsWithoutTemplates().includes(object.layout) && S.Block.checkFlags(rootId, rootId, [ I.RestrictionObject.Template ]);
 		const allowedExport = !isFilePreview && !isChat && !isDate;
-		const allowedPrint = !isFilePreview && !isChat && !isVideo;
+		const allowedPrint = !isFilePreview && !isChat && !isVideoOrAudio;
 		const allowedDownloadFile = isInFile;
 		const allowedOpenFile = isInFile;
 		const allowedOpenObject = isFilePreview;
@@ -185,7 +185,7 @@ const MenuObject = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 			pageCopy = null;
 			pageExport = null;
 		};
-		if (isVideo) {
+		if (isVideoOrAudio) {
 			editType = null;
 		};
 
