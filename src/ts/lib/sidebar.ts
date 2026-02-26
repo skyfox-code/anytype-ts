@@ -61,7 +61,7 @@ class Sidebar {
 			let isClosed = (undefined !== data.isClosed) && (panel != I.SidebarPanel.Right) ? Boolean(data.isClosed) : true;
 
 			// When auto-hide is enabled, start with left panels closed to prevent flicker on new tab
-			if (S.Common.hideSidebar && (panel != I.SidebarPanel.Right)) {
+			if (S.Common.hideSidebar && (panel != I.SidebarPanel.Right) && !keyboard.isMainSettings()) {
 				isClosed = true;
 			};
 
@@ -490,7 +490,8 @@ class Sidebar {
 			this.isAnimating ||
 			!hideSidebar ||
 			!keyboard.isMain() ||
-			!windowIsFocused
+			!windowIsFocused ||
+			keyboard.isMainSettings()
 		) {
 			window.clearTimeout(this.timeoutHover);
 			this.timeoutHover = 0;
