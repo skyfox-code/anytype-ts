@@ -603,7 +603,10 @@ class Sidebar {
 
 		if (animate) {
 			this.setAnimating(true);
-			window.setTimeout(() => this.setAnimating(false), J.Constant.delay.sidebar);
+			window.setTimeout(() => {
+				this.setAnimating(false);
+				$(window).trigger('sidebarResize');
+			}, J.Constant.delay.sidebar);
 		};
 
 		const { config, singleTab } = S.Common;
