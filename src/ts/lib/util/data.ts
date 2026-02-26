@@ -317,9 +317,7 @@ class UtilData {
 					if (pin && !keyboard.isPinChecked) {
 						U.Router.go('/auth/pin-check', routeParam);
 					} else {
-						const rp = route ? U.Router.getParam(route) : {};
-
-						if (route && (rp.page != 'index')) {
+						if (route) {
 							U.Router.go(route, routeParam);
 						} else {
 							U.Space.openDashboard(routeParam);

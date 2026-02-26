@@ -142,10 +142,6 @@ class UtilRouter {
 		const { space } = S.Common;
 		const { replace, animate, delay, onFadeOut, onFadeIn, onRouteChange } = param;
 		const routeParam = this.getParam(route);
-
-		if (routeParam.page == 'index') {
-			return;
-		};
 		const newRoute = this.build(routeParam);
 
 		let updateTabRoute = param.updateTabRoute;
@@ -170,7 +166,7 @@ class UtilRouter {
 		const change = () => {
 			this.history.push(newRoute);
 
-			if (updateTabRoute) {
+			if (updateTabRoute && ![ 'index', 'auth' ].includes(routeParam.page)) {
 				Renderer.send('updateTab', U.Common.getElectron().tabId(), { route: newRoute });
 			};
 
