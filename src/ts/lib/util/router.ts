@@ -142,6 +142,10 @@ class UtilRouter {
 		const { space } = S.Common;
 		const { replace, animate, delay, onFadeOut, onFadeIn, onRouteChange } = param;
 		const routeParam = this.getParam(route);
+
+		if (routeParam.page == 'index') {
+			return;
+		};
 		const newRoute = this.build(routeParam);
 
 		let updateTabRoute = param.updateTabRoute;

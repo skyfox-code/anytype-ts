@@ -816,6 +816,10 @@ class CommonStore {
 	redirectSet (v: string) {
 		const param = U.Router.getParam(v);
 
+		if (param.page == 'index') {
+			return;
+		};
+
 		if ((param.page == 'auth') && (param.action == 'pin-check')) {
 			return;
 		};
