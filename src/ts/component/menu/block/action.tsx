@@ -192,8 +192,7 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 
 			const c1: any[] = [
 				hasLink ? { id: 'linkSettings', name: translate('commonPreview'), arrow: true } : null,
-				hasTurnFile ? { id: 'turnStyle', name: translate('commonAppearance'), arrow: true, isBlockFile: true } : null,
-				hasTurnFile ? changeFile : null,
+				hasTurnFile ? { id: 'turnStyle', name: translate('commonView'), caption: I.FileStyle[style], arrow: true, isBlockFile: true } : null,
 				hasTurnText ? turnText : null,
 				hasTurnDiv ? { id: 'turnStyle', icon: U.Data.styleIcon(I.BlockType.Div, style), name: translate('menuBlockActionsSectionsDividerStyle'), arrow: true, isBlockDiv: true } : null,
 				hasAlign ? { id: 'align', name: translate('commonAlign'), caption: I.BlockHAlign[hAlign], arrow: true } : null,
