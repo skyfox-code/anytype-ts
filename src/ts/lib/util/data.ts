@@ -1324,7 +1324,7 @@ class UtilData {
 			const mode = U.Object.getChatNotificationMode(spaceview, it.id);
 
 			if (mode == I.NotificationMode.Nothing) {
-				return false;
+				return counters.mentionCounter > 0;
 			};
 
 			return (counters.messageCounter > 0) || (counters.mentionCounter > 0);
