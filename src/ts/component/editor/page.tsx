@@ -1650,7 +1650,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			if (!next) {
 				// If block is closed toggle - find next block on the same level
 				if (block && block.canToggle() && !Storage.checkToggle(rootId, block.id)) {
-					next = S.Block.getNextBlock(rootId, focused, dir, it => (it.parentId != block.id) && it.isFocusable());
+					next = S.Block.getNextBlock(rootId, focused, dir, it => it.isFocusable() && !S.Block.checkIsChild(rootId, block.id, it.id));
 				} else {
 					next = S.Block.getNextBlock(rootId, focused, dir, it => it.isFocusable());
 				};
