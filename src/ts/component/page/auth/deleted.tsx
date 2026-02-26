@@ -64,7 +64,7 @@ const PageAuthDeleted = observer(forwardRef<I.PageRef, I.PageComponent>(() => {
 		const duration = Math.max(0, account.status.date - U.Date.now());
 		
 		days = Math.max(1, Math.floor(duration / J.Constant.day));
-		const dt = `${days} ${U.Common.plural(days, translate('pluralDay'))}`;
+		const dt = U.String.sprintf(translate('commonCountDays'), days, U.Common.plural(days, translate('pluralDay')));
 
 		// Deletion Status
 		let status: I.AccountStatusType = account.status.type;

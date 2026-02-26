@@ -298,13 +298,13 @@ class UtilMenu {
 	getActions (param: ActionMenuParam) {
 		const { rootId, blockId, hasText, hasFile, hasCommon, hasCopyMedia, hasBookmark, hasDataview, hasTurnObject, hasClipboard, count } = param;
 		const cmd = keyboard.cmdSymbol();
-		const copyName = `${translate('commonDuplicate')} ${U.Common.plural(count, translate('pluralBlock'))}`;
+		const copyName = U.String.sprintf(translate('commonDuplicateBlocks'), U.Common.plural(count, translate('pluralBlock')));
 
 		let items: any[] = [];
 
 		if (hasCommon) {
 			items = items.concat([
-				{ id: 'remove', icon: 'remove', name: `${translate('commonDelete')} ${U.Common.plural(count, translate('pluralLCBlock'))}`, caption: 'Del' },
+				{ id: 'remove', icon: 'remove', name: U.String.sprintf(translate('commonDeleteBlocks'), U.Common.plural(count, translate('pluralLCBlock'))), caption: 'Del' },
 				{ id: 'copy', icon: 'copy', name: copyName, caption: keyboard.getCaption('duplicate') },
 			]);
 		};

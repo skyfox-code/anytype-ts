@@ -1348,7 +1348,7 @@ class UtilData {
 			names.push(`+${more}`);
 		};
 
-		return `${U.Common.plural(l, translate('pluralObjectType'))}: ${names.join(', ')}`;
+		return U.String.sprintf(translate('commonObjectTypeList'), U.Common.plural(l, translate('pluralObjectType')), names.join(', '));
 	};
 
 	updateTabsDimmer(popupList?: I.Popup[], menuList?: I.Menu[]) {
