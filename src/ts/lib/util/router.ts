@@ -286,7 +286,7 @@ class UtilRouter {
 							const dataLeft = sidebar.getData(I.SidebarPanel.Left);
 							const dataSubLeft = sidebar.getData(I.SidebarPanel.SubLeft);
 
-							if (!((dataLeft.isClosed && dataLeft.savedClosed) || dataSubLeft.savedClosed)) {
+							if (!S.Common.hideSidebar && !((dataLeft.isClosed && dataLeft.savedClosed) || dataSubLeft.savedClosed)) {
 								sidebar.leftPanelSubPageOpen('widget', false, true);
 							};
 						});
