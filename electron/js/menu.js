@@ -240,7 +240,7 @@ class MenuManager {
 					{ label: Util.translate('electronMenuNewTab'), accelerator: this.getAccelerator('newTab'), click: () => {
 						const Api = require('./api.js');
 						const activeView = Util.getActiveView(this.win);
-						const { isPinned, ...data } = activeView?.data || {};
+						const { isPinned, route, ...data } = activeView?.data || {};
 
 						Api.openTab(this.win, data, { fireAnalytics: true });
 					}
