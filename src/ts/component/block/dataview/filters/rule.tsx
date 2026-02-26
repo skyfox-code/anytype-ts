@@ -36,7 +36,8 @@ const DataviewFilterRule = observer(forwardRef<{}, Props>((props, ref) => {
 	const operatorRef = useRef(null);
 	const conditionRef = useRef(null);
 	const inputRef = useRef(null);
-	const relation: any = relationKey ? S.Record.getRelationByKey(relationKey) : null;
+	const relationRaw: any = relationKey ? S.Record.getRelationByKey(relationKey) : null;
+	const relation: any = (relationRaw && !relationRaw.isArchived && !relationRaw.isDeleted) ? relationRaw : null;
 	const conditionOptions = relation ? Relation.filterConditionsByType(relation.format) : [];
 	const operatorOptions = [
 		{ id: String(I.FilterOperator.And), name: translate('filterOperatorAnd') },
