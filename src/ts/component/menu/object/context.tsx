@@ -18,7 +18,6 @@ const MenuObjectContext = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =>
 	const spaceview = U.Space.getSpaceview();
 	const participantId = U.Space.getCurrentParticipantId();
 	const n = useRef(0);
-	const allowedCollectionRef = useRef(!!data.allowedCollection);
 
 	useEffect(() => {
 		rebind();
@@ -46,7 +45,8 @@ const MenuObjectContext = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =>
 		let pageCopy = { id: 'copy', icon: 'copy', name: translate('commonDuplicate') };
 		let pageLink = { id: 'pageLink', icon: 'link', name: translate('commonCopyLink') };
 		let open = { id: 'open', icon: 'expand', name: translate('commonOpenObject') };
-		let addTo = { id: 'addTo', icon: 'linkTo', name: translate('commonAddTo'), arrow: true };
+		let linkTo = { id: 'linkTo', icon: 'linkTo', name: translate('commonLinkTo'), arrow: true };
+		let addCollection = { id: 'addCollection', icon: 'collection', name: translate('commonAddToCollection'), arrow: true };
 		let changeType = { id: 'changeType', icon: 'pencil', name: translate('blockFeaturedTypeMenuChangeType'), arrow: true };
 		let unlink = { id: 'unlink', icon: 'unlink', name: translate('menuObjectContextUnlinkFromCollection') };
 		let relation = { id: 'relation', icon: 'editRelation', name: translate('menuObjectContextEditRelations') };
@@ -177,13 +177,12 @@ const MenuObjectContext = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =>
 			archive = { id: 'archive', icon: 'remove', name: translate('commonMoveToBin') };
 		};
 
-		allowedCollectionRef.current = !!allowedCollection;
-
 		if (!allowedArchive)	 archive = null;
 		if (!allowedPin)		 pin = null;
 		if (!allowedCopy)		 pageCopy = null;
 		if (!allowedType)		 changeType = null;
-		if (!allowedLinkTo && !allowedCollection) addTo = null;
+		if (!allowedLinkTo)		 linkTo = null;
+		if (!allowedCollection)	 addCollection = null;
 		if (!allowedOpen)		 open = null;
 		if (!allowedUnlink)		 unlink = null;
 		if (!allowedRelation)	 relation = null;
@@ -210,7 +209,7 @@ const MenuObjectContext = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =>
 
 		let sections = [
 			{ children: [ open, changeType, relation, pageLink ] },
-			{ children: [ pin, notification, editChat, addTo ] },
+			{ children: [ pin, notification, editChat, linkTo, addCollection ] },
 			{ children: [ pageCopy, exportObject, unlink, archive ] },
 			{ children: [ newTab, newWindow ] },
 		];
@@ -287,39 +286,50 @@ const MenuObjectContext = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =>
 				break;
 			};
 
-			case 'addTo': {
-				const collectionType = S.Record.getCollectionType();
-				const isSingle = objectIds.length == 1;
-				const hasChat = objectIds.some(id => {
-					const obj = getObjectHandler(subId, getObject, id);
-					return obj && U.Object.isChatLayout(obj.layout);
-				});
-				const showCollections = allowedCollectionRef.current && !hasChat;
-
-				let layouts = [];
-				if (isSingle) layouts = layouts.concat(U.Object.getPageLayouts());
-				if (showCollections) layouts.push(I.ObjectLayout.Collection);
-
-				const filters: any[] = [
-					{ relationKey: 'resolvedLayout', condition: I.FilterCondition.In, value: layouts },
-					{ relationKey: 'isReadonly', condition: I.FilterCondition.NotEqual, value: true },
-				];
-
-				if (isSingle) {
-					filters.push({ relationKey: 'links', condition: I.FilterCondition.NotIn, value: [ itemId ] });
-				};
-
+			case 'linkTo': {
 				menuId = 'searchObject';
 				menuParam.data = Object.assign(menuParam.data, {
-					filters,
+					filters: [
+						{ relationKey: 'resolvedLayout', condition: I.FilterCondition.In, value: U.Object.getPageLayouts() },
+						{ relationKey: 'isReadonly', condition: I.FilterCondition.NotEqual, value: true },
+						{ relationKey: 'links', condition: I.FilterCondition.NotIn, value: [ itemId ] },
+					],
 					rootId: itemId,
 					blockId: itemId,
 					blockIds: [ itemId ],
-					type: isSingle ? I.NavigationType.LinkTo : undefined,
+					type: I.NavigationType.LinkTo,
 					skipIds: [ itemId ],
 					position: I.BlockPosition.Bottom,
 					canAdd: true,
-					addParam: showCollections ? {
+					onSelect: (el: any) => {
+						if (onLinkTo) {
+							onLinkTo(el.id, itemId);
+						};
+
+						close();
+					},
+				});
+				break;
+			};
+
+			case 'addCollection': {
+				const collectionType = S.Record.getCollectionType();
+
+				menuId = 'searchObject';
+				menuParam.className = [ 'single', className ].join(' ');
+				menuParam.data = Object.assign(menuParam.data, {
+					filters: [
+						{ relationKey: 'resolvedLayout', condition: I.FilterCondition.In, value: I.ObjectLayout.Collection },
+						{ relationKey: 'type.uniqueKey', condition: I.FilterCondition.NotIn, value: [ J.Constant.typeKey.template ] },
+						{ relationKey: 'isReadonly', condition: I.FilterCondition.NotEqual, value: true },
+						{ relationKey: 'links', condition: I.FilterCondition.NotIn, value: [ itemId ] },
+					],
+					rootId: itemId,
+					blockId: itemId,
+					blockIds: [ itemId ],
+					skipIds: [ itemId ],
+					canAdd: true,
+					addParam: {
 						name: translate('blockDataviewCreateNewCollection'),
 						nameWithFilter: translate('blockDataviewCreateNewCollectionWithName'),
 						onClick: (details: any) => {
@@ -328,11 +338,9 @@ const MenuObjectContext = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =>
 								U.Object.openAuto(message.details);
 							});
 						},
-					} : undefined,
+					},
 					onSelect: (el: any) => {
-						if (!isSingle) {
-							Action.addToCollection(el.id, objectIds);
-						}
+						Action.addToCollection(el.id, objectIds);
 
 						if (onLinkTo) {
 							onLinkTo(el.id, itemId);

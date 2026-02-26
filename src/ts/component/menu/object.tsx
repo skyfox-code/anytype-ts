@@ -61,7 +61,8 @@ const MenuObject = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		let setDefaultTemplate = null;
 		let advancedOptions = [];
 		let print = { id: 'print', name: translate('menuObjectPrint'), caption: keyboard.getCaption('print') };
-		let addTo = { id: 'addTo', icon: 'linkTo', name: translate('commonAddTo'), arrow: true };
+		let linkTo = { id: 'linkTo', icon: 'linkTo', name: translate('commonLinkTo'), arrow: true };
+		let addCollection = { id: 'addCollection', icon: 'collection', name: translate('commonAddToCollection'), arrow: true };
 		let searchText = { id: 'searchText', icon: 'search', name: translate('menuObjectSearchOnPage'), caption: keyboard.getCaption('searchText') };
 		let history = { id: 'history', name: translate('commonVersionHistory'), caption: keyboard.getCaption('history') };
 		let pageCopy = { id: 'pageCopy', icon: 'duplicate', name: translate('commonDuplicate') };
@@ -116,7 +117,8 @@ const MenuObject = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		const allowedSearchText = !isFilePreview && !isInSet && !isChat;
 		const allowedHistory = !object.isArchived && !isInFileOrSystem && !isParticipant && !isDate && !isChat && !object.templateIsBundled;
 		const allowedLock = canWrite && !object.isArchived && S.Block.checkFlags(rootId, rootId, [ I.RestrictionObject.Details ]) && !isInFileOrSystem;
-		const allowedAddTo = canWrite && !isRelation && !object.isArchived;
+		const allowedLinkTo = canWrite && !isRelation && !object.isArchived;
+		const allowedAddCollection = canWrite && !isRelation && !object.isArchived && !isTemplate;
 		const allowedPageLink = !isRelation && !object.isArchived;
 		const allowedCopy = canWrite && !object.isArchived && S.Block.checkFlags(rootId, rootId, [ I.RestrictionObject.Duplicate ]) && !isTypeOrRelation;
 		const allowedReload = canWrite && object.source && isBookmark;
@@ -150,7 +152,8 @@ const MenuObject = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		if (!allowedSearchText)		 searchText = null;
 		if (!allowedHistory)		 history = null;
 		if (!isTemplate && !allowedTemplate)	 template = null;
-		if (!allowedAddTo)			 addTo = null;
+		if (!allowedLinkTo)			 linkTo = null;
+		if (!allowedAddCollection)	 addCollection = null;
 		if (!allowedExport)			 pageExport = null;
 		if (!allowedPrint)			 print = null;
 		if (!allowedDownloadFile)	 downloadFile = null;
@@ -205,7 +208,7 @@ const MenuObject = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 
 			sections = sections.concat([
 				{ children: [ openObject ] },
-				{ children: [ pageLink, addTo, pageCopy, archive, remove ] },
+				{ children: [ pageLink, linkTo, addCollection, pageCopy, archive, remove ] },
 				{ children: [ pageLock, history ] },
 				{ children: [ downloadFile, copyMedia, print ] },
 			]);
@@ -226,7 +229,7 @@ const MenuObject = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 			} else {
 				sections = sections.concat([
 					{ children: [ openObject ] },
-					{ children: [ pageLink, addTo, template, pageCopy, archive ] },
+					{ children: [ pageLink, linkTo, addCollection, template, pageCopy, archive ] },
 					{ children: [ pageLock, searchText, history ] },
 					{ children: [ pageReload, print, pageExport ] },
 				]);
@@ -288,17 +291,12 @@ const MenuObject = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 
 		let menuId = '';
 		switch (item.id) {
-			case 'addTo': {
-				const collectionType = S.Record.getCollectionType();
-				const layouts = isTemplate
-					? U.Object.getPageLayouts()
-					: [].concat(U.Object.getPageLayouts(), I.ObjectLayout.Collection);
-
+			case 'linkTo': {
 				menuId = 'searchObject';
 				menuParam.data = Object.assign(menuParam.data, {
 					type: I.NavigationType.LinkTo,
 					filters: [
-						{ relationKey: 'resolvedLayout', condition: I.FilterCondition.In, value: layouts },
+						{ relationKey: 'resolvedLayout', condition: I.FilterCondition.In, value: U.Object.getPageLayouts() },
 						{ relationKey: 'isReadonly', condition: I.FilterCondition.NotEqual, value: true },
 						{ relationKey: 'links', condition: I.FilterCondition.NotIn, value: [ rootId ] },
 					],
@@ -306,7 +304,28 @@ const MenuObject = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 					skipIds: [ rootId ],
 					position: I.BlockPosition.Bottom,
 					canAdd: true,
-					addParam: !isTemplate ? {
+				});
+				break;
+			};
+
+			case 'addCollection': {
+				const collectionType = S.Record.getCollectionType();
+
+				menuId = 'searchObject';
+				menuParam.className = 'single';
+				menuParam.data = Object.assign(menuParam.data, {
+					filters: [
+						{ relationKey: 'resolvedLayout', condition: I.FilterCondition.In, value: I.ObjectLayout.Collection },
+						{ relationKey: 'type.uniqueKey', condition: I.FilterCondition.NotIn, value: [ J.Constant.typeKey.template ] },
+						{ relationKey: 'isReadonly', condition: I.FilterCondition.NotEqual, value: true },
+						{ relationKey: 'links', condition: I.FilterCondition.NotIn, value: [ rootId ] },
+					],
+					onSelect: (el: any) => {
+						Action.addToCollection(el.id, [ rootId ]);
+					},
+					skipIds: [ rootId ],
+					canAdd: true,
+					addParam: {
 						name: translate('blockDataviewCreateNewCollection'),
 						nameWithFilter: translate('blockDataviewCreateNewCollectionWithName'),
 						onClick: (details: any) => {
@@ -315,7 +334,7 @@ const MenuObject = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 								U.Object.openAuto(message.details);
 							});
 						},
-					} : undefined,
+					},
 				});
 				break;
 			};
