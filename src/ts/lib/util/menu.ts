@@ -1168,8 +1168,11 @@ class UtilMenu {
 				return o;
 			};
 
-			const d1 = c1.lastMessage?.createdAt || c1.spaceJoinDate;
-			const d2 = c2.lastMessage?.createdAt || c2.spaceJoinDate;
+			if (c1.spaceJoinDate > c2.spaceJoinDate) return -1;
+			if (c1.spaceJoinDate < c2.spaceJoinDate) return 1;
+
+			const d1 = c1.lastMessage?.createdAt || 0;
+			const d2 = c2.lastMessage?.createdAt || 0;
 
 			if (d1 > d2) return -1;
 			if (d1 < d2) return 1;
