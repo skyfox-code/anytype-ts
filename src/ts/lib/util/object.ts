@@ -190,7 +190,7 @@ class UtilObject {
 		keyboard.isPopup() ? this.openPopup(object, param) : this.openRoute(object, param);
 	};
 	
-	openRoute (object: any, param?: Partial<I.RouteParam>) {
+	async openRoute (object: any, param?: Partial<I.RouteParam>) {
 		if (!object) {
 			return;
 		};
@@ -203,21 +203,29 @@ class UtilObject {
 			return;
 		};
 
+		const route = this.route(object);
+		const switched = await Renderer.send('switchToTabByRoute', route);
+		if (switched) {
+			return;
+		};
+
 		keyboard.setSource(null);
-		U.Router.go(this.route(object), param);
+		U.Router.go(route, param);
 	};
 
 	openWindow (object: any) {
 		Renderer.send('openWindow', this.route(object), S.Auth.token);
 	};
 
-	openTab (object: any, analyticsRoute?: string) {
+	async openTab (object: any, analyticsRoute?: string) {
 		if (!object) {
 			return;
 		};
 
-		Renderer.send('openTab', this.getTabData(object), { setActive: false });
-		analytics.event('AddTab', { objectType: object.type, route: analyticsRoute });
+		const switched = await Renderer.send('openTab', this.getTabData(object), { setActive: false });
+		if (!switched) {
+			analytics.event('AddTab', { objectType: object.type, route: analyticsRoute });
+		};
 	};
 
 	openTabs (objects: any[], analyticsRoute?: string) {
