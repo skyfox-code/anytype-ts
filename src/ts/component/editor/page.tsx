@@ -621,6 +621,10 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				});
 
 				if (style !== null) {
+					const first = S.Block.getLeaf(rootId, ids[0]);
+					if (first && first.isText()) {
+						style = resolveHeaderToggle(style, first.content.style);
+					};
 					C.BlockListTurnInto(rootId, ids, style);
 				};
 			};
@@ -882,6 +886,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				});
 
 				if (style !== null) {
+					style = resolveHeaderToggle(style, block.content.style);
 					C.BlockListTurnInto(rootId, [ block.id ], style);
 				};
 			};
@@ -955,6 +960,23 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				onCtrlShiftArrowBlock(e, pressed);
 			});
 		};
+	};
+
+	const resolveHeaderToggle = (targetStyle: I.TextStyle, currentStyle: I.TextStyle): I.TextStyle => {
+		const pairs = {
+			[I.TextStyle.Header1]: I.TextStyle.ToggleHeader1,
+			[I.TextStyle.Header2]: I.TextStyle.ToggleHeader2,
+			[I.TextStyle.Header3]: I.TextStyle.ToggleHeader3,
+			[I.TextStyle.ToggleHeader1]: I.TextStyle.Header1,
+			[I.TextStyle.ToggleHeader2]: I.TextStyle.Header2,
+			[I.TextStyle.ToggleHeader3]: I.TextStyle.Header3,
+		};
+
+		if (currentStyle === targetStyle) {
+			return pairs[targetStyle] ?? targetStyle;
+		};
+
+		return targetStyle;
 	};
 
 	const getStyleParam = () => {
