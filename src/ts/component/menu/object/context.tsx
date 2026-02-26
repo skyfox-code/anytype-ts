@@ -18,6 +18,7 @@ const MenuObjectContext = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =>
 	const spaceview = U.Space.getSpaceview();
 	const participantId = U.Space.getCurrentParticipantId();
 	const n = useRef(0);
+	const allowedCollectionRef = useRef(!!data.allowedCollection);
 
 	useEffect(() => {
 		rebind();
@@ -176,6 +177,8 @@ const MenuObjectContext = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =>
 			archive = { id: 'archive', icon: 'remove', name: translate('commonMoveToBin') };
 		};
 
+		allowedCollectionRef.current = !!allowedCollection;
+
 		if (!allowedArchive)	 archive = null;
 		if (!allowedPin)		 pin = null;
 		if (!allowedCopy)		 pageCopy = null;
@@ -291,7 +294,7 @@ const MenuObjectContext = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =>
 					const obj = getObjectHandler(subId, getObject, id);
 					return obj && U.Object.isChatLayout(obj.layout);
 				});
-				const showCollections = !!data.allowedCollection && !hasChat;
+				const showCollections = allowedCollectionRef.current && !hasChat;
 
 				let layouts = [];
 				if (isSingle) layouts = layouts.concat(U.Object.getPageLayouts());
