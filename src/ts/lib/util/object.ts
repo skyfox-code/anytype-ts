@@ -215,6 +215,7 @@ class UtilObject {
 
 	openWindow (object: any) {
 		Renderer.send('openWindow', this.route(object), S.Auth.token);
+		analytics.event('OpenNewWindow');
 	};
 
 	async openTab (object: any, analyticsRoute?: string) {
@@ -261,6 +262,10 @@ class UtilObject {
 
 		if (routes.length) {
 			Renderer.send('openWindows', routes, token);
+
+			for (const _route of routes) {
+				analytics.event('OpenNewWindow');
+			};
 		};
 	};
 

@@ -870,6 +870,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 
 			if (type !== null) {
 				onMarkBlock(e, type, text, marks, '', range);
+				analytics.event('ChangeTextStyle', { type, count: 1 });
 			};
 		};
 
@@ -887,7 +888,9 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 
 				if (style !== null) {
 					style = resolveHeaderToggle(style, block.content.style);
-					C.BlockListTurnInto(rootId, [ block.id ], style);
+					C.BlockListTurnInto(rootId, [ block.id ], style, () => {
+						analytics.event('ChangeBlockStyle', { type: I.BlockType.Text, style });
+					});
 				};
 			};
 		};
@@ -1904,6 +1907,8 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				blockCreate: blockCreate,
 			},
 		});
+
+		analytics.event('ScreenSlashMenu', { route: analytics.route.shortcut });
 	};
 	
 	const onScroll = () => {

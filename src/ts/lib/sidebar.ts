@@ -309,7 +309,11 @@ class Sidebar {
 			this.rightPanelClose(isPopup, true);
 		};
 
-		analytics.event(isClosed ? 'ExpandSidebar' : 'CollapseSidebar');
+		if (isClosed && (state?.page == 'object/tableOfContents')) {
+			analytics.event('ScreenTableOfContents');
+		} else {
+			analytics.event(isClosed ? 'ExpandSidebar' : 'CollapseSidebar');
+		};
 		S.Menu.closeAll();
 	};
 

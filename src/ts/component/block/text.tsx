@@ -1050,7 +1050,7 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 						focus.setWithTimeout(block.id, { from: to, to }, 30);
 					});
 				},
-				route: analytics.route.editor,
+				route: analytics.route.shortcut,
 			},
 		});
 	};
