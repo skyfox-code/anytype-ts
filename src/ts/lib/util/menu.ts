@@ -323,7 +323,7 @@ class UtilMenu {
 		};
 
 		if (hasCopyMedia) {
-			items.push({ id: 'copyMedia', icon: 'copy', name: translate('commonCopyMedia') });
+			items.push({ id: 'copyMedia', icon: 'copy', name: translate('commonCopyToClipboard') });
 		};
 
 		if (hasBookmark) {

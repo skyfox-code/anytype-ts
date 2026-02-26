@@ -576,6 +576,10 @@ class UtilObject {
 		return layout == I.ObjectLayout.Image;
 	};
 
+	isVideoLayout (layout: I.ObjectLayout): boolean {
+		return layout == I.ObjectLayout.Video;
+	};
+
 	isDateLayout (layout: I.ObjectLayout): boolean {
 		return layout == I.ObjectLayout.Date;
 	};
