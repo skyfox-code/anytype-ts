@@ -1977,6 +1977,10 @@ class Keyboard {
 		};
 
 		if (res) {
+			if (this.shortcuts[res]) {
+				analytics.event('UseShortcut', { name: res });
+			};
+
 			callBack(res);
 		};
 	};
