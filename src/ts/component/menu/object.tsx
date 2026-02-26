@@ -64,7 +64,7 @@ const MenuObject = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		let addTo = { id: 'addTo', icon: 'linkTo', name: translate('commonAddTo'), arrow: true };
 		let searchText = { id: 'searchText', icon: 'search', name: translate('menuObjectSearchOnPage'), caption: keyboard.getCaption('searchText') };
 		let history = { id: 'history', name: translate('commonVersionHistory'), caption: keyboard.getCaption('history') };
-		let pageCopy = { id: 'pageCopy', icon: 'pageCopy', name: translate('commonDuplicate') };
+		let pageCopy = { id: 'pageCopy', icon: 'duplicate', name: translate('commonDuplicate') };
 		let pageLink = { id: 'pageLink', icon: 'pageLink', name: translate('commonCopyLink') };
 		let pageDeeplink = { id: 'pageDeeplink', icon: 'linkTo', name: translate('commonCopyDeeplink') };
 		let pageReload = { id: 'pageReload', icon: 'reload', name: translate('menuObjectReloadFromSource') };
@@ -82,7 +82,6 @@ const MenuObject = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		if (isTemplate) {	
 			template = { id: 'pageCreate', icon: 'createObject', name: translate('commonCreateObject') };
 			setDefaultTemplate = { id: 'setDefault', icon: 'pin', name: translate('menuObjectSetDefault') };
-			pageCopy.name = translate('commonDuplicate');
 			searchText.name = translate('menuObjectSearchInTemplate')
 		} else {
 			template = { id: 'templateCreate', icon: 'template', name: translate('menuObjectUseAsTemplate') };

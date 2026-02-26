@@ -343,7 +343,7 @@ class UtilMenu {
 
 		if (hasCommon) {
 			items = items.concat([
-				{ id: 'copy', icon: 'copy', name: copyName, caption: keyboard.getCaption('duplicate') },
+				{ id: 'copy', icon: 'duplicate', name: copyName, caption: keyboard.getCaption('duplicate') },
 				{ id: 'remove', icon: 'remove', name: `${translate('commonDelete')} ${U.Common.plural(count, translate('pluralLCBlock'))}`, caption: 'Del' },
 			]);
 		};
