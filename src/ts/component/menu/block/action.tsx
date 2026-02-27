@@ -92,7 +92,7 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		};
 		
 		const { hAlign, content, bgColor } = block;
-		const { color, style } = content;
+		const { color, style, cardStyle } = content;
 		const checkFlag = checkFlagByObject(block.getTargetObjectId());
 
 		let sections: any[] = [];
@@ -190,10 +190,12 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 				caption: (I.TextStyle[style] ? translate(U.String.toCamelCase(`blockName-${I.TextStyle[style]}`)) : ''),
 			};
 
+			const isCardStyle = hasLink && (cardStyle == I.LinkCardStyle.Card);
+
 			const c1: any[] = [
-				hasLink ? { id: 'linkSettings', name: translate('commonPreview'), arrow: true } : null,
+				hasLink ? { id: 'linkSettings', name: translate('commonView'), caption: translate(`menuBlockLinkSettingsStyle${I.LinkCardStyle[cardStyle]}`), arrow: true } : null,
 				hasTurnFile ? { id: 'turnStyle', name: translate('commonView'), caption: I.FileStyle[style], arrow: true, isBlockFile: true } : null,
-				hasTurnText ? turnText : null,
+				(hasTurnText && !isCardStyle) ? turnText : null,
 				hasTurnDiv ? { id: 'turnStyle', icon: U.Data.styleIcon(I.BlockType.Div, style), name: translate('menuBlockActionsSectionsDividerStyle'), arrow: true, isBlockDiv: true } : null,
 				hasAlign ? { id: 'align', name: translate('commonAlign'), caption: I.BlockHAlign[hAlign], arrow: true } : null,
 				hasColor ? { id: 'color', name: translate('commonColor'), arrow: true, isTextColor: true, value: (color || 'default') } : null,
