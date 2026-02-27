@@ -196,6 +196,12 @@ const WidgetObject = observer(forwardRef<{}, I.WidgetComponent>((props, ref) => 
 			transition,
 		};
 		const canAdd = canWrite && (realId == J.Constant.widgetId.type) && isAllowedObject(item);
+		const spaceview = U.Space.getSpaceview();
+		const itemCn = [ 'item' ];
+
+		if (isChat && (U.Object.getChatNotificationMode(spaceview, item.id) == I.NotificationMode.Nothing)) {
+			itemCn.push('isMuted');
+		};
 
 		let icon = null;
 		if (item.icon) {
@@ -213,7 +219,7 @@ const WidgetObject = observer(forwardRef<{}, I.WidgetComponent>((props, ref) => 
 		return (
 			<div
 				id={`item-${item.id}`}
-				className="item"
+				className={itemCn.join(' ')}
 				ref={setNodeRef}
 				{...attributes}
 				{...listeners}

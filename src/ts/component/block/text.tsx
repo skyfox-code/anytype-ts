@@ -188,9 +188,9 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	};
 
 	const renderMarkup = () => {
-		renderMentions(rootId, nodeRef.current, marksRef.current, () => text);
-		renderObjects(rootId, nodeRef.current, marksRef.current, () => text, props);
-		renderLinks(rootId, nodeRef.current, marksRef.current, () => text, props);
+		renderMentions(rootId, nodeRef.current, marksRef.current, getTextValue);
+		renderObjects(rootId, nodeRef.current, marksRef.current, getTextValue, props);
+		renderLinks(rootId, nodeRef.current, marksRef.current, getTextValue, props);
 		renderEmoji(nodeRef.current);
 	};
 	
@@ -283,16 +283,6 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			{ key: 'zoomIn' },
 			{ key: 'zoomOut' },
 			{ key: 'zoomReset' },
-			{ key: 'turnBlock0' },
-			{ key: 'turnBlock1' },
-			{ key: 'turnBlock2' },
-			{ key: 'turnBlock3' },
-			{ key: 'turnBlock4' },
-			{ key: 'turnBlock5' },
-			{ key: 'turnBlock6' },
-			{ key: 'turnBlock7' },
-			{ key: 'turnBlock8' },
-			{ key: 'turnBlock9' },
 			{ key: 'menuAction' },
 			{ key: 'indent', preventDefault: true },
 			{ key: 'outdent', preventDefault: true },
@@ -304,6 +294,10 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			{ key: `ctrl+shift+/` },
 			{ key: 'theme' },
 		];
+
+		for (let i = 0; i <= 9; i++) {
+			saveKeys.push({ key: `turnBlock${i}` });
+		};
 
 		if (isInsideTable) {
 			if (!range.to) {
@@ -676,6 +670,8 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		const menuOpenEmoji = S.Menu.isOpen('blockEmoji');
 		const oneSymbolBefore = range ? value[range.from - 1] : '';
 		const twoSymbolBefore = range ? value[range.from - 2] : '';
+		const threeSymbolBefore = range ? value[range.from - 3] : '';
+		const isAllowedMenuBase = isAllowedMenu;
 
 		if (range) {
 			isAllowedMenu = isAllowedMenu && (!range.from || (range.from == 1) || [ ' ', '\n', '(', '[', '"', '\'' ].includes(twoSymbolBefore));
@@ -684,7 +680,7 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		const canOpenMenuAdd = !menuOpenAdd && (oneSymbolBefore == '/') && isAllowedMenu;
 		const canOpenMenuMention = !menuOpenMention && (oneSymbolBefore == '@') && isAllowedMenu;
 		const canOpenMenuLink = !menuOpenMention && (oneSymbolBefore == '[') && (twoSymbolBefore == '[') && isAllowedMenu;
-		const canOpenMenuEmoji = !menuOpenEmoji && (oneSymbolBefore == ':') && isAllowedMenu;
+		const canOpenMenuEmoji = !menuOpenEmoji && (twoSymbolBefore == ':') && /\S/.test(oneSymbolBefore) && isAllowedMenuBase && (!range || (range.from <= 2) || [ ' ', '\n', '(', '[', '"', '\'' ].includes(threeSymbolBefore));
 
 		preventMenu.current = false;
 
@@ -980,10 +976,11 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		const win = $(window);
 
 		let value = getTextValue();
+		const firstChar = value.charAt(range.from - 1);
 
-		value = U.String.cut(value, range.from - 1, range.from);
+		value = U.String.cut(value, range.from - 2, range.from);
 
-		S.Common.filterSet(range.from - 1, '');
+		S.Common.filterSet(range.from - 2, firstChar);
 
 		S.Menu.open('blockEmoji', {
 			classNameWrap: 'fromBlock',
@@ -1056,7 +1053,7 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 						focus.setWithTimeout(block.id, { from: to, to }, 30);
 					});
 				},
-				route: analytics.route.editor,
+				route: analytics.route.shortcut,
 			},
 		});
 	};

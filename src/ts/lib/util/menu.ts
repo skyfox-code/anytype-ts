@@ -298,7 +298,7 @@ class UtilMenu {
 	getActions (param: ActionMenuParam) {
 		const { rootId, blockId, hasText, hasFile, hasCommon, hasCopyMedia, hasBookmark, hasDataview, hasTurnObject, hasClipboard, count } = param;
 		const cmd = keyboard.cmdSymbol();
-		const copyName = `${translate('commonDuplicate')} ${U.Common.plural(count, translate('pluralLCBlock'))}`;
+		const copyName = U.String.sprintf(translate('commonDuplicateBlocks'), U.Common.plural(count, translate('pluralBlock')));
 
 		let items: any[] = [];
 
@@ -1161,11 +1161,14 @@ class UtilMenu {
 				return o;
 			};
 
-			const d1 = c1.lastMessage?.createdAt || c1.spaceJoinDate;
-			const d2 = c2.lastMessage?.createdAt || c2.spaceJoinDate;
+			const d1 = c1.lastMessage?.createdAt || 0;
+			const d2 = c2.lastMessage?.createdAt || 0;
 
 			if (d1 > d2) return -1;
 			if (d1 < d2) return 1;
+
+			if (c1.spaceJoinDate > c2.spaceJoinDate) return -1;
+			if (c1.spaceJoinDate < c2.spaceJoinDate) return 1;
 
 			if (c1.hasCounter && !c2.hasCounter) return -1;
 			if (!c1.hasCounter && c2.hasCounter) return 1;

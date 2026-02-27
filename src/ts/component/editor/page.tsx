@@ -621,6 +621,10 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				});
 
 				if (style !== null) {
+					const first = S.Block.getLeaf(rootId, ids[0]);
+					if (first && first.isText()) {
+						style = resolveHeaderToggle(style, first.content.style);
+					};
 					C.BlockListTurnInto(rootId, ids, style);
 				};
 			};
@@ -866,6 +870,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 
 			if (type !== null) {
 				onMarkBlock(e, type, text, marks, '', range);
+				analytics.event('ChangeTextStyle', { type, count: 1 });
 			};
 		};
 
@@ -882,7 +887,10 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				});
 
 				if (style !== null) {
-					C.BlockListTurnInto(rootId, [ block.id ], style);
+					style = resolveHeaderToggle(style, block.content.style);
+					C.BlockListTurnInto(rootId, [ block.id ], style, () => {
+						analytics.event('ChangeBlockStyle', { type: I.BlockType.Text, style });
+					});
 				};
 			};
 		};
@@ -955,6 +963,23 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				onCtrlShiftArrowBlock(e, pressed);
 			});
 		};
+	};
+
+	const resolveHeaderToggle = (targetStyle: I.TextStyle, currentStyle: I.TextStyle): I.TextStyle => {
+		const pairs = {
+			[I.TextStyle.Header1]: I.TextStyle.ToggleHeader1,
+			[I.TextStyle.Header2]: I.TextStyle.ToggleHeader2,
+			[I.TextStyle.Header3]: I.TextStyle.ToggleHeader3,
+			[I.TextStyle.ToggleHeader1]: I.TextStyle.Header1,
+			[I.TextStyle.ToggleHeader2]: I.TextStyle.Header2,
+			[I.TextStyle.ToggleHeader3]: I.TextStyle.Header3,
+		};
+
+		if (currentStyle === targetStyle) {
+			return pairs[targetStyle] ?? targetStyle;
+		};
+
+		return targetStyle;
 	};
 
 	const getStyleParam = () => {
@@ -1628,7 +1653,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			if (!next) {
 				// If block is closed toggle - find next block on the same level
 				if (block && block.canToggle() && !Storage.checkToggle(rootId, block.id)) {
-					next = S.Block.getNextBlock(rootId, focused, dir, it => (it.parentId != block.id) && it.isFocusable());
+					next = S.Block.getNextBlock(rootId, focused, dir, it => it.isFocusable() && !S.Block.checkIsChild(rootId, block.id, it.id));
 				} else {
 					next = S.Block.getNextBlock(rootId, focused, dir, it => it.isFocusable());
 				};
@@ -1882,6 +1907,8 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				blockCreate: blockCreate,
 			},
 		});
+
+		analytics.event('ScreenSlashMenu', { route: analytics.route.shortcut });
 	};
 	
 	const onScroll = () => {
@@ -2377,6 +2404,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		const isOpen = Storage.checkToggle(rootId, focused.id);
 		const childrenIds = S.Block.getChildrenIds(rootId, focused.id);
 		const length = focused.getLength();
+		const isMiddle = (range.from != 0) && (range.from != length);
 
 		let style = I.TextStyle.Paragraph;
 		let mode = I.BlockSplitMode.Bottom;
@@ -2391,6 +2419,10 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			mode = range.to ? I.BlockSplitMode.Bottom : I.BlockSplitMode.Top;
 		};
 
+		if (isHeader) {
+			style = (!range.from && !range.to) || (range.to != length) ? content.style : I.TextStyle.Paragraph;
+		};
+
 		if (isCode || (isToggle && isOpen)) {
 			style = I.TextStyle.Paragraph;
 		};
@@ -2403,7 +2435,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			mode = I.BlockSplitMode.Top;
 		};
 
-		if (isCallout || isQuote || (isHeader && !isToggle)) {
+		if (isCallout || isQuote) {
 			style = content.style;
 		};
 
