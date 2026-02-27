@@ -200,9 +200,55 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 				hasBg ? { id: 'background', name: translate('commonBackground'), arrow: true, isBgColor: true, value: (bgColor || 'default') } : null,
 				hasText ? { id: 'clear', name: translate('libMenuClearStyle') } : null,
 			].filter(it => it);
-			const c2 = hasAction ? U.Menu.getActions(actionParam) : [];
+			let actionSections: any[] = [];
 
-			sections = [ { name: translate('commonText'), className: 'settingsText', children: c1 }, { children: c2 } ];
+			if (hasAction) {
+				const cmd = keyboard.cmdSymbol();
+				const count = blockIds.length;
+				const copyName = `${translate('commonDuplicate')} ${U.Common.plural(count, translate('pluralLCBlock'))}`;
+				const deleteName = `${translate('commonDelete')} ${U.Common.plural(count, translate('pluralLCBlock'))}`;
+
+				const move = hasCommon ? { id: 'move', icon: 'move', name: translate('commonMoveTo'), arrow: true } : null;
+				const clipboardCopy = hasClipboard ? { id: 'clipboardCopy', icon: 'clipboard-copy', name: translate('commonCopy'), caption: `${cmd} + C` } : null;
+				const clipboardCut = hasClipboard ? { id: 'clipboardCut', icon: 'clipboard-cut', name: translate('commonCut'), caption: `${cmd} + X` } : null;
+				const clipboardPaste = hasClipboard ? { id: 'clipboardPaste', icon: 'clipboard-paste', name: translate('commonPaste'), caption: `${cmd} + V` } : null;
+				const copy = hasCommon ? { id: 'copy', icon: 'duplicate', name: copyName, caption: keyboard.getCaption('duplicate') } : null;
+				const remove = hasCommon ? { id: 'remove', icon: 'remove', name: deleteName, caption: 'Del' } : null;
+				const download = hasFile ? { id: 'download', icon: 'download', name: translate('commonDownload') } : null;
+				const copyUrl = hasBookmark ? { id: 'copyUrl', icon: 'copy', name: translate('libMenuCopyUrl') } : null;
+				const openAsObject = (hasFile || hasBookmark || hasDataview) ? { id: 'openAsObject', icon: 'expand', name: translate('commonOpenObject') } : null;
+				const newTab = { id: 'newTab', icon: 'newTab', name: translate('menuObjectOpenInNewTab') };
+				const newWindow = { id: 'newWindow', icon: 'newWindow', name: translate('menuObjectOpenInNewWindow') };
+
+				if (hasLink) {
+					actionSections = [
+						{ children: [ move, clipboardCopy, clipboardCut, clipboardPaste, copy, remove ] },
+						{ children: [ newTab, newWindow ] },
+					];
+				} else
+				if (hasFile) {
+					actionSections = [
+						{ children: [ move, clipboardCopy, clipboardCut, clipboardPaste, copy, remove ] },
+						{ children: [ download ] },
+						{ children: [ openAsObject, newTab, newWindow ] },
+					];
+				} else
+				if (hasBookmark) {
+					actionSections = [
+						{ children: [ copyUrl, move, clipboardCopy, clipboardCut, clipboardPaste, copy, remove ] },
+						{ children: [ openAsObject, newTab, newWindow ] },
+					];
+				} else {
+					actionSections = [
+						{ children: U.Menu.getActions(actionParam) },
+					];
+				};
+			};
+
+			sections = [
+				{ name: translate('commonText'), className: 'settingsText', children: c1 },
+				...actionSections,
+			];
 		};
 
 		return U.Menu.sectionsMap(sections);
@@ -562,7 +608,19 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 				U.Common.copyToast(translate('commonLink'), block.content.url);
 				break;
 			};
-				
+
+			case 'newTab':
+			case 'newWindow': {
+				const object = S.Detail.get(rootId, targetObjectId);
+
+				if (item.itemId == 'newTab') {
+					U.Object.openTabs([ object ], analytics.route.menuAction);
+				} else {
+					U.Object.openWindows([ object ], S.Auth.token);
+				};
+				break;
+			};
+
 			case 'remove': {
 				Action.remove(rootId, blockId, ids);
 				break;
