@@ -377,10 +377,10 @@ class Api {
 		const { isPinned, ...rest } = data || {};
 		const route = rest.route || '';
 
-		// Check if a tab with this route already exists
+		// Check if a pinned tab with this route already exists
 		if (route) {
 			const existing = WindowManager.findTabByRoute(win, route);
-			if (existing) {
+			if (existing && existing.data && existing.data.isPinned) {
 				WindowManager.setActiveTab(win, existing.id);
 				return true;
 			};
@@ -396,7 +396,7 @@ class Api {
 
 	switchToTabByRoute (win, route) {
 		const existing = WindowManager.findTabByRoute(win, route);
-		if (existing) {
+		if (existing && existing.data && existing.data.isPinned) {
 			WindowManager.setActiveTab(win, existing.id);
 			return true;
 		};

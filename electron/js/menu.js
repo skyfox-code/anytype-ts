@@ -242,6 +242,7 @@ class MenuManager {
 						const activeView = Util.getActiveView(this.win);
 						const { isPinned, route, ...data } = activeView?.data || {};
 
+						data.route = '/main/void/dashboard';
 						Api.openTab(this.win, data, { fireAnalytics: true });
 					}
 				},
