@@ -245,8 +245,20 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 				};
 			};
 
+			let sectionName = 'commonText';
+
+			if (hasLink) {
+				sectionName = 'commonObject';
+			} else
+			if (hasFile) {
+				sectionName = (content.type == I.FileType.Image) ? 'commonImage' : 'commonFile';
+			} else
+			if (hasBookmark) {
+				sectionName = 'commonBookmark';
+			};
+
 			sections = [
-				{ name: translate('commonText'), className: 'settingsText', children: c1 },
+				{ name: translate(sectionName), className: 'settingsText', children: c1 },
 				...actionSections,
 			];
 		};
