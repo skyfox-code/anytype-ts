@@ -92,7 +92,7 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		};
 		
 		const { hAlign, content, bgColor } = block;
-		const { color, style } = content;
+		const { color, style, cardStyle } = content;
 		const checkFlag = checkFlagByObject(block.getTargetObjectId());
 
 		let sections: any[] = [];
@@ -190,20 +190,79 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 				caption: (I.TextStyle[style] ? translate(U.String.toCamelCase(`blockName-${I.TextStyle[style]}`)) : ''),
 			};
 
+			const isCardStyle = hasLink && (cardStyle == I.LinkCardStyle.Card);
+
 			const c1: any[] = [
-				hasLink ? { id: 'linkSettings', name: translate('commonPreview'), arrow: true } : null,
-				hasTurnFile ? { id: 'turnStyle', name: translate('commonAppearance'), arrow: true, isBlockFile: true } : null,
-				hasTurnFile ? changeFile : null,
-				hasTurnText ? turnText : null,
+				hasLink ? { id: 'linkSettings', name: translate('commonView'), caption: translate(`menuBlockLinkSettingsStyle${I.LinkCardStyle[cardStyle]}`), arrow: true } : null,
+				hasTurnFile ? { id: 'turnStyle', name: translate('commonView'), caption: I.FileStyle[style], arrow: true, isBlockFile: true } : null,
+				(hasTurnText && !isCardStyle) ? turnText : null,
 				hasTurnDiv ? { id: 'turnStyle', icon: U.Data.styleIcon(I.BlockType.Div, style), name: translate('menuBlockActionsSectionsDividerStyle'), arrow: true, isBlockDiv: true } : null,
 				hasAlign ? { id: 'align', name: translate('commonAlign'), caption: I.BlockHAlign[hAlign], arrow: true } : null,
 				hasColor ? { id: 'color', name: translate('commonColor'), arrow: true, isTextColor: true, value: (color || 'default') } : null,
 				hasBg ? { id: 'background', name: translate('commonBackground'), arrow: true, isBgColor: true, value: (bgColor || 'default') } : null,
 				hasText ? { id: 'clear', name: translate('libMenuClearStyle') } : null,
 			].filter(it => it);
-			const c2 = hasAction ? U.Menu.getActions(actionParam) : [];
+			let actionSections: any[] = [];
 
-			sections = [ { name: translate('commonText'), className: 'settingsText', children: c1 }, { children: c2 } ];
+			if (hasAction) {
+				const cmd = keyboard.cmdSymbol();
+				const count = blockIds.length;
+				const copyName = `${translate('commonDuplicate')} ${U.Common.plural(count, translate('pluralLCBlock'))}`;
+				const deleteName = `${translate('commonDelete')} ${U.Common.plural(count, translate('pluralLCBlock'))}`;
+
+				const move = hasCommon ? { id: 'move', icon: 'move', name: translate('commonMoveTo'), arrow: true } : null;
+				const clipboardCopy = hasClipboard ? { id: 'clipboardCopy', icon: 'clipboard-copy', name: translate('commonCopy'), caption: `${cmd} + C` } : null;
+				const clipboardCut = hasClipboard ? { id: 'clipboardCut', icon: 'clipboard-cut', name: translate('commonCut'), caption: `${cmd} + X` } : null;
+				const clipboardPaste = hasClipboard ? { id: 'clipboardPaste', icon: 'clipboard-paste', name: translate('commonPaste'), caption: `${cmd} + V` } : null;
+				const copy = hasCommon ? { id: 'copy', icon: 'duplicate', name: copyName, caption: keyboard.getCaption('duplicate') } : null;
+				const remove = hasCommon ? { id: 'remove', icon: 'remove', name: deleteName, caption: 'Del' } : null;
+				const download = hasFile ? { id: 'download', icon: 'download', name: translate('commonDownload') } : null;
+				const copyUrl = hasBookmark ? { id: 'copyUrl', icon: 'copy', name: translate('libMenuCopyUrl') } : null;
+				const openAsObject = (hasFile || hasBookmark || hasDataview) ? { id: 'openAsObject', icon: 'expand', name: translate('commonOpenObject') } : null;
+				const newTab = { id: 'newTab', icon: 'newTab', name: translate('menuObjectOpenInNewTab') };
+				const newWindow = { id: 'newWindow', icon: 'newWindow', name: translate('menuObjectOpenInNewWindow') };
+
+				if (hasLink) {
+					actionSections = [
+						{ children: [ move, clipboardCopy, clipboardCut, clipboardPaste, copy, remove ] },
+						{ children: [ newTab, newWindow ] },
+					];
+				} else
+				if (hasFile) {
+					actionSections = [
+						{ children: [ move, clipboardCopy, clipboardCut, clipboardPaste, copy, remove ] },
+						{ children: [ download ] },
+						{ children: [ openAsObject, newTab, newWindow ] },
+					];
+				} else
+				if (hasBookmark) {
+					actionSections = [
+						{ children: [ copyUrl, move, clipboardCopy, clipboardCut, clipboardPaste, copy, remove ] },
+						{ children: [ openAsObject, newTab, newWindow ] },
+					];
+				} else {
+					actionSections = [
+						{ children: U.Menu.getActions(actionParam) },
+					];
+				};
+			};
+
+			let sectionName = 'commonText';
+
+			if (hasLink) {
+				sectionName = 'commonObject';
+			} else
+			if (hasFile) {
+				sectionName = (content.type == I.FileType.Image) ? 'commonImage' : 'commonFile';
+			} else
+			if (hasBookmark) {
+				sectionName = 'commonBookmark';
+			};
+
+			sections = [
+				{ name: translate(sectionName), className: 'settingsText', children: c1 },
+				...actionSections,
+			];
 		};
 
 		return U.Menu.sectionsMap(sections);
@@ -563,7 +622,19 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 				U.Common.copyToast(translate('commonLink'), block.content.url);
 				break;
 			};
-				
+
+			case 'newTab':
+			case 'newWindow': {
+				const object = S.Detail.get(rootId, targetObjectId);
+
+				if (item.itemId == 'newTab') {
+					U.Object.openTabs([ object ], analytics.route.menuAction);
+				} else {
+					U.Object.openWindows([ object ], S.Auth.token);
+				};
+				break;
+			};
+
 			case 'remove': {
 				Action.remove(rootId, blockId, ids);
 				break;
