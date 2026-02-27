@@ -188,9 +188,9 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	};
 
 	const renderMarkup = () => {
-		renderMentions(rootId, nodeRef.current, marksRef.current, () => text);
-		renderObjects(rootId, nodeRef.current, marksRef.current, () => text, props);
-		renderLinks(rootId, nodeRef.current, marksRef.current, () => text, props);
+		renderMentions(rootId, nodeRef.current, marksRef.current, getTextValue);
+		renderObjects(rootId, nodeRef.current, marksRef.current, getTextValue, props);
+		renderLinks(rootId, nodeRef.current, marksRef.current, getTextValue, props);
 		renderEmoji(nodeRef.current);
 	};
 	
