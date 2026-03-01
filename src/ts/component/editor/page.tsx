@@ -39,6 +39,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	const blockFeatured = useRef<any>(null);
 	const container = useRef<any>(null);
 	const scrollTopRef = useRef(0);
+	const isEnterProcessing = useRef(false);
 
 	useEffect(() => {
 		open();
@@ -1578,16 +1579,33 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		if (menuCheck()) {
 			return;
 		};
-		
+
+		// Guard against re-entry while a block operation from a previous Enter is still in flight.
+		// On Linux, focus changes during block creation can trigger synthetic key events from input
+		// methods, causing an infinite loop of block creation on empty blocks.
+		if (isEnterProcessing.current) {
+			e.preventDefault();
+			return;
+		};
+
 		e.preventDefault();
 		e.stopPropagation();
+
+		isEnterProcessing.current = true;
+
+		// Release after the focus change settles (focusSet uses a 15ms setTimeout for focus.apply).
+		// The extra delay ensures no stale keydown events sneak through during the focus transition.
+		const releaseEnterGuard = () => {
+			window.setTimeout(() => { isEnterProcessing.current = false; }, 30);
+		};
 
 		if (replace) {
 			if (parent?.isTextList()) {
 				onTabBlock(e, range, true);
+				releaseEnterGuard();
 			} else {
 				C.BlockListTurnInto(rootId, [ block.id ], I.TextStyle.Paragraph, () => {
-					C.BlockTextListClearStyle(rootId, [ block.id ]);
+					C.BlockTextListClearStyle(rootId, [ block.id ], releaseEnterGuard);
 				});
 			};
 		} else
@@ -1595,25 +1613,26 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			blockCreate(block.id, I.BlockPosition.Bottom, {
 				type: I.BlockType.Text,
 				style: I.TextStyle.Paragraph,
-			});
+			}, releaseEnterGuard);
 		} else
 		if (canToggle && !Storage.checkToggle(rootId, block.id) && (range.from == length)) {
 			blockCreate(block.id, I.BlockPosition.Bottom, {
 				type: I.BlockType.Text,
 				style: I.TextStyle.Paragraph,
-			});
+			}, releaseEnterGuard);
 			return;
 		} else
 		if (canToggle && !Storage.checkToggle(rootId, block.id) && S.Block.getChildrenIds(rootId, block.id).length && !range.to) {
 			blockCreate(block.id, I.BlockPosition.Top, {
 				type: I.BlockType.Text,
 				style: I.TextStyle.Paragraph,
-			});
+			}, releaseEnterGuard);
 		} else
 		if (block.isTextParagraph() && !length && parent && parent.canToggle()) {
 			Action.move(rootId, rootId, parent.id, [ block.id ], I.BlockPosition.Bottom);
+			releaseEnterGuard();
 		} else {
-			blockSplit(block, range, isShift);
+			blockSplit(block, range, isShift, releaseEnterGuard);
 		};
 	};
 
@@ -2391,7 +2410,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		};
 	};
 	
-	const blockSplit = (focused: I.Block, range: I.TextRange, isShift: boolean) => {
+	const blockSplit = (focused: I.Block, range: I.TextRange, isShift: boolean, callBack?: () => void) => {
 		const { content } = focused;
 		const isTitle = focused.isTextTitle();
 		const isHeader = focused.isTextHeader();
@@ -2441,6 +2460,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 
 		C.BlockSplit(rootId, focused.id, range, style, mode, (message: any) => {
 			if (message.error.code) {
+				callBack?.();
 				return;
 			};
 
@@ -2459,9 +2479,11 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			};
 
 			analytics.event('CreateBlock', { middleTime: message.middleTime, type: I.BlockType.Text, style });
+
+			callBack?.();
 		});
 	};
-	
+
 	const blockRemove = (focused?: I.Block) => {
 		const selection = S.Common.getRef('selectionProvider');
 		const ids = selection?.get(I.SelectType.Block) || [];
