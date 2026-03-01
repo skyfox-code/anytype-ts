@@ -622,6 +622,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				});
 
 				if (style !== null) {
+					e.preventDefault();
 					const first = S.Block.getLeaf(rootId, ids[0]);
 					if (first && first.isText()) {
 						style = resolveHeaderToggle(style, first.content.style);
@@ -888,6 +889,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				});
 
 				if (style !== null) {
+					e.preventDefault();
 					style = resolveHeaderToggle(style, block.content.style);
 					C.BlockListTurnInto(rootId, [ block.id ], style, () => {
 						analytics.event('ChangeBlockStyle', { type: I.BlockType.Text, style });
