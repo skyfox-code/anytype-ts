@@ -2077,7 +2077,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				from = to = message.caretPosition;
 			};
 
-			focusSet(id, from, to, true);
+			focusSet(id, from, to, !message.isSameBlockCaret);
 			analytics.event('PasteBlock', { count });
 		});
 	};
