@@ -28,6 +28,7 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 
 	useEffect(() => {
 		n.current = 0;
+		setActive(null, true);
 	}, [ filter ]);
 	
 	const onFilterFocus = (e: any) => {
@@ -694,7 +695,7 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		getFilterRef: () => filterRef.current,
 		onClick,
 		onOver,
-	}), []);
+	}));
 	
 	return (
 		<div>
