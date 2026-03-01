@@ -501,7 +501,7 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		};
 		
 		const selection = S.Common.getRef('selectionProvider');
-		const ids = selection.getForClick(blockId, true, false);
+		const ids = selection.getForClick(blockId, false, false);
 		const idsWithChildren = selection.getForClick(blockId, true, false);
 		const targetObjectId = block.getTargetObjectId();
 
