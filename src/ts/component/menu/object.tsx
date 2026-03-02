@@ -74,7 +74,7 @@ const MenuObject = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		let openFile = { id: 'openFile', icon: 'expand', name: translate('menuObjectDownloadOpen') };
 		let openObject = { id: 'openAsObject', icon: 'expand', name: translate('commonOpenObject') };
 		let advanced = { id: 'advanced', icon: 'advanced', name: translate('menuObjectAdvanced'), children:[], arrow: true };
-		let editType = { id: 'editType', name: translate('commonEditType'), icon: 'editType' };
+		let editType = { id: 'editType', name: translate('menuObjectTypeSettings'), icon: 'editType' };
 		let editChat = { id: 'editChat', name: translate('commonEditChat'), icon: 'editChat' };
 		let notification: any = { id: 'notification', name: translate('commonNotifications'), icon: 'notification', arrow: true };
 		let copyMedia = { id: 'copyMedia', name: translate('commonCopyToClipboard'), icon: 'copy' };
