@@ -1912,10 +1912,6 @@ class Keyboard {
 		if (e.metaKey) {
 			ret.push('cmd');
 		};
-		// Add CapsLock as a modifier if active
-		if (e.getModifierState && e.getModifierState('CapsLock')) {
-			ret.push('capslock');
-		};
 		return ret;
 	};
 
