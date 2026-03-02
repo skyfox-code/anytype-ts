@@ -43,6 +43,7 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 	const frameRef = useRef(0);
 	const namespace = U.Common.getEventNamespace(isPopup);
 	const jumpIds = useRef([]);
+	const object = S.Detail.get(rootId, rootId, []);
 
 	const getChatId = () => {
 		const object = S.Detail.get(rootId, rootId, [ 'chatId' ]);
@@ -456,12 +457,12 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 						};
 
 						case 'reply': {
-							formRef.current.onReply(item);
+							formRef.current?.onReply(item);
 							break;
 						};
 
 						case 'edit': {
-							formRef.current.onEdit(item);
+							formRef.current?.onEdit(item);
 							break;
 						};
 
@@ -817,7 +818,7 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 	};
 
 	const onReplyEdit = (e: MouseEvent, message: any) => {
-		formRef.current.onReply(message);
+		formRef.current?.onReply(message);
 		scrollToBottomCheck();
 	};
 
@@ -1097,23 +1098,25 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 				{content}
 			</div>
 
-			<Form 
-				ref={formRef}
-				{...props}
-				rootId={chatId}
-				blockId={block.id}
-				subId={subId}
-				analyticsChatId={analyticsChatId}
-				onScrollToBottomClick={onScrollToBottomClick}
-				scrollToBottom={scrollToBottomCheck}
-				scrollToMessage={scrollToMessage}
-				loadMessagesByOrderId={loadMessagesByOrderId}
-				getMessages={getMessages}
-				getReplyContent={getReplyContent}
-				highlightMessage={highlightMessage}
-				loadDepsAndReplies={loadDepsAndReplies}
-				isEmpty={isEmpty}
-			/>
+			{!object.isArchived ? (
+				<Form 
+					ref={formRef}
+					{...props}
+					rootId={chatId}
+					blockId={block.id}
+					subId={subId}
+					analyticsChatId={analyticsChatId}
+					onScrollToBottomClick={onScrollToBottomClick}
+					scrollToBottom={scrollToBottomCheck}
+					scrollToMessage={scrollToMessage}
+					loadMessagesByOrderId={loadMessagesByOrderId}
+					getMessages={getMessages}
+					getReplyContent={getReplyContent}
+					highlightMessage={highlightMessage}
+					loadDepsAndReplies={loadDepsAndReplies}
+					isEmpty={isEmpty}
+				/>
+			) : ''}
 		</div>
 	);
 
