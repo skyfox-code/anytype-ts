@@ -341,12 +341,6 @@ class Util {
 				fs.mkdirSync(applicationsDir, { recursive: true });
 				fs.writeFileSync(desktopFilePath, content, 'utf-8');
 
-				execFile('update-desktop-database', [ applicationsDir ], (err) => {
-					if (err) {
-						this.log('info', `update-desktop-database failed: ${err.message}`);
-					};
-				});
-
 				execFile('xdg-mime', [ 'default', 'anytype.desktop', 'x-scheme-handler/anytype' ], (err) => {
 					if (err) {
 						this.log('info', `xdg-mime default failed: ${err.message}`);
