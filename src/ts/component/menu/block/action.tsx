@@ -217,7 +217,7 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 				const copy = hasCommon ? { id: 'copy', icon: 'duplicate', name: copyName, caption: keyboard.getCaption('duplicate') } : null;
 				const remove = hasCommon ? { id: 'remove', icon: 'remove', name: deleteName, caption: 'Del' } : null;
 				const download = hasFile ? { id: 'download', icon: 'download', name: translate('commonDownload') } : null;
-				const copyUrl = hasBookmark ? { id: 'copyUrl', icon: 'copy', name: translate('libMenuCopyUrl') } : null;
+				const copyUrl = hasBookmark ? { id: 'copyUrl', icon: 'pageLink', name: translate('libMenuCopyUrl') } : null;
 				const openAsObject = (hasFile || hasBookmark || hasDataview) ? { id: 'openAsObject', icon: 'expand', name: translate('commonOpenObject') } : null;
 				const newTab = { id: 'newTab', icon: 'newTab', name: translate('menuObjectOpenInNewTab') };
 				const newWindow = { id: 'newWindow', icon: 'newWindow', name: translate('menuObjectOpenInNewWindow') };
