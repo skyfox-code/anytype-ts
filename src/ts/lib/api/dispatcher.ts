@@ -748,7 +748,7 @@ class Dispatcher {
 
 									if (idx >= 0) {
 										if (key.id == 'relation') {
-											const updateKeys = [];
+											const updateKeys = [ 'isVisible' ];
 
 											for (const f of updateKeys) {
 												if (list[idx][f] != item[f]) {
