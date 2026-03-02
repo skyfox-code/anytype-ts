@@ -572,6 +572,7 @@ const WidgetIndex = observer(forwardRef<{}, Props>((props, ref) => {
 				subId,
 				allowedNewTab: true,
 				openAfterDuplicate: true,
+				allowedCollection: true,
 			},
 		};
 
