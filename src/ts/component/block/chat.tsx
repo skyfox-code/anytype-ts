@@ -303,14 +303,13 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 		const depsSubId = `${subId}-deps`;
 		const keys = U.Subscription.chatRelationKeys();
 
-		U.Subscription.destroyList([ subId ], false, () => {
-			U.Subscription.subscribe({
+		U.Subscription.destroyList([ depsSubId ], false, () => {
+			U.Subscription.subscribeIds({
+				ids,
 				subId: depsSubId,
-				filters: [
-					{ relationKey: 'id', condition: I.FilterCondition.In, value: ids },
-				],
 				keys,
 				noDeps: true,
+				ignoreHidden: true,
 				crossSpace: true,
 			}, (message: any) => {
 				if (!message.error.code) {

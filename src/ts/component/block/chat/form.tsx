@@ -613,6 +613,8 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 				};
 			};
 
+			console.log('TYPE', I.MarkType[type], value);
+
 			// Internal object link: resolve as attachment and remove URL from text
 			if (type == I.MarkType.Object) {
 				addBookmark(value);
@@ -867,8 +869,12 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 
 		const { isInside, target, spaceId } = U.Common.getLinkParamFromUrl(url);
 
+		console.log('LINK PARAM', { url, isInside, target, spaceId });
+
 		if (isInside) {
 			U.Object.getById(target, { spaceId }, object => {
+				console.log(object);
+
 				if (object) {
 					addAttachments([ object ]);
 				};

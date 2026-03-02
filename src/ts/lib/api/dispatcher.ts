@@ -1561,7 +1561,7 @@ class Dispatcher {
 		const { config } = S.Common;
 		const debugRequest = config.flagsMw.request;
 		const debugSubscribe = config.flagsMw.subscribe;
-		const subscribeCommands = [ 'ObjectSearchSubscribe', 'ObjectSearchUnsubscribe', 'ObjectSubscribeIds' ];
+		const subscribeCommands = [ 'ObjectSearchSubscribe', 'ObjectSearchUnsubscribe', 'ObjectSubscribeIds', 'ObjectCrossSpaceSearchSubscribe' ];
 
 		if (debugSubscribe && subscribeCommands.includes(type)) {
 			return true;

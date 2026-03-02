@@ -310,7 +310,9 @@ class DetailStore {
 
 			if (mappedKeys) {
 				for (const k in mappedKeys) {
-					object[k] = object[mappedKeys[k]];
+					if ((object[k] === undefined) && (object[mappedKeys[k]] !== undefined)) {
+						object[k] = object[mappedKeys[k]];
+					};
 				};
 			};
 		};
