@@ -1,13 +1,13 @@
 import React, { forwardRef, useState, useEffect, useRef, useImperativeHandle, MouseEvent } from 'react';
 import $ from 'jquery';
 import { observer } from 'mobx-react';
-import { MenuItemVertical, Icon } from 'Component';
+import { MenuItemVertical } from 'Component';
 import { I, C, S, U, J, keyboard, translate, Action, analytics } from 'Lib';
 
 const MenuWidget = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 
-	const { param, close, setActive, onKeyDown, position } = props;
-	const { data } = param;
+	const { param, close, setActive, onKeyDown, position, getId, getSize } = props;
+	const { data, className, classNameWrap } = param;
 	const { blockId, isPreview } = data;
 	const { widgets } = S.Block;
 	const [ layout, setLayout ] = useState<I.WidgetLayout>(data.layout);
@@ -16,6 +16,7 @@ const MenuWidget = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 	const nodeRef = useRef(null);
 	const needUpdate = useRef(false);
 	const n = useRef(-1);
+	const route = analytics.route.widget;
 
 	useEffect(() => {
 		needUpdate.current = false;
@@ -35,13 +36,13 @@ const MenuWidget = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		setActive();
 		position();
 	});
-	
+
 	const rebind = () => {
 		unbind();
 		$(window).on('keydown.menu', e => onKeyDown(e));
 		window.setTimeout(() => setActive(), 15);
 	};
-	
+
 	const unbind = () => {
 		$(window).off('keydown.menu');
 	};
@@ -49,7 +50,7 @@ const MenuWidget = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 	const getSections = () => {
 		const checked = checkState(layout, limit);
 		const hasLimit = ![ I.WidgetLayout.Link ].includes(checked.layout);
-		const canRemove = U.Space.canMyParticipantWrite();
+		const canWrite = U.Space.canMyParticipantWrite();
 		const layoutOptions = U.Menu.getWidgetLayoutOptions(target?.id, target?.layout, isPreview);
 		const block = S.Block.getLeaf(widgets, blockId);
 		const isSystem = U.Menu.isSystemWidget(target?.id);
@@ -58,53 +59,75 @@ const MenuWidget = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 			return [];
 		};
 
+		const isPinned = block.content.section == I.WidgetSection.Pin;
+		const spaceview = U.Space.getSpaceview();
+		const currentLayout = layoutOptions.find(it => it.id == layout);
 		const sections: any[] = [];
 
+		// Section 1: Widget settings (View + Number of Objects)
+		const settingsChildren: any[] = [];
+
 		if (layoutOptions.length > 1) {
-			sections.push({
+			settingsChildren.push({
 				id: 'layout',
-				name: translate('commonAppearance'),
-				children: [],
-				options: layoutOptions,
-				value: layout,
+				name: translate('menuWidgetView'),
+				caption: currentLayout?.name || '',
+				arrow: true,
 			});
 		};
 
 		if (hasLimit) {
-			sections.push({
+			settingsChildren.push({
 				id: 'limit',
 				name: translate('menuWidgetNumberOfObjects'),
-				children: [],
-				options: U.Menu.getWidgetLimitOptions(layout),
-				value: limit,
+				caption: String(limit),
+				arrow: true,
 			});
 		};
 
-		if (canRemove) {
-			const children: any[] = [];
-			const isPinned = block.content.section == I.WidgetSection.Pin;
-			const isSystem = U.Menu.isSystemWidget(target?.id);
+		if (settingsChildren.length) {
+			sections.push({
+				id: 'settings',
+				name: translate('menuWidgetTitle'),
+				children: settingsChildren,
+			});
+		};
 
-			if (isPinned) {
-				const name = isSystem ? translate('menuWidgetRemoveWidget') : translate('commonUnpin');
-				const icon = isSystem ? 'remove' : 'unpin';
+		// Section 2: Actions
+		const actionChildren: any[] = [];
 
-				children.push({ id: 'removeWidget', name, icon });
-			};
+		if (!isSystem) {
+			actionChildren.push({ id: 'pageLink', icon: 'pageLink', name: translate('commonCopyLink') });
+		};
 
-			if (sections.length && children.length) {
-				children.unshift({ isDiv: true });
-			};
+		if (canWrite && isPinned) {
+			const name = isSystem ? translate('menuWidgetRemoveWidget') : translate('commonUnpin');
+			const icon = isSystem ? 'remove' : 'unpin';
 
-			if (children.length) {
-				sections.push({ children });
+			actionChildren.push({ id: 'removeWidget', name, icon });
+		};
+
+		if (!isSystem && canWrite) {
+			actionChildren.push({ id: 'addCollection', icon: 'collection', name: translate('commonAddToCollection'), arrow: true });
+		};
+
+		if (!isSystem && canWrite) {
+			const allowedArchive = S.Block.isAllowed(target?.restrictions, [ I.RestrictionObject.Delete ]);
+
+			if (allowedArchive) {
+				actionChildren.push({ id: 'archive', icon: 'remove', name: translate('commonMoveToBin') });
 			};
 		};
 
+		if (actionChildren.length) {
+			sections.push({ id: 'actions', children: actionChildren });
+		};
+
+		// Section 3: Open in New Tab / New Window
 		if (!isSystem) {
 			sections.push({
+				id: 'open',
 				children: [
-					{ isDiv: true },
 					{ id: 'newTab', icon: 'newTab', name: translate('menuObjectOpenInNewTab') },
 					{ id: 'newWindow', icon: 'newWindow', name: translate('menuObjectOpenInNewWindow') },
 				]
@@ -161,46 +184,138 @@ const MenuWidget = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 	const onMouseEnter = (e: MouseEvent, item): void => {
 		if (!keyboard.isMouseDisabled) {
 			setActive(item, false);
+			onOver(e, item);
 		};
 	};
 
-	const onOptionClick = (e: MouseEvent, option: any, section: any) => {
-		const block = S.Block.getLeaf(widgets, blockId);
-
-		if (!block) {
+	const onOver = (e: any, item: any) => {
+		if (!item.arrow) {
+			S.Menu.closeAll(J.Menu.widget);
 			return;
 		};
 
-		const isSectionPin = block.content.section == I.WidgetSection.Pin;
+		const menuParam: any = {
+			menuKey: item.id,
+			element: `#${getId()} #item-${U.Common.esc(item.id)}`,
+			offsetX: getSize().width,
+			vertical: I.MenuDirection.Center,
+			isSub: true,
+			noAutoHover: true,
+			className,
+			classNameWrap,
+			rebind,
+			parentId: props.id,
+			data: {},
+		};
 
-		needUpdate.current = true;
+		let menuId = '';
 
-		switch (section.id) {
+		switch (item.id) {
 			case 'layout': {
-				const { layout } = checkState(Number(option.id), limit);
-				
-				setLayout(layout);
+				const layoutOptions = U.Menu.getWidgetLayoutOptions(target?.id, target?.layout, isPreview);
 
-				if (isSectionPin) {
-					C.BlockWidgetSetLayout(widgets, blockId, layout, () => close());
+				menuId = 'select';
+				menuParam.data = {
+					noClose: true,
+					value: String(layout),
+					options: layoutOptions.map(it => ({ id: String(it.id), name: it.name, icon: it.icon })),
+					onSelect: (e: any, option: any) => {
+						const block = S.Block.getLeaf(widgets, blockId);
+
+						if (!block) {
+							return;
+						};
+
+						const isSectionPin = block.content.section == I.WidgetSection.Pin;
+
+						needUpdate.current = true;
+
+						const { layout: newLayout } = checkState(Number(option.id), limit);
+
+						n.current = -1;
+						setLayout(newLayout);
+						S.Menu.updateData('select', { value: String(newLayout) });
+
+						if (isSectionPin) {
+							C.BlockWidgetSetLayout(widgets, blockId, newLayout);
+						};
+
+						analytics.event('ChangeWidgetLayout', { layout: newLayout, route: 'Inner', params: { target } });
+					},
 				};
-
-				analytics.event('ChangeWidgetLayout', { layout, route: 'Inner', params: { target } });
 				break;
 			};
 
 			case 'limit': {
-				const { limit } = checkState(layout, Number(option.id));
+				const limitOptions = U.Menu.getWidgetLimitOptions(layout);
 
-				setLimit(limit);
+				menuId = 'select';
+				menuParam.data = {
+					noClose: true,
+					value: String(limit),
+					options: limitOptions.map(it => ({ id: String(it.id), name: String(it.name) })),
+					onSelect: (e: any, option: any) => {
+						const block = S.Block.getLeaf(widgets, blockId);
 
-				if (isSectionPin) {
-					C.BlockWidgetSetLimit(widgets, blockId, limit, () => close());
+						if (!block) {
+							return;
+						};
+
+						const isSectionPin = block.content.section == I.WidgetSection.Pin;
+
+						needUpdate.current = true;
+
+						const { limit: newLimit } = checkState(layout, Number(option.id));
+
+						n.current = -1;
+						setLimit(newLimit);
+						S.Menu.updateData('select', { value: String(newLimit) });
+
+						if (isSectionPin) {
+							C.BlockWidgetSetLimit(widgets, blockId, newLimit);
+						};
+
+						analytics.event('ChangeWidgetLimit', { limit: newLimit, layout, route: 'Inner', params: { target } });
+					},
 				};
-
-				analytics.event('ChangeWidgetLimit', { limit, layout, route: 'Inner', params: { target } });
 				break;
 			};
+
+			case 'addCollection': {
+				const collectionType = S.Record.getCollectionType();
+
+				menuId = 'searchObject';
+				menuParam.className = [ 'single', className ].join(' ');
+				menuParam.data = {
+					filters: [
+						{ relationKey: 'resolvedLayout', condition: I.FilterCondition.In, value: I.ObjectLayout.Collection },
+						{ relationKey: 'type.uniqueKey', condition: I.FilterCondition.NotIn, value: [ J.Constant.typeKey.template ] },
+						{ relationKey: 'isReadonly', condition: I.FilterCondition.NotEqual, value: true },
+					],
+					canAdd: true,
+					addParam: {
+						name: translate('blockDataviewCreateNewCollection'),
+						nameWithFilter: translate('blockDataviewCreateNewCollectionWithName'),
+						onClick: (details: any) => {
+							C.ObjectCreate(details, [], '', collectionType?.uniqueKey, S.Common.space, (message) => {
+								Action.addToCollection(message.objectId, [ target.id ]);
+								U.Object.openAuto(message.details);
+							});
+						},
+					},
+					onSelect: (el: any) => {
+						Action.addToCollection(el.id, [ target.id ]);
+						close();
+					},
+				};
+				break;
+			};
+		};
+
+		if (menuId && !S.Menu.isOpen(menuId, item.id) && !S.Menu.isAnimating(menuId)) {
+			S.Menu.closeAll(J.Menu.widget, () => {
+				S.Menu.open(menuId, menuParam);
+			});
 		};
 	};
 
@@ -241,8 +356,19 @@ const MenuWidget = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 				break;
 			};
 
+			case 'pageLink': {
+				const spaceview = U.Space.getSpaceview();
+				U.Object.copyLink(target, spaceview, 'web', route);
+				break;
+			};
+
+			case 'archive': {
+				Action.archiveCheckType('', [ target.id ], route);
+				break;
+			};
+
 			case 'newTab': {
-				U.Object.openTab(target, analytics.route.widget);
+				U.Object.openTab(target, route);
 				break;
 			};
 
@@ -257,31 +383,9 @@ const MenuWidget = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 
 	const sections = getSections();
 
-	const Section = item => (
+	const Section = (item: any) => (
 		<div id={`section-${item.id}`} className="section">
 			{item.name ? <div className="name">{item.name}</div> : ''}
-
-			{item.options ? (
-				<div className="options">
-					{item.options.map((option, i) => {
-						const cn = [ 'option' ];
-
-						if (item.value == option.id) {
-							cn.push('active');
-						};
-
-						if (option.icon) {
-							cn.push('icon');
-						};
-
-						return (
-							<div className={cn.join(' ')} key={i} onClick={e => onOptionClick(e, option, item)}>
-								{option.icon ? <Icon className={option.icon} tooltipParam={{ text: option.description }} /> : option.name}
-							</div>
-						);
-					})}
-				</div>
-			) : ''}
 
 			{item.children.length ? (
 				<div className="items">
@@ -305,8 +409,9 @@ const MenuWidget = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		getIndex: () => n.current,
 		setIndex: (i: number) => n.current = i,
 		onClick,
+		onOver,
 	}), []);
-	
+
 	return (
 		<div ref={nodeRef}>
 			<div className="sections">

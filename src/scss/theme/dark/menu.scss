@@ -272,16 +272,12 @@
 
     /* Widget */
 
-	.menu.menuWidget {
-		.options {
-			.option {
-				.icon.widget-0 { background-image: url('#{$themePath}/icon/menu/widget/link.svg'); }
-				.icon.widget-1 { background-image: url('#{$themePath}/icon/menu/widget/tree.svg'); }
-				.icon.widget-2 { background-image: url('#{$themePath}/icon/menu/widget/list.svg'); }
-				.icon.widget-3 { background-image: url('#{$themePath}/icon/menu/widget/compact.svg'); }
-				.icon.widget-4 { background-image: url('#{$themePath}/icon/menu/widget/view.svg'); }
-			}
-		}
+	.menu {
+		.icon.widget-0 { background-image: url('#{$themePath}/icon/menu/widget/link.svg'); }
+		.icon.widget-1 { background-image: url('#{$themePath}/icon/menu/widget/tree.svg'); }
+		.icon.widget-2 { background-image: url('#{$themePath}/icon/menu/widget/list.svg'); }
+		.icon.widget-3 { background-image: url('#{$themePath}/icon/menu/widget/compact.svg'); }
+		.icon.widget-4 { background-image: url('#{$themePath}/icon/menu/widget/view.svg'); }
 	}
 
 	/* Publish */
