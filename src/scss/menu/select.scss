@@ -100,6 +100,9 @@
 
 	/* Type layout conflict */
 	.menu.menuSelect.menuTypeLayout { width: var(--menu-width-icon); }
+	.menu.menuSelect.menuTypeLayout {
+		.sectionName > .name { overflow: visible; white-space: normal; height: auto; }
+	}
 
 	/* Links, Backlinks */
 	.menu.menuSelect.featuredLinks {
