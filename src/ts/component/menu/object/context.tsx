@@ -43,7 +43,7 @@ const MenuObjectContext = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =>
 		const canWrite = U.Space.canMyParticipantWrite();
 
 		let pageCopy = { id: 'copy', icon: 'copy', name: translate('commonDuplicate') };
-		let pageLink = { id: 'pageLink', icon: 'link', name: translate('commonCopyLink') };
+		let pageLink = { id: 'pageLink', icon: 'pageLink', name: translate('commonCopyLink') };
 		let open = { id: 'open', icon: 'expand', name: translate('commonOpenObject') };
 		let linkTo = { id: 'linkTo', icon: 'linkTo', name: translate('commonLinkTo'), arrow: true };
 		let addCollection = { id: 'addCollection', icon: 'collection', name: translate('commonAddToCollection'), arrow: true };
@@ -208,9 +208,9 @@ const MenuObjectContext = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) =>
 		};
 
 		let sections = [
-			{ children: [ open, changeType, relation, pageLink ] },
+			{ children: [ open, changeType, relation ] },
 			{ children: [ pin, notification, editChat, linkTo, addCollection ] },
-			{ children: [ pageCopy, exportObject, unlink, archive ] },
+			{ children: [ pageLink, pageCopy, exportObject, unlink, archive ] },
 			{ children: [ newTab, newWindow ] },
 		];
 
