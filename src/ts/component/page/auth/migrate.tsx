@@ -6,7 +6,6 @@ import { I, C, S, U, Storage, translate, keyboard } from 'Lib';
 const PageAuthMigrate = observer(forwardRef<I.PageRef, I.PageComponent>((props, ref) => {
 
 	const { dataPath } = S.Common;
-	const match = keyboard.getMatch();
 	const accountId = Storage.get('accountId');
 	const [ screen, setScreen ] = useState('init');
 	const [ errorTitle, setErrorTitle ] = useState('');
