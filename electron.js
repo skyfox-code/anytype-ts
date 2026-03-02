@@ -68,14 +68,19 @@ if (disableGpu) {
 	console.log('[GPU] Hardware acceleration disabled');
 };
 
-app.removeAsDefaultProtocolClient(protocol);
+// On Linux, protocol registration is handled by registerLinuxProtocolHandler()
+// which checks for an existing .desktop file before writing. Electron's built-in
+// setAsDefaultProtocolClient would overwrite .desktop files on every launch.
+if (!is.linux) {
+	app.removeAsDefaultProtocolClient(protocol);
 
-if (!process.defaultApp) {
-	app.setAsDefaultProtocolClient(protocol);
+	if (!process.defaultApp) {
+		app.setAsDefaultProtocolClient(protocol);
+	};
 };
 
 if (!is.macos && (process.argv.length >= 2)) {
-	if (process.defaultApp) {
+	if (process.defaultApp && !is.linux) {
 		app.setAsDefaultProtocolClient(protocol, process.execPath, [ path.resolve(process.argv[1]) ]);
 	};
 	deeplinkingUrl = process.argv.find(arg => arg.startsWith(`${protocol}://`));
