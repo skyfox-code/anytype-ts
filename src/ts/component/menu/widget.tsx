@@ -8,11 +8,10 @@ const MenuWidget = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 
 	const { param, close, setActive, onKeyDown, position, getId, getSize } = props;
 	const { data, className, classNameWrap } = param;
-	const { blockId, isPreview } = data;
+	const { blockId, isPreview, target } = data;
 	const { widgets } = S.Block;
 	const [ layout, setLayout ] = useState<I.WidgetLayout>(data.layout);
 	const [ limit, setLimit ] = useState(data.limit);
-	const [ target, setTarget ] = useState(data.target);
 	const nodeRef = useRef(null);
 	const needUpdate = useRef(false);
 	const n = useRef(-1);
@@ -60,7 +59,6 @@ const MenuWidget = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		};
 
 		const isPinned = block.content.section == I.WidgetSection.Pin;
-		const spaceview = U.Space.getSpaceview();
 		const currentLayout = layoutOptions.find(it => it.id == layout);
 		const sections: any[] = [];
 
@@ -109,9 +107,7 @@ const MenuWidget = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 
 		if (!isSystem && canWrite) {
 			actionChildren.push({ id: 'addCollection', icon: 'collection', name: translate('commonAddToCollection'), arrow: true });
-		};
 
-		if (!isSystem && canWrite) {
 			const allowedArchive = S.Block.isAllowed(target?.restrictions, [ I.RestrictionObject.Delete ]);
 
 			if (allowedArchive) {
@@ -188,6 +184,49 @@ const MenuWidget = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 		};
 	};
 
+	const onSelectOption = (key: string, optionId: string) => {
+		const block = S.Block.getLeaf(widgets, blockId);
+
+		if (!block) {
+			return;
+		};
+
+		const isSectionPin = block.content.section == I.WidgetSection.Pin;
+
+		needUpdate.current = true;
+		n.current = -1;
+
+		switch (key) {
+			case 'layout': {
+				const { layout: newLayout } = checkState(Number(optionId), limit);
+
+				setLayout(newLayout);
+				S.Menu.updateData('select', { value: String(newLayout) });
+
+				if (isSectionPin) {
+					C.BlockWidgetSetLayout(widgets, blockId, newLayout);
+				};
+
+				analytics.event('ChangeWidgetLayout', { layout: newLayout, route: 'Inner', params: { target } });
+				break;
+			};
+
+			case 'limit': {
+				const { limit: newLimit } = checkState(layout, Number(optionId));
+
+				setLimit(newLimit);
+				S.Menu.updateData('select', { value: String(newLimit) });
+
+				if (isSectionPin) {
+					C.BlockWidgetSetLimit(widgets, blockId, newLimit);
+				};
+
+				analytics.event('ChangeWidgetLimit', { limit: newLimit, layout, route: 'Inner', params: { target } });
+				break;
+			};
+		};
+	};
+
 	const onOver = (e: any, item: any) => {
 		if (!item.arrow) {
 			S.Menu.closeAll(J.Menu.widget);
@@ -219,29 +258,7 @@ const MenuWidget = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 					noClose: true,
 					value: String(layout),
 					options: layoutOptions.map(it => ({ id: String(it.id), name: it.name, icon: it.icon })),
-					onSelect: (e: any, option: any) => {
-						const block = S.Block.getLeaf(widgets, blockId);
-
-						if (!block) {
-							return;
-						};
-
-						const isSectionPin = block.content.section == I.WidgetSection.Pin;
-
-						needUpdate.current = true;
-
-						const { layout: newLayout } = checkState(Number(option.id), limit);
-
-						n.current = -1;
-						setLayout(newLayout);
-						S.Menu.updateData('select', { value: String(newLayout) });
-
-						if (isSectionPin) {
-							C.BlockWidgetSetLayout(widgets, blockId, newLayout);
-						};
-
-						analytics.event('ChangeWidgetLayout', { layout: newLayout, route: 'Inner', params: { target } });
-					},
+					onSelect: (e: any, option: any) => onSelectOption('layout', option.id),
 				};
 				break;
 			};
@@ -254,29 +271,7 @@ const MenuWidget = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 					noClose: true,
 					value: String(limit),
 					options: limitOptions.map(it => ({ id: String(it.id), name: String(it.name) })),
-					onSelect: (e: any, option: any) => {
-						const block = S.Block.getLeaf(widgets, blockId);
-
-						if (!block) {
-							return;
-						};
-
-						const isSectionPin = block.content.section == I.WidgetSection.Pin;
-
-						needUpdate.current = true;
-
-						const { limit: newLimit } = checkState(layout, Number(option.id));
-
-						n.current = -1;
-						setLimit(newLimit);
-						S.Menu.updateData('select', { value: String(newLimit) });
-
-						if (isSectionPin) {
-							C.BlockWidgetSetLimit(widgets, blockId, newLimit);
-						};
-
-						analytics.event('ChangeWidgetLimit', { limit: newLimit, layout, route: 'Inner', params: { target } });
-					},
+					onSelect: (e: any, option: any) => onSelectOption('limit', option.id),
 				};
 				break;
 			};
