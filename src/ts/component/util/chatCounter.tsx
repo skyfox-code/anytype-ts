@@ -43,7 +43,7 @@ const ChatCounter = observer(forwardRef<HTMLDivElement, Props>((props, ref) => {
 					modeMention = chatMode;
 				};
 
-				if (state.messageCounter && [ I.NotificationMode.All ].includes(chatMode)) {
+				if (state.messageCounter && [ I.NotificationMode.All, I.NotificationMode.Mentions ].includes(chatMode)) {
 					counters.messageCounter += Number(state.messageCounter) || 0;
 					modeMessage = chatMode;
 				};

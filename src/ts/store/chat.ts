@@ -401,7 +401,7 @@ class ChatStore {
 				ret.mentionCounter += Number(state.mentionCounter) || 0;
 			};
 
-			if (state.messageCounter && (ignoreMute || [ I.NotificationMode.All ].includes(chatMode))) {
+			if (state.messageCounter && (ignoreMute || [ I.NotificationMode.All, I.NotificationMode.Mentions ].includes(chatMode))) {
 				ret.messageCounter += Number(state.messageCounter) || 0;
 			};
 		};
