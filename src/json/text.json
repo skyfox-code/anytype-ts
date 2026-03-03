@@ -202,6 +202,7 @@
 	"commonMedia": "Media",
 	"commonFile": "File",
 	"commonMembers": "Members",
+	"commonInviteMembers": "Invite Members",
 	"commonNothingFound": "Nothing found",
 	"commonNothingHere": "Nothing here yet",
 	"commonSystem": "System",
@@ -624,7 +625,6 @@
 	"pageSettingsSpaceManageContent": "Content Model",
 
 	"pageSettingsSpaceIndexEdit": "Edit",
-	"pageSettingsSpaceIndexInviteMembers": "Invite Members",
 	"pageSettingsSpaceIndexAddMembers": "Add members",
 	"pageSettingsSpaceIndexQRCode": "QR code",
 	"pageSettingsSpaceIndexCopyLink": "Copy link",

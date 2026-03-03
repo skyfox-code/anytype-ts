@@ -241,6 +241,7 @@ const SidebarPageVault = observer(forwardRef<{}, I.SidebarPageComponent>((props,
 			withOpenNewTab: true,
 			noMembers: true, 
 			noManage: true,
+			noShare: true,
 			route: analytics.route.vault,
 		});
 	};
