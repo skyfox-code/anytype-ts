@@ -379,7 +379,7 @@ const MenuBlockAction = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 
 			case 'color':
 			case 'background': {
-				ids = selection?.getForClick(blockId, false, false);
+				ids = selection?.getForClick(blockId, true, false);
 
 				let cmd = '';
 				let event = '';
