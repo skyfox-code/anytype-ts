@@ -2,7 +2,7 @@ import React, { forwardRef, useRef, useEffect, DragEvent, MouseEvent, useState, 
 import $ from 'jquery';
 import raf from 'raf';
 import { observer } from 'mobx-react';
-import { I, C, S, U, J, M, keyboard, translate, Preview, Mark, analytics } from 'Lib';
+import { I, C, S, U, J, M, keyboard, translate, Preview, Mark, analytics, Storage, Action } from 'Lib';
 
 import Form from './chat/form';
 import Message from './chat/message';
@@ -396,12 +396,89 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 		};
 	};
 
+	const getDownloadableAttachments = (message: I.ChatMessage): any[] => {
+		const downloadLayouts = [
+			I.ObjectLayout.File,
+			I.ObjectLayout.Image,
+			I.ObjectLayout.Video,
+			I.ObjectLayout.Audio,
+			I.ObjectLayout.Pdf,
+		];
+
+		return (message.attachments || [])
+			.map(it => S.Detail.get(subId, it.target))
+			.filter(it => !it._empty_ && downloadLayouts.includes(it.layout));
+	};
+
+	const getQuickReactionEmojis = (): { id: string, skin: number, native: string }[] => {
+		const defaults = [
+			{ id: 'heart', skin: 1 },
+			{ id: 'joy', skin: 1 },
+			{ id: 'open_mouth', skin: 1 },
+			{ id: 'cry', skin: 1 },
+			{ id: 'rage', skin: 1 },
+			{ id: '+1', skin: 1 },
+		];
+
+		const storage = Storage.get('smile') || {};
+		const recent = (storage.recent || []).slice(0, 6);
+		const list = recent.length >= 6 ? recent : defaults;
+
+		return list.map(it => ({
+			id: it.id,
+			skin: it.skin || 1,
+			native: U.Smile.nativeById(it.id, it.skin || 1),
+		})).filter(it => it.native);
+	};
+
 	const onContextMenu = (e: MouseEvent, item: any, onMore?: boolean) => {
 		if (readonly) {
 			return;
 		};
 
 		const message = `#block-${U.Common.esc(block.id)} #item-${U.Common.esc(item.id)}`;
+		const isRightClick = !onMore;
+
+		let satellite = null;
+
+		if (isRightClick) {
+			const emojis = getQuickReactionEmojis();
+			const { reactions } = item;
+			const limit = J.Constant.limit.chat.reactions;
+			const self = reactions.filter(it => it.authors.includes(account.id));
+			const noReaction = (self.length >= limit.self) || (reactions.length >= limit.all);
+
+			if (!noReaction) {
+				satellite = (
+					<div className="satellite emojiQuickReaction">
+						{emojis.map((emoji, i) => (
+							<div
+								key={i}
+								className="emojiItem"
+								onClick={() => {
+									C.ChatToggleMessageReaction(chatId, item.id, emoji.native);
+									S.Menu.close('select');
+									analytics.event('AddReaction', { chatId: analyticsChatId });
+								}}
+							>
+								{emoji.native}
+							</div>
+						))}
+						<div
+							className="emojiItem emojiPlus"
+							onClick={() => {
+								S.Menu.close('select', () => {
+									messageRefs.current[item.id]?.onReactionAdd();
+								});
+							}}
+						>
+							<div className="icon plus" />
+						</div>
+					</div>
+				);
+			};
+		};
+
 		const menuParam: Partial<I.MenuParam> = {
 			classNameWrap: 'fromBlock',
 			onOpen: () => {
@@ -412,20 +489,16 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 			},
 			data: {
 				options: getMessageMenuOptions(item, onMore),
+				satellite,
 				onSelect: (e, option) => {
 					switch (option.id) {
-						case 'reaction': {
-							messageRefs.current[item.id]?.onReactionAdd();
-							break;
-						};
-
 						case 'copy': {
 							const block = new M.Block({
 								type: I.BlockType.Text,
 								content: item.content,
 							});
-					
-							U.Common.clipboardCopy({ 
+
+							U.Common.clipboardCopy({
 								text: U.String.sanitize(Mark.insertEmoji(item.content.text, item.content.marks)),
 								anytype: {
 									range: { from: 0, to: item.content.text.length },
@@ -457,6 +530,16 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 
 						case 'delete': {
 							formRef.current.onDelete(item.id);
+							break;
+						};
+
+						case 'download': {
+							const files = getDownloadableAttachments(item);
+
+							files.forEach(it => {
+								const isImage = it.layout == I.ObjectLayout.Image;
+								Action.downloadFile(it.id, analytics.route.chat, isImage);
+							});
 							break;
 						};
 					};
@@ -635,33 +718,37 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 	};
 
 	const getMessageMenuOptions = (message: I.ChatMessage, noControls: boolean): I.Option[] => {
-		const { reactions } = message;
-		const limit = J.Constant.limit.chat.reactions;
-		const self = reactions.filter(it => it.authors.includes(account.id));
-		const noReaction = (self.length >= limit.self) || (reactions.length >= limit.all);
-
-		let options: any[] = [];
-
-		if (message.content.text) {
-			options.push({ id: 'copy', icon: 'chat-copy', name: translate('blockChatCopyText') });
-		};
-
-		options.push({ id: 'link', icon: 'chat-link', name: translate('commonCopyLink') });
-
-		if (message.creator == S.Auth.account.id) {
-			options = options.concat([
-				{ id: 'edit', icon: 'chat-pencil', name: translate('commonEdit') },
-				{ isDiv: true },
-				{ id: 'delete', icon: 'remove-red', name: translate('commonDelete'), color: 'red' },
-			]);
-		};
+		const isSelf = message.creator == S.Auth.account.id;
+		const downloadable = getDownloadableAttachments(message);
+		const options: any[] = [];
 
 		if (!noControls) {
-			options = ([
-				!noReaction ? { id: 'reaction', icon: 'chat-reaction', name: translate('blockChatReactionAdd') } : null,
-				{ id: 'reply', icon: 'chat-reply', name: translate('blockChatReply') },
-				options.length ? { isDiv: true } : null,
-			].filter(it => it)).concat(options);
+			options.push({ id: 'reply', icon: 'chat-reply', name: translate('blockChatReply') });
+		};
+
+		if (message.content.text) {
+			options.push({ id: 'copy', icon: 'clipboard-copy', name: translate('blockChatCopyText') });
+		};
+
+		if (downloadable.length) {
+			const name = downloadable.length > 1
+				? U.String.sprintf(translate('blockChatDownloadFiles'), downloadable.length)
+				: translate('commonDownload');
+
+			options.push({ id: 'download', icon: 'download', name });
+		};
+
+		if (isSelf) {
+			options.push({ isDiv: true });
+			options.push({ id: 'edit', icon: 'chat-pencil', name: translate('commonEdit') });
+			options.push({ isDiv: true });
+			options.push({ id: 'link', icon: 'pageLink', name: translate('commonCopyLink') });
+			options.push({ id: 'delete', icon: 'remove-red', name: translate('commonDelete'), color: 'red' });
+		} else {
+			if (options.length) {
+				options.push({ isDiv: true });
+			};
+			options.push({ id: 'link', icon: 'pageLink', name: translate('commonCopyLink') });
 		};
 
 		return options;
