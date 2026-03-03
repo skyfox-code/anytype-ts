@@ -756,6 +756,12 @@ class Dispatcher {
 													break;
 												};
 											};
+
+											// Preserve existing custom width if update doesn't specify one
+											// (protobuf3 defaults unset int fields to 0)
+											if (!item.width) {
+												item.width = list[idx]?.width || 0;
+											};
 										};
 
 										list[idx] = item;
