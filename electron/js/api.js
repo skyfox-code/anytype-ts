@@ -387,7 +387,7 @@ class Api {
 		};
 
 		if (options?.fireAnalytics) {
-			Util.sendToActiveTab(win, 'commandGlobal', 'analyticsAddTab');
+			Util.sendToActiveTab(win, 'analyticsEvent', 'AddTab', { route: 'Navigation' });
 		};
 
 		WindowManager.createTab(win, rest, options);

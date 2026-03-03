@@ -85,6 +85,9 @@ class Keyboard {
 		Renderer.remove('commandGlobal');
 		Renderer.on('commandGlobal', (e: any, cmd: string, arg: any) => this.onCommand(cmd, arg));
 
+		Renderer.remove('analyticsEvent');
+		Renderer.on('analyticsEvent', (e: any, code: string, data: any) => analytics.event(code, data));
+
 		this.onResize();
 	};
 
@@ -801,11 +804,6 @@ class Keyboard {
 				} else {
 					document.execCommand('redo');
 				};
-				break;
-			};
-
-			case 'analyticsAddTab': {
-				analytics.event('AddTab', { route: analytics.route.navigation });
 				break;
 			};
 
