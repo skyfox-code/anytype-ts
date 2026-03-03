@@ -1040,7 +1040,7 @@ class UtilMenu {
 
 			if (!noShare && inviteLink) {
 				sections.share = [
-					{ id: 'link', icon: 'copyLink', name: translate('menuSpaceContextCopyInviteLink') },
+					{ id: 'link', icon: 'clipboard-copy', name: translate('menuSpaceContextCopyInviteLink') },
 					{ id: 'qr', icon: 'qr', name: translate('menuSpaceContextShowQRCode') },
 				];
 			}
@@ -1089,9 +1089,10 @@ class UtilMenu {
 				};
 
 				if (withDelete) {
+					const icon = isOwner ? 'remove-red' : 'leave-red';
 					const name = isOwner ? translate('pageSettingsSpaceDeleteSpace') : translate('commonLeaveSpace');
 
-					sections.delete.push({ id: 'remove', icon: 'remove-red', name, color: 'red' });
+					sections.delete.push({ id: 'remove', icon, name, color: 'red' });
 				};
 			};
 
