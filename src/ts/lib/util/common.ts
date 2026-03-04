@@ -12,6 +12,15 @@ const iconCache: Map<string, string> = new Map();
 class UtilCommon {
 
 	/**
+	 * Checks if the mouse event button is an auxiliary button (not the main/left button).
+	 * @param {MouseEvent} e - The mouse event.
+	 * @returns {boolean} True if it's an auxiliary button, false otherwise.
+	 */
+	checkAuxButton (e: MouseEvent | React.MouseEvent) {
+		return !!(e.button && (e.button !== 1));
+	};
+
+	/**
 	 * Returns the Electron object from the window, or an empty object if not available.
 	 */
 	getElectron () {
