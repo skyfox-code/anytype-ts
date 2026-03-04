@@ -20,6 +20,13 @@ interface RefProps {
 };
 
 const GROUP_TIME = 300;
+const DOWNLOAD_LAYOUTS = [
+	I.ObjectLayout.File,
+	I.ObjectLayout.Image,
+	I.ObjectLayout.Video,
+	I.ObjectLayout.Audio,
+	I.ObjectLayout.Pdf,
+];
 
 const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) => {
 
@@ -397,17 +404,16 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 	};
 
 	const getDownloadableAttachments = (message: I.ChatMessage): any[] => {
-		const downloadLayouts = [
-			I.ObjectLayout.File,
-			I.ObjectLayout.Image,
-			I.ObjectLayout.Video,
-			I.ObjectLayout.Audio,
-			I.ObjectLayout.Pdf,
-		];
-
 		return (message.attachments || [])
 			.map(it => S.Detail.get(subId, it.target))
-			.filter(it => !it._empty_ && downloadLayouts.includes(it.layout));
+			.filter(it => !it._empty_ && DOWNLOAD_LAYOUTS.includes(it.layout));
+	};
+
+	const canAddReaction = (message: I.ChatMessage): boolean => {
+		const { reactions } = message;
+		const limit = J.Constant.limit.chat.reactions;
+		const self = reactions.filter(it => it.authors.includes(account.id));
+		return (self.length < limit.self) && (reactions.length < limit.all);
 	};
 
 	const getQuickReactionEmojis = (): { id: string, skin: number, native: string }[] => {
@@ -441,42 +447,38 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 
 		let satellite = null;
 
-		if (isRightClick) {
+		if (isRightClick && canAddReaction(item)) {
 			const emojis = getQuickReactionEmojis();
-			const { reactions } = item;
-			const limit = J.Constant.limit.chat.reactions;
-			const self = reactions.filter(it => it.authors.includes(account.id));
-			const noReaction = (self.length >= limit.self) || (reactions.length >= limit.all);
 
-			if (!noReaction) {
-				satellite = (
-					<div className="satellite emojiQuickReaction">
-						{emojis.map((emoji, i) => (
-							<div
-								key={i}
-								className="emojiItem"
-								onClick={() => {
-									C.ChatToggleMessageReaction(chatId, item.id, emoji.native);
-									S.Menu.close('select');
-									analytics.event('AddReaction', { chatId: analyticsChatId });
-								}}
-							>
-								{emoji.native}
-							</div>
-						))}
+			satellite = (
+				<div className="satellite emojiQuickReaction">
+					{emojis.map((emoji, i) => (
 						<div
-							className="emojiItem emojiPlus"
+							key={i}
+							className="emojiItem"
 							onClick={() => {
-								S.Menu.close('select', () => {
-									messageRefs.current[item.id]?.onReactionAdd();
-								});
+								const hasReaction = item.reactions.find(it => it.icon == emoji.native);
+
+								C.ChatToggleMessageReaction(chatId, item.id, emoji.native);
+								S.Menu.close('select');
+								analytics.event(hasReaction ? 'RemoveReaction' : 'AddReaction', { chatId: analyticsChatId });
 							}}
 						>
-							<div className="icon plus" />
+							{emoji.native}
 						</div>
+					))}
+					<div
+						className="emojiItem emojiPlus"
+						onClick={() => {
+							S.Menu.close('select', () => {
+								messageRefs.current[item.id]?.onReactionAdd();
+							});
+						}}
+					>
+						<div className="icon plus" />
 					</div>
-				);
-			};
+				</div>
+			);
 		};
 
 		const menuParam: Partial<I.MenuParam> = {
