@@ -65,8 +65,7 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 	const editingId = useRef<string>('');
 	const speedLimit = useRef({ last: 0, counter: 0 });
 	const counters = S.Chat.getState(subId);
-	const mentionCounter = counters.mentionCounter;
-	const reactionCounter = counters.reactionCounter;
+	const { mentionCounter, reactionCounter } = counters;
 	const messageCounter = S.Chat.counterString(counters.messageCounter);
 	const history = useRef({ position: -1, states: [] });
 	const menuContext = useRef(null);

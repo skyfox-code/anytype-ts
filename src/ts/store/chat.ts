@@ -161,6 +161,7 @@ class ChatStore {
 	 */
 	private createState (state: I.ChatState): I.ChatStoreState {
 		const { messages, mentions, reactionOrderId, lastStateId, order } = state;
+
 		const el = {
 			messageOrderId: messages.orderId,
 			messageCounter: messages.counter,
