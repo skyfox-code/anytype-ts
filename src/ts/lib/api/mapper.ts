@@ -719,6 +719,7 @@ export const Mapper = {
 				reactions: Mapper.From.ChatMessageReaction(obj.getReactions()),
 				isReadMessage: obj.getRead(),
 				isReadMention: obj.getMentionread(),
+				isReadReaction: !obj.getUnreadreaction(),
 				hasMention: obj.getHasmention(),
 				isSynced: obj.getSynced(),
 			};
@@ -728,6 +729,7 @@ export const Mapper = {
 			return {
 				messages: Mapper.From.ChatStateUnreadMessages(obj.getMessages()),
 				mentions: Mapper.From.ChatStateUnreadMessages(obj.getMentions()),
+				reactionOrderId: obj.getUnreadreactionorderid(),
 				lastStateId: obj.getLaststateid(),
 				order: obj.getOrder(),
 			};
