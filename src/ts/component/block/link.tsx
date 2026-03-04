@@ -43,7 +43,7 @@ const BlockLink = observer(forwardRef<I.BlockRef, I.BlockComponent>((props, ref)
 	};
 	
 	const onClick = (e: any) => {
-		if (e.button) {
+		if (e.button && (e.button !== 1)) {
 			return;
 		};
 

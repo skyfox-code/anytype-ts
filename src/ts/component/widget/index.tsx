@@ -594,7 +594,7 @@ const WidgetIndex = observer(forwardRef<{}, Props>((props, ref) => {
 		e.preventDefault();
 		e.stopPropagation();
 
-		if (e.button) {
+		if (e.button && (e.button !== 1)) {
 			return;
 		};
 

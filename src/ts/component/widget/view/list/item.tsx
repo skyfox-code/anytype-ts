@@ -51,7 +51,7 @@ const WidgetListItem = observer(forwardRef<{}, Props>((props, ref) => {
 	};
 
 	const onClick = (e: MouseEvent) => {
-		if (e.button) {
+		if (e.button && (e.button !== 1)) {
 			return;
 		};
 

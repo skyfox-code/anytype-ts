@@ -25,10 +25,10 @@ const WidgetGalleryItem = observer(forwardRef<{}, Props>(({
 	const rootId = keyboard.getRootId();
 	const object = S.Detail.get(subId, id, J.Relation.sidebar.concat(J.Relation.cover).concat(view.coverRelationKey));
 	const { isReadonly, isArchived, restrictions } = object;
-	const allowedDetails = S.Block.isAllowed(restrictions, [ I.RestrictionObject.Details ]);
+	const allowedDetails = S.Block.isAllowed(restrictions, [I.RestrictionObject.Details]);
 	const iconKey = `widget-icon-${block.id}-${id}`;
-	const canDrop = S.Block.isAllowed(restrictions, [ I.RestrictionObject.Block ]);
-	const cn = [ 'item' ];
+	const canDrop = S.Block.isAllowed(restrictions, [I.RestrictionObject.Block]);
+	const cn = ['item'];
 	const cover = view ? Dataview.getCoverObject(subId, object, view.coverRelationKey) : null;
 	const nameRelation = view.getRelation('name');
 	const withName = !cover || (cover && nameRelation?.isVisible);
@@ -42,7 +42,7 @@ const WidgetGalleryItem = observer(forwardRef<{}, Props>(({
 	};
 
 	const onClick = (e: MouseEvent) => {
-		if (e.button) {
+		if (e.button && (e.button !== 1)) {
 			return;
 		};
 
@@ -69,7 +69,7 @@ const WidgetGalleryItem = observer(forwardRef<{}, Props>(({
 			onClose: () => node.removeClass('active'),
 			data: {
 				route: analytics.route.widget,
-				objectIds: [ id ],
+				objectIds: [id],
 				subId,
 				allowedCollection: true,
 				allowedExport: true,
@@ -120,7 +120,7 @@ const WidgetGalleryItem = observer(forwardRef<{}, Props>(({
 	if (canDrop) {
 		inner = (
 			<DropTarget
-				cacheKey={[ block.id, object.id ].join('-')}
+				cacheKey={[block.id, object.id].join('-')}
 				id={object.id}
 				rootId={rootId}
 				targetContextId={object.id}

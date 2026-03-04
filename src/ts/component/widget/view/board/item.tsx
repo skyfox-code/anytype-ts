@@ -26,7 +26,7 @@ const WidgetBoardItem = observer(forwardRef<{}, Props>((props, ref) => {
 	const hasMore = false;//U.Space.canMyParticipantWrite();
 
 	const onClick = (e: MouseEvent) => {
-		if (e.button) {
+		if (e.button && (e.button !== 1)) {
 			return;
 		};
 
