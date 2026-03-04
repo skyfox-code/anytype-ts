@@ -274,6 +274,10 @@ class Api {
 		WindowManager.updateTabBarVisibility(win);
 	};
 
+	setHideSidebar (win, v) {
+		WindowManager.sendToAllTabs('set-hide-sidebar', v);
+	};
+
 	setAlwaysShowTabs (win, show) {
 		this.setConfig(win, { alwaysShowTabs: show }, () => {
 			WindowManager.updateTabBarVisibility(win);
