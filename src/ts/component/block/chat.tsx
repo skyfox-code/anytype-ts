@@ -683,6 +683,18 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 				C.ChatReadMessages(chatId, first.orderId, last.orderId, lastStateId, I.ChatReadType.Mention);
 			};
 
+			// Read reactions: if any visible message is at or past the unread reaction orderId, mark as read
+			if (state.reactionOrderId && last) {
+				const maxOrderId = ids.reduce((max, id) => {
+					const msg = S.Chat.getMessageById(subId, id);
+					return (msg && (msg.orderId >= max)) ? msg.orderId : max;
+				}, '');
+
+				if (maxOrderId >= state.reactionOrderId) {
+					C.ChatReadReactions(chatId, maxOrderId);
+				};
+			};
+
 			S.Chat.setReadMessageStatus(subId, ids, true);
 			S.Chat.setReadMentionStatus(subId, ids, true);
 		};
