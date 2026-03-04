@@ -2421,12 +2421,11 @@ export const ChatUnreadMessages = (objectId: string, afterOrderId: string, callB
 	dispatcher.request(ChatUnreadMessages.name, request, callBack);
 };
 
-export const ChatReadReactions = (objectId: string, afterOrderId: string, beforeOrderId: string, callBack?: (message: any) => void) => {
+export const ChatReadReactions = (objectId: string, orderId: string, callBack?: (message: any) => void) => {
 	const request = new Rpc.Chat.ReadReactions.Request();
 
 	request.setChatobjectid(objectId);
-	request.setAfterorderid(afterOrderId);
-	request.setBeforeorderid(beforeOrderId);
+	request.setOrderid(orderId);
 
 	dispatcher.request(ChatReadReactions.name, request, callBack);
 };

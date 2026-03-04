@@ -1336,6 +1336,7 @@ export const Mapper = {
 			if (v == V.CHATUPDATEMESSAGEREADSTATUS)	 t = 'ChatUpdateMessageReadStatus';
 			if (v == V.CHATUPDATEMENTIONREADSTATUS)	 t = 'ChatUpdateMentionReadStatus';
 			if (v == V.CHATUPDATEMESSAGESYNCSTATUS)	 t = 'ChatUpdateMessageSyncStatus';
+			if (v == V.CHATUPDATEREACTIONREADSTATUS)	 t = 'ChatUpdateReactionReadStatus';
 
 			if (v == V.MEMBERSHIPV2UPDATE)			 t = 'MembershipV2Update';
 			if (v == V.MEMBERSHIPV2PRODUCTSUPDATE)	 t = 'MembershipV2ProductsUpdate';
@@ -1874,6 +1875,14 @@ export const Mapper = {
 			return {
 				ids: obj.getIdsList(),
 				isSynced: obj.getIssynced(),
+				subIds: obj.getSubidsList(),
+			};
+		},
+
+		ChatUpdateReactionReadStatus: (obj: Events.Event.Chat.UpdateReactionReadStatus) => {
+			return {
+				ids: obj.getIdsList(),
+				isRead: !obj.getIsunread(),
 				subIds: obj.getSubidsList(),
 			};
 		},

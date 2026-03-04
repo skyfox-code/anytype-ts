@@ -598,6 +598,21 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 				C.ChatReadMessages(chatId, first.orderId, last.orderId, lastStateId, I.ChatReadType.Mention);
 			};
 
+			// Read reactions for visible messages that have unread reactions
+			const unreadReactionIds = ids.filter(id => {
+				const msg = S.Chat.getMessageById(subId, id);
+				return msg && !msg.isReadReaction && msg.reactions.length;
+			});
+
+			if (unreadReactionIds.length) {
+				const lastUnread = S.Chat.getMessageById(subId, unreadReactionIds[unreadReactionIds.length - 1]);
+				if (lastUnread) {
+					C.ChatReadReactions(chatId, lastUnread.orderId);
+				};
+
+				S.Chat.setReadReactionStatus(subId, unreadReactionIds, true);
+			};
+
 			S.Chat.setReadMessageStatus(subId, ids, true);
 			S.Chat.setReadMentionStatus(subId, ids, true);
 		};

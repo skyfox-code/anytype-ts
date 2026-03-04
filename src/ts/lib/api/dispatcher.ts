@@ -1126,6 +1126,14 @@ class Dispatcher {
 					break;
 				};
 
+				case 'ChatUpdateReactionReadStatus': {
+					mapped.subIds = S.Chat.checkVaultSubscriptionIds(mapped.subIds, spaceId, rootId);
+					mapped.subIds.forEach(subId => {
+						S.Chat.setReadReactionStatus(subId, mapped.ids, mapped.isRead);
+					});
+					break;
+				};
+
 				case 'ChatDelete': {
 					mapped.subIds = S.Chat.checkVaultSubscriptionIds(mapped.subIds, spaceId, rootId);
 					mapped.subIds.forEach(subId => {
