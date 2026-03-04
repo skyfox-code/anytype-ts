@@ -231,6 +231,8 @@ class Keyboard {
 		const data = sidebar.getData(I.SidebarPanel.Right, isPopup);
 		const route = analytics.route.shortcut;
 		const electron = U.Common.getElectron();
+		const selectedBlockIds = selection?.get(I.SelectType.Block) || [];
+		const selectedRecordIds = selection?.get(I.SelectType.Record) || [];
 
 		if (this.isMainEditor()) {
 			this.shortcut('tableOfContents', e, () => {
@@ -262,11 +264,9 @@ class Keyboard {
 						U.Common.clearSelection();
 						canClose = false;
 					} else
-					if (selection) {
-						const ids = selection?.get(I.SelectType.Block) || [];
-						if (ids.length) {
-							canClose = false;
-						};
+					if (selectedBlockIds.length || selectedRecordIds.length) {
+						selection.clear();
+						canClose = false;
 					};
 				};
 
@@ -277,6 +277,9 @@ class Keyboard {
 					};
 				};
 			} else 
+			if (selectedBlockIds.length || selectedRecordIds.length) {
+				selection.clear();
+			} else
 			if (electron.isFullScreen()) {
 				Renderer.send('toggleFullScreen');
 			} else
