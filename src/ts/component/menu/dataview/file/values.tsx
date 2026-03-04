@@ -214,7 +214,8 @@ const MenuDataviewFileValues = observer(forwardRef<I.MenuRef, I.Menu>((props, re
 				{canEdit ? <Icon className="dnd" /> : ''}
 				<div
 					className="clickable"
-					onClick={e => U.Object.openEvent(e, item)} onAuxClick={e => U.Object.openEvent(e, item)}
+					onClick={e => U.Object.openEvent(e, item)} 
+					onAuxClick={e => U.Object.openEvent(e, item)}
 					onContextMenu={e => onMore(e, item)}
 				>
 					{content}
