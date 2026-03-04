@@ -42,7 +42,7 @@ const WidgetGalleryItem = observer(forwardRef<{}, Props>(({
 	};
 
 	const onClick = (e: MouseEvent) => {
-		if (e.button && (e.button !== 1)) {
+		if (U.Common.checkAuxButton(e)) {
 			return;
 		};
 
@@ -69,7 +69,7 @@ const WidgetGalleryItem = observer(forwardRef<{}, Props>(({
 			onClose: () => node.removeClass('active'),
 			data: {
 				route: analytics.route.widget,
-				objectIds: [id],
+				objectIds: [ id ],
 				subId,
 				allowedCollection: true,
 				allowedExport: true,
@@ -120,7 +120,7 @@ const WidgetGalleryItem = observer(forwardRef<{}, Props>(({
 	if (canDrop) {
 		inner = (
 			<DropTarget
-				cacheKey={[block.id, object.id].join('-')}
+				cacheKey={[ block.id, object.id ].join('-')}
 				id={object.id}
 				rootId={rootId}
 				targetContextId={object.id}

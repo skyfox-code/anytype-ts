@@ -22,7 +22,7 @@ const PreviewIndex = observer(forwardRef(() => {
 	};
 
 	const onClick = (e: MouseEvent) => {
-		if (e.button && (e.button !== 1)) {
+		if (U.Common.checkAuxButton(e)) {
 			return;
 		};
 
