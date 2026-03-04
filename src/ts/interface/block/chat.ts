@@ -47,6 +47,7 @@ export interface ChatCounter {
 export enum ChatReadType {
 	Message = 0,
 	Mention = 1,
+	Reaction = 2,
 };
 
 export interface ChatMessageReaction {
