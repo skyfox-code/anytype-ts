@@ -538,10 +538,10 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 						case 'download': {
 							const files = getDownloadableAttachments(item);
 
-							files.forEach(it => {
-								const isImage = it.layout == I.ObjectLayout.Image;
-								Action.downloadFile(it.id, analytics.route.chat, isImage);
-							});
+							if (files.length) {
+								const file = files[0];
+								Action.downloadFile(file.id, analytics.route.chat, file.layout == I.ObjectLayout.Image);
+							};
 							break;
 						};
 					};
@@ -732,12 +732,8 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 			options.push({ id: 'copy', icon: 'clipboard-copy', name: translate('blockChatCopyText') });
 		};
 
-		if (downloadable.length) {
-			const name = downloadable.length > 1
-				? U.String.sprintf(translate('blockChatDownloadFiles'), downloadable.length)
-				: translate('commonDownload');
-
-			options.push({ id: 'download', icon: 'download', name });
+		if (downloadable.length == 1) {
+			options.push({ id: 'download', icon: 'download', name: translate('commonDownload') });
 		};
 
 		if (isSelf) {
