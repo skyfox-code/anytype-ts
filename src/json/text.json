@@ -848,6 +848,7 @@
 	"blockChatReplying": "Replying to %s",
 	"blockChatFormReadonly": "Only editors can send messages. Contact the owner to request access.",
 	"blockChatCopyText": "Copy Text",
+	"blockChatDownloadFiles": "Download %s files",
 	"blockChatMarkAsUnread": "Mark as unread",
 	"blockChatAddAttachment": "Add attachment",
 
