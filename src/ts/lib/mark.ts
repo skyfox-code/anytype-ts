@@ -428,8 +428,9 @@ class Mark {
 				const needsZws = ZWS_TYPES.includes(mark.type);
 				const zwsBefore = needsZws ? ZWS : '';
 				const zwsAfter = needsZws ? ZWS : '';
+				const zwsInner = needsZws ? ZWS : '';
 
-				r[mark.range.from] = `${zwsBefore}<${tag} ${attr} ${data.join(' ')}>${prefix}${r[mark.range.from]}`;
+				r[mark.range.from] = `${zwsBefore}<${tag} ${attr} ${data.join(' ')}>${prefix}${zwsInner}${r[mark.range.from]}`;
 				r[mark.range.to - 1] += `${suffix}</${tag}>${zwsAfter}`;
 			};
 		};
