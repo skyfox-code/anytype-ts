@@ -389,12 +389,55 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		keyboard.shortcut('arrowleft, arrowright, arrowdown, arrowup', e, (pressed: string) => {
 			keyboard.disableContextClose(false);
 
+			const isArrowRight = pressed == 'arrowright';
+			const isArrowLeft = pressed == 'arrowleft';
+
 			// When cursor is at model boundary but DOM has ZWS to traverse, let browser handle natively
-			if ((pressed == 'arrowright') && (range.to == value.length) && !editableRef.current?.isAtDomEnd()) {
+			if (isArrowRight && (range.to == value.length) && !editableRef.current?.isAtDomEnd()) {
 				ret = true;
 			} else
-			if ((pressed == 'arrowleft') && !range.from && !editableRef.current?.isAtDomStart()) {
+			if (isArrowLeft && !range.from && !editableRef.current?.isAtDomStart()) {
 				ret = true;
+			};
+
+			// Atomic cursor navigation over emoji/mention marks
+			const atomicTypes = [ I.MarkType.Emoji, I.MarkType.Mention ];
+			const atomicMarks = (marksRef.current || []).filter(it => atomicTypes.includes(it.type));
+			const isShift = e.shiftKey;
+
+			if (isArrowRight && atomicMarks.length) {
+				const pos = isShift ? range.to : range.from;
+				const mark = atomicMarks.find(it => (it.range.from == pos) && (it.range.to > pos));
+
+				if (mark) {
+					e.preventDefault();
+
+					if (isShift) {
+						focus.set(block.id, { from: range.from, to: mark.range.to });
+					} else {
+						focus.set(block.id, { from: mark.range.to, to: mark.range.to });
+					};
+
+					focus.apply();
+					ret = true;
+				};
+			} else
+			if (isArrowLeft && atomicMarks.length) {
+				const pos = isShift ? range.from : range.to;
+				const mark = atomicMarks.find(it => (it.range.to == pos) && (it.range.from < pos));
+
+				if (mark) {
+					e.preventDefault();
+
+					if (isShift) {
+						focus.set(block.id, { from: mark.range.from, to: range.to });
+					} else {
+						focus.set(block.id, { from: mark.range.from, to: mark.range.from });
+					};
+
+					focus.apply();
+					ret = true;
+				};
 			};
 		});
 
