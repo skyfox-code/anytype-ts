@@ -1187,6 +1187,12 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	};
 	
 	const onBlurHandler = (e: any) => {
+		// Don't clear focus when a from-block menu is open
+		// (e.g., OS keyboard layout switch triggers window blur on Linux)
+		if (S.Menu.isOpenList([ 'blockAdd', 'blockMention', 'blockEmoji' ])) {
+			return;
+		};
+
 		if (block.isTextTitle() || block.isTextDescription()) {
 			placeholderCheck();
 		} else {
