@@ -1274,7 +1274,10 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 					scrollToMessage(target.id, true, true);
 				} else {
 					loadMessagesByOrderId(mentionOrderId, () => {
-						highlightMessage('', mentionOrderId);
+						const loaded = S.Chat.getMessageByOrderId(subId, mentionOrderId);
+						if (loaded) {
+							scrollToMessage(loaded.id, true, true);
+						};
 					});
 				};
 
@@ -1290,7 +1293,10 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 					scrollToMessage(target.id, true, true);
 				} else {
 					loadMessagesByOrderId(reactionOrderId, () => {
-						highlightMessage('', reactionOrderId);
+						const loaded = S.Chat.getMessageByOrderId(subId, reactionOrderId);
+						if (loaded) {
+							scrollToMessage(loaded.id, true, true);
+						};
 					});
 				};
 
