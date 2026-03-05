@@ -523,7 +523,7 @@ class Mark {
 	 */
 	fromHtml(html: string, restricted: I.MarkType[]): I.FromHtmlResult {
 		const tags = this.getTags();
-		const rh = new RegExp(`<(\/)?(${Object.values(tags).join('|')})(?:([^>]*)>|>)`, 'ig');
+		const rh = new RegExp(`<(\/)?(${Object.values(tags).join('|')})\\b(?:([^>]*)>|>)`, 'ig');
 		const rp = new RegExp('data-param="([^"]*)"', 'i');
 		const obj = this.cleanHtml(html);
 		const marks: I.Mark[] = [];
@@ -539,7 +539,7 @@ class Mark {
 		text = text.replace(/<span style="font-weight:(?:[^;]+);">([^<]*)(?:<\/span>)?/g, (s: string, p: string) => p);
 
 		// Fix browser markup bug
-		text = text.replace(/<\/?(i|b|strike|font|markupsearch)[^>]*>/g, (s: string, p: string) => {
+		text = text.replace(/<\/?(i|b|strike|font|markupsearch)\b[^>]*>/g, (s: string, p: string) => {
 			let r = '';
 
 			if (p == 'i') r = this.getTag(I.MarkType.Italic);
