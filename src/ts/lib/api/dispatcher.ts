@@ -1194,7 +1194,7 @@ class Dispatcher {
 
 								if (authorName) {
 									const title = U.String.shorten(spaceview.name, 32);
-									const text = `${authorName}: ${icon} to ${U.String.shorten(messagePreview, 48)}`;
+									const text = `${icon} to ${U.String.shorten(messagePreview, 48)}`;
 
 									Renderer.send('notification', {
 										id: mapped.id,
