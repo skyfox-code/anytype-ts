@@ -400,43 +400,41 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				ret = true;
 			};
 
-			// Atomic cursor navigation over emoji/mention marks
-			const atomicTypes = [ I.MarkType.Emoji, I.MarkType.Mention ];
-			const atomicMarks = (marksRef.current || []).filter(it => atomicTypes.includes(it.type));
-			const isShift = e.shiftKey;
+			// Atomic cursor navigation over emoji/mention marks (skip when menus are open)
+			if (!menuOpen && !menuOpenMention && !menuOpenEmoji && !menuOpenSmile) {
+				const atomicTypes = [ I.MarkType.Emoji, I.MarkType.Mention ];
+				const atomicMarks = (marksRef.current || []).filter(it => atomicTypes.includes(it.type));
+				const isShift = e.shiftKey;
 
-			if (isArrowRight && atomicMarks.length) {
-				const pos = isShift ? range.to : range.from;
-				const mark = atomicMarks.find(it => (it.range.from == pos) && (it.range.to > pos));
+				if (isArrowRight && atomicMarks.length) {
+					const pos = isShift ? range.to : range.from;
+					const mark = atomicMarks.find(it => (it.range.from == pos) && (it.range.to > pos));
 
-				if (mark) {
-					e.preventDefault();
+					if (mark) {
+						e.preventDefault();
 
-					if (isShift) {
-						focus.set(block.id, { from: range.from, to: mark.range.to });
-					} else {
-						focus.set(block.id, { from: mark.range.to, to: mark.range.to });
+						const newRange = isShift
+							? { from: range.from, to: mark.range.to }
+							: { from: mark.range.to, to: mark.range.to };
+
+						editableRef.current?.setRange(newRange);
+						ret = true;
 					};
+				} else
+				if (isArrowLeft && atomicMarks.length) {
+					const pos = isShift ? range.from : range.to;
+					const mark = atomicMarks.find(it => (it.range.to == pos) && (it.range.from < pos));
 
-					focus.apply();
-					ret = true;
-				};
-			} else
-			if (isArrowLeft && atomicMarks.length) {
-				const pos = isShift ? range.from : range.to;
-				const mark = atomicMarks.find(it => (it.range.to == pos) && (it.range.from < pos));
+					if (mark) {
+						e.preventDefault();
 
-				if (mark) {
-					e.preventDefault();
+						const newRange = isShift
+							? { from: mark.range.from, to: range.to }
+							: { from: mark.range.from, to: mark.range.from };
 
-					if (isShift) {
-						focus.set(block.id, { from: mark.range.from, to: range.to });
-					} else {
-						focus.set(block.id, { from: mark.range.from, to: mark.range.from });
+						editableRef.current?.setRange(newRange);
+						ret = true;
 					};
-
-					focus.apply();
-					ret = true;
 				};
 			};
 		});
