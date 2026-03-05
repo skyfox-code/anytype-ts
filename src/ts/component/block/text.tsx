@@ -284,8 +284,6 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			{ key: 'zoomOut' },
 			{ key: 'zoomReset' },
 			{ key: 'menuAction' },
-			{ key: 'indent', preventDefault: true },
-			{ key: 'outdent', preventDefault: true },
 			{ key: 'pageLock' },
 			{ key: `${cmd}+v` },
 			{ key: `${cmd}+c`, preventDefault: true },
@@ -299,6 +297,13 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			saveKeys.push({ key: `turnBlock${i}`, preventDefault: true });
 		};
 
+		// Non-code blocks: saveKeys handles save + onKeyDown for block indentation.
+		// Code blocks handle indent/outdent separately (tab characters in text).
+		if (!block.isTextCode()) {
+			saveKeys.push({ key: 'indent', preventDefault: true });
+			saveKeys.push({ key: 'outdent', preventDefault: true });
+		};
+
 		if (isInsideTable) {
 			if (!range.to) {
 				saveKeys.push({ key: `arrowleft, arrowup` });
@@ -306,18 +311,6 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 
 			if (range.to == value.length) {
 				saveKeys.push({ key: `arrowright, arrowdown` });
-			};
-		};
-
-		// For code blocks, indent/outdent are handled explicitly below
-		// to avoid double blockSetText calls (causes extra lines)
-		if (block.isTextCode()) {
-			const skipKeys = [ 'indent', 'outdent' ];
-
-			for (let i = saveKeys.length - 1; i >= 0; i--) {
-				if (skipKeys.includes(saveKeys[i].key)) {
-					saveKeys.splice(i, 1);
-				};
 			};
 		};
 
@@ -452,15 +445,15 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			});
 		});
 
-		keyboard.shortcut('indent, outdent', e, (pressed: string) => {
-			e.preventDefault();
+		// Code blocks: indent/outdent inserts/removes tab characters in text
+		if (block.isTextCode()) {
+			keyboard.shortcut('indent, outdent', e, (pressed: string) => {
+				e.preventDefault();
 
-			const isOutdent = pressed == 'outdent';
-
-			if (block.isTextCode()) {
+				const isOutdent = pressed == 'outdent';
 				const lineStart = value.lastIndexOf('\n', range.from - 1) + 1;
-				let lineEnd = value.indexOf('\n', range.to);
 
+				let lineEnd = value.indexOf('\n', range.to);
 				if (lineEnd == -1) {
 					lineEnd = value.length;
 				};
@@ -536,16 +529,10 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				U.Data.blockSetText(rootId, block.id, newValue, marksRef.current, true, () => {
 					focus.apply();
 				});
-			} else
-			if (!isOutdent) {
-				setText(marksRef.current, true, () => {
-					focus.apply();
-					onKeyDown(e, value, marksRef.current, range, props);
-				});
-			};
 
-			ret = true;
-		});
+				ret = true;
+			});
+		};
 
 		keyboard.shortcut('backspace', e, () => {
 			if (range.to) {

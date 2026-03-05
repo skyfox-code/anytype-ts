@@ -1528,7 +1528,6 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 
 		if (isShift) {
 			Action.move(rootId, rootId, obj.id, [ block.id ], I.BlockPosition.Bottom, () => {
-				Action.move(rootId, rootId, block.id, parentElement.childrenIds.slice(idx), I.BlockPosition.Inner);
 				focus.setWithTimeout(block.id, { from: range.from, to: range.to }, 50);
 			});
 		} else {
