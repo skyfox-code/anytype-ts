@@ -914,6 +914,10 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 		};
 	};
 
+	const reloadAndScrollToBottom = () => {
+		loadMessages(1, true, () => scrollToBottom(true));
+	};
+
 	const onReplyEdit = (e: MouseEvent, message: any) => {
 		formRef.current?.onReply(message);
 		scrollToBottomCheck();
@@ -1211,6 +1215,7 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 					getReplyContent={getReplyContent}
 					highlightMessage={highlightMessage}
 					loadDepsAndReplies={loadDepsAndReplies}
+					reloadAndScrollToBottom={reloadAndScrollToBottom}
 					isEmpty={isEmpty}
 				/>
 			) : ''}

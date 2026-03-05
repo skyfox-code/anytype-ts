@@ -23,6 +23,7 @@ interface Props extends I.BlockComponent {
 	getReplyContent: (message: any) => any;
 	highlightMessage: (id: string, orderId?: string) => void;
 	loadDepsAndReplies: (list: I.ChatMessage[], callBack?: () => void) => void;
+	reloadAndScrollToBottom: () => void;
 };
 
 interface RefProps {
@@ -44,9 +45,9 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 	const { account } = S.Auth;
 	const { space } = S.Common;
 	const { 
-		rootId, block, subId, readonly, isEmpty, isPopup, getReplyContent, loadDepsAndReplies, getMessages, 
-		scrollToBottom, scrollToMessage, renderMentions, renderObjects, renderLinks, renderEmoji, onScrollToBottomClick, loadMessagesByOrderId, 
-		highlightMessage, analyticsChatId,
+		rootId, block, subId, readonly, isEmpty, isPopup, getReplyContent, loadDepsAndReplies, getMessages,
+		scrollToBottom, scrollToMessage, renderMentions, renderObjects, renderLinks, renderEmoji, onScrollToBottomClick, loadMessagesByOrderId,
+		highlightMessage, analyticsChatId, reloadAndScrollToBottom,
 	} = props;
 	const [ replyingId, setReplyingId ] = useState<string>('');
 	const nodeRef = useRef(null);
@@ -990,7 +991,7 @@ const ChatForm = observer(forwardRef<RefProps, Props>((props, ref) => {
 				};
 
 				C.ChatAddMessage(rootId, message, () => {
-					scrollToBottom();
+					reloadAndScrollToBottom();
 					clear();
 
 					analytics.event('SentMessage', { type: messageType, chatId: analyticsChatId});
