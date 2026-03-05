@@ -665,9 +665,20 @@ class Mark {
 			const suffix = hasZws ? '' : ' ';
 			const replace = p2.replace(new RegExp(U.String.regexEscape(symbol), 'g'), '') + suffix;
 
+			// Trim leading/trailing spaces from mark range so they stay outside the formatting
+			const inner = p2.slice(length, p2.length - length);
+			const leadingSpaces = inner.length - inner.trimStart().length;
+			const trailingSpaces = inner.length - inner.trimEnd().length;
+			const markFrom = from + leadingSpaces;
+			const markTo = to - trailingSpaces;
+
+			if (markFrom >= markTo) {
+				return s;
+			};
+
 			let check = true;
 			for (const mark of checked) {
-				const overlap = this.overlap({ from, to }, mark.range);
+				const overlap = this.overlap({ from: markFrom, to: markTo }, mark.range);
 				if (overlaps.includes(overlap)) {
 					check = false;
 					break;
@@ -680,7 +691,7 @@ class Mark {
 
 			marks = this.adjust(marks, from, -length);
 			marks = this.adjust(marks, to, -length + (hasZws ? 0 : 1));
-			marks.push({ type, range: { from, to }, param: '' });
+			marks.push({ type, range: { from: markFrom, to: markTo }, param: '' });
 
 			text = U.String.insert(text, replace, o + p1l, o + p1l + p2l);
 			adjustMarks = true;
