@@ -63,10 +63,7 @@ class Onboarding {
 					noFlipX: true,
 					onClose: () => { 
 						Storage.setOnboarding(key);
-
-						if (section.onComplete) {
-							section.onComplete(force);
-						};
+						section.onComplete?.(force);
 					},
 					data: {
 						...param.data,
