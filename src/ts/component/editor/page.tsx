@@ -8,13 +8,12 @@ import { I, C, S, U, J, Key, Preview, Mark, keyboard, Storage, Action, translate
 import PageHeadEditor from 'Component/page/elements/head/editor';
 import Children from 'Component/page/elements/children';
 import TableOfContents from 'Component/page/elements/tableOfContents';
-import { link } from 'fs';
 
 interface Props extends I.PageComponent {
 	onOpen?(): void;
 };
 
-const THROTTLE = 50;
+const THROTTLE = 40;
 const BUTTON_OFFSET = 10;
 
 const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
@@ -327,7 +326,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			timeoutMove.current = window.setTimeout(() => {
 				buttonAdd.current.removeClass('show');
 				clear();
-			}, 30);
+			}, 100);
 		};
 
 		if (
