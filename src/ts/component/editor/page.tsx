@@ -2388,9 +2388,23 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			analytics.event('DeleteBlock', { count: 1 });
 		};
 
+		// When deleting forward into a toggle, preserve the toggle structure
+		if ((dir > 0) && next.canToggle()) {
+			if (!length) {
+				focus.clear(true);
+				C.BlockListDelete(rootId, [ focused.id ], (message: any) => {
+					if (!message.error.code) {
+						focusSet(next.id, 0, 0, true);
+						analytics.event('DeleteBlock', { count: 1 });
+					};
+				});
+			};
+			return;
+		};
+
 		if (next.isText()) {
 			C.BlockMerge(rootId, blockId, targetId, cb);
-		} else 
+		} else
 		if (!length) {
 			focus.clear(true);
 			C.BlockListDelete(rootId, [ focused.id ], cb);
