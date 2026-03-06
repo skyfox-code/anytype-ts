@@ -18,7 +18,7 @@ module.exports = (env, argv) => {
 		//devtool: 'source-map',
 
 		optimization: {
-			minimize: false,
+			minimize: prod,
 			removeAvailableModules: true,
 			removeEmptyChunks: true,
 			splitChunks: false,

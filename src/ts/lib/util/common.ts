@@ -3,10 +3,23 @@ import raf from 'raf';
 import { I, C, S, J, U, Preview, Renderer, translate, Mark, Action, Storage, keyboard } from 'Lib';
 import target from 'Component/selection/target';
 
-const katex = require('katex');
-require('katex/dist/contrib/mhchem');
-
 const ALLOWED_KATEX = ['\\url', '\\href', '\\includegraphics'];
+
+let _katex: any = null;
+let _katexLoading: Promise<any> | null = null;
+const getKatex = (): any => {
+	if (_katex) return _katex;
+	if (!_katexLoading) {
+		_katexLoading = import('katex').then(m => {
+			_katex = m.default || m;
+			return import('katex/dist/contrib/mhchem');
+		});
+	};
+	return null;
+};
+
+// Eagerly start loading katex
+getKatex();
 const iconCache: Map<string, string> = new Map();
 
 class UtilCommon {
@@ -1122,6 +1135,11 @@ class UtilCommon {
 	 */
 	getLatex (input: string) {
 		if (!input || (input.indexOf('$') < 0)) {
+			return input;
+		};
+
+		const katex = getKatex();
+		if (!katex) {
 			return input;
 		};
 
