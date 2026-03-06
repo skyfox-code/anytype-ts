@@ -48,7 +48,6 @@ class CommonStore {
 	public vaultMessagesValue = null;
 	public vaultIsMinimalValue = null;
 	public gridTitleClickValue = null;
-	public analyticsDeviceIdValue = null;
 	public leftSidebarStateValue = { page: '', subPage: '' };
 
 	public recentEditModeValue: I.RecentEditMode = null;
@@ -160,7 +159,6 @@ class CommonStore {
 			vaultMessagesValue: observable,
 			vaultIsMinimalValue: observable,
 			gridTitleClickValue: observable,
-			analyticsDeviceIdValue: observable,
 			isActiveTab: observable,
 			isPinnedValue: observable,
 			widgetSectionsValue: observable,
@@ -182,7 +180,6 @@ class CommonStore {
 			vaultMessages: computed,
 			vaultIsMinimal: computed,
 			gridTitleClick: computed,
-			analyticsDeviceId: computed,
 			widgetSections: computed,
 			recentEditMode: computed,
 			isPinned: computed,
@@ -213,7 +210,6 @@ class CommonStore {
 			vaultMessagesSet: action,
 			vaultIsMinimalSet: action,
 			gridTitleClickSet: action,
-			analyticsDeviceIdSet: action,
 			widgetSectionsInit: action,
 			widgetSectionsSet: action,
 			recentEditModeSet: action,
@@ -308,17 +304,6 @@ class CommonStore {
 		let ret = this.fullscreenObjectValue;
 		if (ret === null) {
 			ret = Storage.get('fullscreenObject');
-		};
-		if (ret === undefined) {
-			ret = true;
-		};
-		return ret;
-	};
-
-	get analyticsDeviceId (): boolean {
-		let ret = this.analyticsDeviceIdValue;
-		if (ret === null) {
-			ret = Storage.get('analyticsDeviceId');
 		};
 		if (ret === undefined) {
 			ret = true;
@@ -707,10 +692,6 @@ class CommonStore {
 	 */
 	fullscreenObjectSet (v: boolean) {
 		this.boolSet('fullscreenObject', v);
-	};
-
-	analyticsDeviceIdSet (v: boolean) {
-		this.boolSet('analyticsDeviceId', v);
 	};
 
 	/**
