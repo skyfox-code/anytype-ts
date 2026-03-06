@@ -1431,20 +1431,30 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			return;
 		};
 
-		const range = getRange();
-
-		let html = getHtmlValue();
-
-		if (!/<(font|span)/.test(html)) {
+		if (!/<(font|span)/.test(getHtmlValue())) {
 			return;
 		};
 
+		// Clean browser-inserted font/span tags (e.g. from umlaut/IME input).
+		// Must re-read html AFTER the input is processed (inside raf), otherwise
+		// the cleanup restores pre-input html and undoes the user's edit.
 		raf(() => {
+			let html = getHtmlValue();
+
+			if (!/<(font|span)/.test(html)) {
+				return;
+			};
+
+			const range = getRange();
+
 			html = html.replace(/<\/?font[^>]*>/g, '');
 			html = html.replace(/<span[^>]*>(.*?)<\/span>/g, '$1');
 
 			editableRef.current?.setValue(html);
-			editableRef.current?.setRange(range);
+
+			if (range) {
+				editableRef.current?.setRange(range);
+			};
 		});
 	};
 
