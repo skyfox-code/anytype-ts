@@ -13,6 +13,11 @@ const MediaExcalidraw = React.lazy(() => import('Component/util/media/excalidraw
 
 let _katex: any = null;
 let _katexLoading: Promise<any> | null = null;
+let _pako: any = null;
+let _pakoLoading: Promise<any> | null = null;
+let _viz: any = null;
+let _vizLoading: Promise<any> | null = null;
+
 const getKatex = (): any => {
 	if (_katex) return _katex;
 	if (!_katexLoading) {
@@ -24,8 +29,7 @@ const getKatex = (): any => {
 	return null;
 };
 
-let _pako: any = null;
-let _pakoLoading: Promise<any> | null = null;
+
 const getPako = async (): Promise<any> => {
 	if (_pako) return _pako;
 	if (!_pakoLoading) {
@@ -34,8 +38,6 @@ const getPako = async (): Promise<any> => {
 	return _pakoLoading;
 };
 
-let _viz: any = null;
-let _vizLoading: Promise<any> | null = null;
 const getViz = async (): Promise<any> => {
 	if (_viz) return _viz;
 	if (!_vizLoading) {
@@ -799,6 +801,7 @@ const BlockEmbed = observer(forwardRef<I.BlockRef, I.BlockComponent>((props, ref
 			const start = resizeStartRef.current;
 			const dy = e.pageY - start.y;
 			const newHeight = Math.max(200, start.h + dy);
+			
 			node.find('#value').css({ height: newHeight });
 		};
 	};
@@ -864,11 +867,11 @@ const BlockEmbed = observer(forwardRef<I.BlockRef, I.BlockComponent>((props, ref
 	let empty = '';
 	let placeholder = '';
 
-	if (U.Embed.allowBlockResize(processor) && text) {
+	if (U.Embed.allowBlockResize(processor) && (text || isExcalidraw)) {
 		resizeIcon = <Icon className="resize" onMouseDown={e => onResizeStart(e, false)} />;
 	};
 
-	if (isExcalidraw && text) {
+	if (isExcalidraw) {
 		expandIcon = <Icon className="expand withBackground" onMouseDown={() => setIsFullScreen(!isFullScreen)} />;
 	};
 
