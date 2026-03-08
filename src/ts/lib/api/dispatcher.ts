@@ -123,6 +123,9 @@ class Dispatcher {
 	 * Cancels the stream and clears the reference.
 	 */
 	stopStream () {
+		window.clearTimeout(this.timeoutStream);
+		this.reconnects = 0;
+
 		if (this.rafId) {
 			cancelAnimationFrame(this.rafId);
 		};
