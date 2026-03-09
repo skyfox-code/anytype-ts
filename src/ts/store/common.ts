@@ -69,6 +69,7 @@ class CommonStore {
 	public openObjectIds: Map<string, Set<string>> = new Map();
 	public isPinnedValue = false;
 	public widgetSectionsValue: I.WidgetSectionParam[] = null;
+	public downloadingIdsValue: Set<string> = new Set();
 
 	public rightSidebarStateValue: { full: I.SidebarRightState, popup: I.SidebarRightState } = { 
 		full: {
@@ -162,6 +163,7 @@ class CommonStore {
 			isActiveTab: observable,
 			isPinnedValue: observable,
 			widgetSectionsValue: observable,
+			downloadingIdsValue: observable,
 			recentEditModeValue: observable,
 			config: computed,
 			preview: computed,
@@ -217,6 +219,8 @@ class CommonStore {
 			isPinnedSet: action,
 			singleTabSet: action,
 			autoDownloadSet: action,
+			downloadStart: action,
+			downloadDone: action,
 		});
 	};
 
@@ -707,6 +711,18 @@ class CommonStore {
 		v = isNaN(n) ? -1 : n;
 		this.autoDownloadValue = v;
 		Storage.set('autoDownload', v);
+	};
+
+	downloadStart (id: string) {
+		this.downloadingIdsValue.add(id);
+	};
+
+	downloadDone (id: string) {
+		this.downloadingIdsValue.delete(id);
+	};
+
+	isDownloading (id: string): boolean {
+		return this.downloadingIdsValue.has(id);
 	};
 
 	/**
