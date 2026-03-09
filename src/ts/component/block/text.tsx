@@ -364,14 +364,34 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				return;
 			};
 
-			let pd = true;
+			// Handle shift+enter manually in non-code text blocks to avoid browser
+			// contenteditable bugs (browser can incorrectly split inline elements like
+			// <markupcode> when inserting <br>)
 			if (block.isText() && !block.isTextCode() && pressed.match('shift')) {
-				pd = false;
-			};
-			if (pd) {
 				e.preventDefault();
+
+				const insert = '\n';
+				const caret = range.from + insert.length;
+				const newValue = U.String.insert(value, insert, range.from, range.to);
+				const caretRange = { from: caret, to: caret };
+
+				if (range.from != range.to) {
+					marksRef.current = Mark.adjust(marksRef.current, range.from, -(range.to - range.from));
+				};
+				marksRef.current = Mark.adjust(marksRef.current, range.from, insert.length);
+
+				focus.set(block.id, caretRange);
+
+				U.Data.blockSetText(rootId, block.id, newValue, marksRef.current, true, () => {
+					focus.apply();
+				});
+
+				ret = true;
+				return;
 			};
-			
+
+			e.preventDefault();
+
 			U.Data.blockSetText(rootId, block.id, value, marksRef.current, true, () => {
 				onKeyDown(e, value, marksRef.current, range, props);
 			});

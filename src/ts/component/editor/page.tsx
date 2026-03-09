@@ -2469,7 +2469,9 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		};
 
 		if (isCallout || isQuote) {
-			style = content.style;
+			if ((range.from != length) || (range.to != length)) {
+				style = content.style;
+			};
 		};
 
 		C.BlockSplit(rootId, focused.id, range, style, mode, (message: any) => {
