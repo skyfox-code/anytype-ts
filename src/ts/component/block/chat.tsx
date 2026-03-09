@@ -761,7 +761,9 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 		};
 
 		if (downloadable.length == 1) {
-			options.push({ id: 'download', icon: 'download', name: translate('commonDownload') });
+			const isFileDownloading = S.Common.isDownloading(downloadable[0].id);
+
+			options.push({ id: 'download', icon: 'download', name: isFileDownloading ? translate('commonDownloading') : translate('commonDownload'), disabled: isFileDownloading });
 		};
 
 		if (isSelf) {
