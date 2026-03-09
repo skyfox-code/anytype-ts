@@ -7,12 +7,11 @@ interface Props {
 	spaceId?: string;
 	chatId?: string;
 	className?: string;
-	disableMention?: boolean;
 };
 
 const ChatCounter = observer(forwardRef<HTMLDivElement, Props>((props, ref) => {
 
-	const { spaceId = S.Common.space, chatId, className = '', disableMention } = props;
+	const { spaceId = S.Common.space, chatId, className = '' } = props;
 	const spaceview = U.Space.getSpaceviewBySpaceId(spaceId);
 
 	let counters = { mentionCounter: 0, messageCounter: 0, reactionCounter: 0 };
@@ -63,7 +62,7 @@ const ChatCounter = observer(forwardRef<HTMLDivElement, Props>((props, ref) => {
 	const cnMention = [ 'mention' ];
 	const cnMessage = [ 'message' ];
 	const cnReaction = [ 'reaction' ];
-	const showMention = mentionCounter && !spaceview?.isOneToOne && !disableMention;
+	const showMention = mentionCounter && !spaceview?.isOneToOne;
 	const showMessage = messageCounter && (modeMessage != I.NotificationMode.Nothing);
 	const showReaction = reactionCounter && (modeReaction != I.NotificationMode.Nothing);
 
