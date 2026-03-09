@@ -8,6 +8,10 @@ for (const i in I.MarkType) {
 	};
 };
 
+const TagValues = Object.values(Tags).join('|');
+const RE_HTML_TAGS = new RegExp(`<(\/)?(${TagValues})\\b(?:([^>]*)>|>)`, 'ig');
+const RE_DATA_PARAM = new RegExp('data-param="([^"]*)"', 'i');
+
 const Patterns: { [key: string]: string } = {
 	// Arrows and Directional Indicators
 	'->': '→',
@@ -45,6 +49,15 @@ const Patterns: { [key: string]: string } = {
 
 	// Mathematical and Scientific
 	'|~': '≉',
+};
+
+let RE_UNICODE_PATTERNS: RegExp = null;
+const getUnicodePatternRegex = (): RegExp => {
+	if (!RE_UNICODE_PATTERNS) {
+		const keys = Object.keys(Patterns).map(it => U.String.regexEscape(it));
+		RE_UNICODE_PATTERNS = new RegExp(`(${keys.join('|')})`, 'g');
+	};
+	return RE_UNICODE_PATTERNS;
 };
 
 const Order = [
@@ -522,9 +535,9 @@ class Mark {
 	 * @returns {I.FromHtmlResult} The parsed result.
 	 */
 	fromHtml(html: string, restricted: I.MarkType[]): I.FromHtmlResult {
-		const tags = this.getTags();
-		const rh = new RegExp(`<(\/)?(${Object.values(tags).join('|')})\\b(?:([^>]*)>|>)`, 'ig');
-		const rp = new RegExp('data-param="([^"]*)"', 'i');
+		RE_HTML_TAGS.lastIndex = 0;
+		const rh = RE_HTML_TAGS;
+		const rp = RE_DATA_PARAM;
 		const obj = this.cleanHtml(html);
 		const marks: I.Mark[] = [];
 
@@ -562,7 +575,7 @@ class Mark {
 			const end = p1 == '/';
 			const offset = Number(text.indexOf(s)) || 0;
 
-			const key = U.Common.getKeyByValue(tags, p2);
+			const key = U.Common.getKeyByValue(Tags, p2);
 			if (undefined === key) {
 				return;
 			};
@@ -750,9 +763,10 @@ class Mark {
 	 * @returns {I.FromHtmlResult} The parsed result.
 	 */
 	fromUnicode(html: string, marks: I.Mark[], updatedValue: boolean): I.FromHtmlResult {
-		const keys = Object.keys(Patterns).map(it => U.String.regexEscape(it));
-		const reg = new RegExp(`(${keys.join('|')})`, 'g');
+		const reg = getUnicodePatternRegex();
+		reg.lastIndex = 0;
 		const test = reg.test(html);
+		reg.lastIndex = 0;
 		const overlaps = [I.MarkOverlap.Inner, I.MarkOverlap.InnerLeft, I.MarkOverlap.InnerRight, I.MarkOverlap.Equal];
 
 		if (!test) {

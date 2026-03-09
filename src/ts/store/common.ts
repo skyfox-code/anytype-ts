@@ -66,7 +66,6 @@ class CommonStore {
 	public isActiveTab = true;
 	public windowIsFocused = true;
 	public routeParam: any = {};
-	public openObjectIds: Map<string, Set<string>> = new Map();
 	public isPinnedValue = false;
 	public widgetSectionsValue: I.WidgetSectionParam[] = null;
 	public downloadingIdsValue: Set<string> = new Set();
@@ -837,6 +836,14 @@ class CommonStore {
 		if (id && ref) {
 			this.refs.set(id, ref);
 		};
+	};
+
+	/**
+	 * Removes a reference by ID.
+	 * @param {string} id - The reference ID.
+	 */
+	refDelete (id: string) {
+		this.refs.delete(id);
 	};
 
 	/**
