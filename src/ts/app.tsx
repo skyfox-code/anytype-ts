@@ -216,6 +216,7 @@ const App: FC = () => {
 
 		Renderer.on('tab-show-tooltip', (e: any, data: any) => U.Common.tabTooltipShow(data));
 		Renderer.on('tab-hide-tooltip', () => U.Common.tabTooltipHide());
+		Renderer.on('analytics', (e: any, code: string, data?: any) => analytics.event(code, data));
 	};
 	
 	const unregisterIpcEvents = () => {
@@ -246,6 +247,7 @@ const App: FC = () => {
 		Renderer.remove('tab-show-tooltip');
 		Renderer.remove('tab-hide-tooltip');
 		Renderer.remove('set-active-tab');
+		Renderer.remove('analytics');
 	};
 
 	const onInit = (data: any) => {
@@ -377,7 +379,7 @@ const App: FC = () => {
 				if (spaceId) {
 					U.Router.switchSpace(spaceId, '', false, routeParam, true);
 				} else {
-					U.Router.go('/main/void/select', routeParam);
+					U.Data.onAuthWithoutSpace(routeParam);
 				};
 			});
 		};

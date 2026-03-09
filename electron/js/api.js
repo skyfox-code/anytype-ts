@@ -70,6 +70,7 @@ class Api {
 
 	pinCheck (win) {
 		WindowManager.sendToAll('pin-check');
+		WindowManager.list.forEach(w => WindowManager.updateTabBarVisibility(w));
 	};
 
 	pinSet (win) {
@@ -162,7 +163,7 @@ class Api {
 			};
 
 			this.isPinChecked = false;
-			WindowManager.sendToAll('pin-check');
+			this.pinCheck();
 		}, pinTimeout);
 	};
 
@@ -184,7 +185,7 @@ class Api {
 			};
 
 			this.isPinChecked = false;
-			WindowManager.sendToAll('pin-check');
+			this.pinCheck();
 		}, this.pinTimeValue);
 	};
 
@@ -746,12 +747,18 @@ class Api {
 		if (isPinned) {
 			items.push({
 				label: Util.translate('electronMenuTabUnpin'),
-				click: () => WindowManager.unpinTab(win, tabId),
+				click: () => {
+					WindowManager.unpinTab(win, tabId);
+					Util.sendToActiveTab(win, 'analytics', 'UnpinTab');
+				},
 			});
 		} else {
 			items.push({
 				label: Util.translate('electronMenuTabPin'),
-				click: () => WindowManager.pinTab(win, tabId),
+				click: () => {
+					WindowManager.pinTab(win, tabId);
+					Util.sendToActiveTab(win, 'analytics', 'PinTab');
+				},
 			});
 		};
 

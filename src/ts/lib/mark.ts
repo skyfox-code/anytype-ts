@@ -428,8 +428,9 @@ class Mark {
 				const needsZws = ZWS_TYPES.includes(mark.type);
 				const zwsBefore = needsZws ? ZWS : '';
 				const zwsAfter = needsZws ? ZWS : '';
+				const zwsInner = needsZws ? ZWS : '';
 
-				r[mark.range.from] = `${zwsBefore}<${tag} ${attr} ${data.join(' ')}>${prefix}${r[mark.range.from]}`;
+				r[mark.range.from] = `${zwsBefore}<${tag} ${attr} ${data.join(' ')}>${prefix}${zwsInner}${r[mark.range.from]}`;
 				r[mark.range.to - 1] += `${suffix}</${tag}>${zwsAfter}`;
 			};
 		};
@@ -522,7 +523,7 @@ class Mark {
 	 */
 	fromHtml(html: string, restricted: I.MarkType[]): I.FromHtmlResult {
 		const tags = this.getTags();
-		const rh = new RegExp(`<(\/)?(${Object.values(tags).join('|')})(?:([^>]*)>|>)`, 'ig');
+		const rh = new RegExp(`<(\/)?(${Object.values(tags).join('|')})\\b(?:([^>]*)>|>)`, 'ig');
 		const rp = new RegExp('data-param="([^"]*)"', 'i');
 		const obj = this.cleanHtml(html);
 		const marks: I.Mark[] = [];
@@ -538,7 +539,7 @@ class Mark {
 		text = text.replace(/<span style="font-weight:(?:[^;]+);">([^<]*)(?:<\/span>)?/g, (s: string, p: string) => p);
 
 		// Fix browser markup bug
-		text = text.replace(/<\/?(i|b|strike|font|markupsearch)[^>]*>/g, (s: string, p: string) => {
+		text = text.replace(/<\/?(i|b|strike|font|markupsearch)\b[^>]*>/g, (s: string, p: string) => {
 			let r = '';
 
 			if (p == 'i') r = this.getTag(I.MarkType.Italic);
@@ -665,9 +666,20 @@ class Mark {
 			const suffix = hasZws ? '' : ' ';
 			const replace = p2.replace(new RegExp(U.String.regexEscape(symbol), 'g'), '') + suffix;
 
+			// Trim leading/trailing spaces from mark range so they stay outside the formatting
+			const inner = p2.slice(length, p2.length - length);
+			const leadingSpaces = inner.length - inner.trimStart().length;
+			const trailingSpaces = inner.length - inner.trimEnd().length;
+			const markFrom = from + leadingSpaces;
+			const markTo = to - trailingSpaces;
+
+			if (markFrom >= markTo) {
+				return s;
+			};
+
 			let check = true;
 			for (const mark of checked) {
-				const overlap = this.overlap({ from, to }, mark.range);
+				const overlap = this.overlap({ from: markFrom, to: markTo }, mark.range);
 				if (overlaps.includes(overlap)) {
 					check = false;
 					break;
@@ -680,7 +692,7 @@ class Mark {
 
 			marks = this.adjust(marks, from, -length);
 			marks = this.adjust(marks, to, -length + (hasZws ? 0 : 1));
-			marks.push({ type, range: { from, to }, param: '' });
+			marks.push({ type, range: { from: markFrom, to: markTo }, param: '' });
 
 			text = U.String.insert(text, replace, o + p1l, o + p1l + p2l);
 			adjustMarks = true;

@@ -8,13 +8,12 @@ import { I, C, S, U, J, Key, Preview, Mark, keyboard, Storage, Action, translate
 import PageHeadEditor from 'Component/page/elements/head/editor';
 import Children from 'Component/page/elements/children';
 import TableOfContents from 'Component/page/elements/tableOfContents';
-import { link } from 'fs';
 
 interface Props extends I.PageComponent {
 	onOpen?(): void;
 };
 
-const THROTTLE = 50;
+const THROTTLE = 40;
 const BUTTON_OFFSET = 10;
 
 const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
@@ -327,7 +326,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			timeoutMove.current = window.setTimeout(() => {
 				buttonAdd.current.removeClass('show');
 				clear();
-			}, 30);
+			}, 100);
 		};
 
 		if (
@@ -1528,7 +1527,6 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 
 		if (isShift) {
 			Action.move(rootId, rootId, obj.id, [ block.id ], I.BlockPosition.Bottom, () => {
-				Action.move(rootId, rootId, block.id, parentElement.childrenIds.slice(idx), I.BlockPosition.Inner);
 				focus.setWithTimeout(block.id, { from: range.from, to: range.to }, 50);
 			});
 		} else {
@@ -2389,9 +2387,23 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			analytics.event('DeleteBlock', { count: 1 });
 		};
 
+		// When deleting forward into a toggle, preserve the toggle structure
+		if ((dir > 0) && next.canToggle()) {
+			if (!length) {
+				focus.clear(true);
+				C.BlockListDelete(rootId, [ focused.id ], (message: any) => {
+					if (!message.error.code) {
+						focusSet(next.id, 0, 0, true);
+						analytics.event('DeleteBlock', { count: 1 });
+					};
+				});
+			};
+			return;
+		};
+
 		if (next.isText()) {
 			C.BlockMerge(rootId, blockId, targetId, cb);
-		} else 
+		} else
 		if (!length) {
 			focus.clear(true);
 			C.BlockListDelete(rootId, [ focused.id ], cb);
@@ -2457,7 +2469,9 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 		};
 
 		if (isCallout || isQuote) {
-			style = content.style;
+			if ((range.from != length) || (range.to != length)) {
+				style = content.style;
+			};
 		};
 
 		C.BlockSplit(rootId, focused.id, range, style, mode, (message: any) => {
