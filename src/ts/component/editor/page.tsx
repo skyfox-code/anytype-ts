@@ -1464,13 +1464,6 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 					C.BlockListTurnInto(rootId, [ block.id ], map[block.content.style]);
 				} else
 				if (block.isTextList() || block.isTextParagraph()) {
-					const parent = S.Block.getParentLeaf(rootId, block.id);
-					const parentElement = S.Block.getParentMapElement(rootId, block.id);
-					const canOutdent = parent && parentElement && parent.canHaveChildren() && block.isIndentable() && !parent.canToggle();
-
-					if (canOutdent) {
-						onTabBlock(e, range, true);	
-					} else 
 					if (block.isTextParagraph()) {
 						ids.length ? blockRemove(block) : blockMerge(block, -1, length);
 					} else {
