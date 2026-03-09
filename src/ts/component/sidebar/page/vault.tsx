@@ -385,7 +385,7 @@ const SidebarPageVault = observer(forwardRef<{}, I.SidebarPageComponent>((props,
 		};
 		const cn = [ 'item', U.Data.spaceClass(item.uxType) ];
 		const iconSize = vaultMessages && !vaultIsMinimal ? 48 : 32;
-		const counter = <ChatCounter spaceId={targetSpaceId} />;
+		const counter = <ChatCounter spaceId={targetSpaceId} isMinimal={vaultIsMinimal} />;
 
 		let chatName = null;
 		let time = null;
