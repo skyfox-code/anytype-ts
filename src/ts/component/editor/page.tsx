@@ -1629,8 +1629,15 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			}, releaseEnterGuard);
 		} else
 		if (block.isTextParagraph() && !length && parent && parent.canToggle()) {
-			Action.move(rootId, rootId, parent.id, [ block.id ], I.BlockPosition.Bottom);
-			releaseEnterGuard();
+			const parentElement = S.Block.getParentMapElement(rootId, block.id);
+			const isLastChild = parentElement && (parentElement.childrenIds[parentElement.childrenIds.length - 1] === block.id);
+
+			if (isLastChild) {
+				Action.move(rootId, rootId, parent.id, [ block.id ], I.BlockPosition.Bottom);
+				releaseEnterGuard();
+			} else {
+				blockSplit(block, range, isShift, releaseEnterGuard);
+			};
 		} else {
 			blockSplit(block, range, isShift, releaseEnterGuard);
 		};
