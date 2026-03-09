@@ -359,10 +359,10 @@ const SidebarPageVault = observer(forwardRef<{}, I.SidebarPageComponent>((props,
 		setFilter('');
 	};
 
-	const ItemObject = (item: any) => {
+	const ItemObject = forwardRef((item: any, forwardedRef: any) => {
 		if (item.isDiv) {
 			return (
-				<div className="separator" style={item.style}>
+				<div ref={forwardedRef} className="separator" style={item.style}>
 					<div className="inner" />
 				</div>
 			);
@@ -370,7 +370,7 @@ const SidebarPageVault = observer(forwardRef<{}, I.SidebarPageComponent>((props,
 
 		if (item.id == 'createSpace') {
 			return (
-				<div className="item add" style={item.style}>
+				<div ref={forwardedRef} className="item add" style={item.style}>
 					{iconCreate()}
 				</div>
 			);
@@ -484,14 +484,24 @@ const SidebarPageVault = observer(forwardRef<{}, I.SidebarPageComponent>((props,
 			);
 		};
 
+		const mergedRef = (node: any) => {
+			setNodeRef(node);
+			if (typeof forwardedRef === 'function') {
+				forwardedRef(node);
+			} else
+			if (forwardedRef) {
+				forwardedRef.current = node;
+			};
+		};
+
 		return (
-			<div 
-				ref={setNodeRef}
+			<div
+				ref={mergedRef}
 				id={`item-${item.id}`}
 				className={cn.join(' ')}
 				{...attributes}
 				{...listeners}
-				style={style} 
+				style={style}
 				onClick={e => onClick(e, item)}
 				onMouseEnter={() => onOver(item)}
 				onMouseLeave={onOut}
@@ -508,7 +518,7 @@ const SidebarPageVault = observer(forwardRef<{}, I.SidebarPageComponent>((props,
 				) : ''}
 			</div>
 		);
-	};
+	});
 
 	const rowRenderer = (param: any) => {
 		const item: any = items[param.index];
