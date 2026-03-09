@@ -19,6 +19,13 @@
 		}
 
 		.iconObject { flex-shrink: 0; }
+
+		.icon.downloading {
+			width: 24px; height: 24px; flex-shrink: 0;
+			background-image: url('~img/icon/vault/spinner.svg'); background-size: 24px; animation: rotate 1.2s infinite linear;
+		}
+
+		.inner.isDownloading { opacity: 0.6; }
 	}
 	
 	.block.blockFile > .wrapContent > .selectionTarget > .dropTarget { @include text-overflow-nw;  }
