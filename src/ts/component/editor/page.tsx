@@ -1629,10 +1629,7 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 			}, releaseEnterGuard);
 		} else
 		if (block.isTextParagraph() && !length && parent && parent.canToggle()) {
-			const parentElement = S.Block.getParentMapElement(rootId, block.id);
-			const isLastChild = parentElement && (parentElement.childrenIds[parentElement.childrenIds.length - 1] === block.id);
-
-			if (isLastChild) {
+			if (S.Block.isLastChild(rootId, block.id)) {
 				Action.move(rootId, rootId, parent.id, [ block.id ], I.BlockPosition.Bottom);
 				releaseEnterGuard();
 			} else {
