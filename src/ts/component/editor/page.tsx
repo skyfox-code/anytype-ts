@@ -652,6 +652,28 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				ret = true;
 			});
 
+			// Open add menu
+			keyboard.shortcut('menuAdd', e, () => {
+				S.Menu.closeAll([ 'blockContext', 'blockAction' ], () => {
+					S.Menu.open('blockAdd', {
+						element: `#block-${U.Common.esc(ids[0])}`,
+						classNameWrap: 'fromBlock',
+						offsetX: J.Size.blockMenu,
+						data: {
+							blockId: ids[0],
+							blockIds: ids,
+							rootId,
+						},
+						onClose: () => {
+							selection.clear();
+							focus.apply();
+						}
+					});
+				});
+
+				ret = true;
+			});
+
 			// Move blocks with arrows
 			keyboard.shortcut(`moveSelectionUp, moveSelectionDown`, e, (pressed: string) => {
 				onCtrlShiftArrowEditor(e, pressed);
