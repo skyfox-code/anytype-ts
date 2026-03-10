@@ -209,8 +209,6 @@ const ChatAttachment = observer(forwardRef<RefProps, Props>((props, ref) => {
 	};
 
 	const onOpen = (e: any) => {
-		const syncStatus = Number(object.syncStatus) || I.SyncStatusObject.Synced;
-
 		if (isDownload && (syncStatus != I.SyncStatusObject.Synced)) {
 			return;
 		};

@@ -1146,6 +1146,8 @@ const BlockChat = observer(forwardRef<RefProps, I.BlockComponent>((props, ref) =
 		return () => {
 			unbind();
 
+			U.Subscription.destroyList([ getSubId() ], false);
+
 			window.clearTimeout(timeoutInterface.current);
 			window.clearTimeout(timeoutScrollStop.current);
 			window.clearTimeout(timeoutResize.current);
