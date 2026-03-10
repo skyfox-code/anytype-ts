@@ -1623,7 +1623,13 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				style: I.TextStyle.Paragraph,
 			}, releaseEnterGuard);
 		} else
-		if (block.isTextParagraph() && !length && parent && parent.canToggle()) {
+		if (block.isTextCallout() && (range.from == length) && (range.to == length)) {
+			blockCreate(block.id, I.BlockPosition.Bottom, {
+				type: I.BlockType.Text,
+				style: I.TextStyle.Paragraph,
+			}, releaseEnterGuard);
+		} else
+		if (block.isTextParagraph() && !length && parent && (parent.canToggle() || parent.isTextCallout())) {
 			if (S.Block.isLastChild(rootId, block.id)) {
 				Action.move(rootId, rootId, parent.id, [ block.id ], I.BlockPosition.Bottom);
 				releaseEnterGuard();

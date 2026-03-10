@@ -162,11 +162,11 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 
 		html = html.replace(/\n/g, '<br/>');
 
-		// Add extra <br/> at end for code blocks to ensure trailing newlines are visible
+		// Add extra <br/> at end to ensure trailing newlines are visible
 		// (contenteditable collapses a single trailing <br/>)
 		// Only add when focused to avoid extra line when blurred
 		phantomNewlineRef.current = false;
-		if (block.isTextCode() && text.endsWith('\n') && (focused == block.id)) {
+		if (text.endsWith('\n') && (focused == block.id)) {
 			html += '<br/>';
 			phantomNewlineRef.current = true;
 		};
@@ -236,9 +236,15 @@ const BlockText = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 	};
 	
 	const getMarksFromHtml = (): { marks: I.Mark[], text: string } => {
-		const value = getHtmlValue();
+		let value = getHtmlValue();
+
+		// Strip phantom <br/> that was added to make trailing newlines visible in contenteditable
+		if (phantomNewlineRef.current) {
+			value = value.replace(/<br\/?>$/, '');
+		};
+
 		const restricted: I.MarkType[] = block.isTextHeader() ? [ I.MarkType.Bold ] : [];
-		
+
 		return Mark.fromHtml(value, restricted);
 	};
 
