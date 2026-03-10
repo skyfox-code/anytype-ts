@@ -6,6 +6,7 @@ const HeaderMainGraph = forwardRef<{}, I.HeaderComponent>((props, ref) => {
 
 	const { renderLeftIcons, renderTabs, menuOpen, rootId } = props;
 	const rootIdRef = useRef('');
+	const key = J.Constant.graphId.global;
 
 	const unbind = () => {
 		$(window).off(`updateGraphRoot.header`);
@@ -28,14 +29,14 @@ const HeaderMainGraph = forwardRef<{}, I.HeaderComponent>((props, ref) => {
 				blockId: rootId,
 				blockIds: [ rootId ],
 				filters: U.Data.getGraphFilters(),
-				filter: S.Common.getGraph(J.Constant.graphId.global).filter,
+				filter: S.Common.getGraph(key).filter,
 				canAdd: true,
 				withPlural: true,
 				onSelect: (item: any) => {
 					$(window).trigger('updateGraphRoot', { id: item.id });
 				},
 				onFilterChange: (v: string) => {
-					S.Common.graphSet(J.Constant.graphId.global, { filter: v });
+					S.Common.graphSet(key, { filter: v });
 				},
 			}
 		});
@@ -45,14 +46,21 @@ const HeaderMainGraph = forwardRef<{}, I.HeaderComponent>((props, ref) => {
 	};
 
 	const onSettings = () => {
-		menuOpen('graphSettings', '#button-header-settings', { 
+		menuOpen('graphSettings', '#button-header-settings', {
 			horizontal: I.MenuDirection.Right,
 			subIds: J.Menu.graphSettings,
 			data: {
 				allowLocal: true,
-				storageKey: J.Constant.graphId.global,
+				storageKey: key,
 			}
 		});
+	};
+
+	const onToggleEnhanced = () => {
+		const settings = S.Common.getGraph(key);
+
+		S.Common.graphSet(key, { enhanced: !settings.enhanced });
+		$(window).trigger(`updateGraphView.${key}`);
 	};
 
 	const initRootId = (id: string) => {
@@ -66,31 +74,43 @@ const HeaderMainGraph = forwardRef<{}, I.HeaderComponent>((props, ref) => {
 		return () => unbind();
 	}, []);
 
+	const isEnhanced = S.Common.getGraph(key).enhanced;
+
 	return (
 		<>
 			<div className="side left">{renderLeftIcons(true, false)}</div>
 			<div className="side center">{renderTabs()}</div>
 
 			<div className="side right">
-				<Icon 
-					id="button-header-search" 
-					className="btn-search withBackground" 
-					tooltipParam={{ text: translate('headerGraphTooltipSearch'), typeY: I.MenuDirection.Bottom }} 
-					onClick={onSearch} 
+				<Icon
+					id="button-header-enhanced"
+					className={[ 'btn-enhanced', 'withBackground', (isEnhanced ? 'active' : '') ].join(' ')}
+					tooltipParam={{
+						text: isEnhanced ? translate('graphEnhancedSwitchToStandard') : translate('graphEnhancedSwitchToEnhanced'),
+						typeY: I.MenuDirection.Bottom,
+					}}
+					onClick={onToggleEnhanced}
 				/>
 
-				<Icon 
-					id="button-header-filter" 
-					className="btn-filter withBackground dn" 
-					tooltipParam={{ text: translate('headerGraphTooltipFilters'), typeY: I.MenuDirection.Bottom }} 
-					onClick={onFilter} 
+				<Icon
+					id="button-header-search"
+					className="btn-search withBackground"
+					tooltipParam={{ text: translate('headerGraphTooltipSearch'), typeY: I.MenuDirection.Bottom }}
+					onClick={onSearch}
 				/>
 
-				<Icon 
-					id="button-header-settings" 
-					className="btn-settings withBackground" 
-					tooltipParam={{ text: translate('headerGraphTooltipSettings'), typeY: I.MenuDirection.Bottom }} 
-					onClick={onSettings} 
+				<Icon
+					id="button-header-filter"
+					className="btn-filter withBackground dn"
+					tooltipParam={{ text: translate('headerGraphTooltipFilters'), typeY: I.MenuDirection.Bottom }}
+					onClick={onFilter}
+				/>
+
+				<Icon
+					id="button-header-settings"
+					className="btn-settings withBackground"
+					tooltipParam={{ text: translate('headerGraphTooltipSettings'), typeY: I.MenuDirection.Bottom }}
+					onClick={onSettings}
 				/>
 			</div>
 		</>

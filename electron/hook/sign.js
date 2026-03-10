@@ -1,12 +1,12 @@
 const Util = require('./util.js');
 
 exports.default = async function (context) {
-	if (process.env.ELECTRON_SKIP_NOTARIZE) {
+	if (process.platform === 'win32' || process.env.ELECTRON_SKIP_NOTARIZE) {
 		return;
 	};
 
 	const cmd = [
-		`AzureSignTool.exe sign`,
+		`azuresigntool sign`,
 		`-du "${context.site}"`,
 		`-fd sha384`,
 		`-td sha384`,

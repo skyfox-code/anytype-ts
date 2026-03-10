@@ -117,6 +117,7 @@ class CommonStore {
 		filterTypes: [],
 		typeEdges: true,
 		timeline: false,
+		enhanced: false,
 	};
 
 	private timeoutMap = new Map<string, number>();

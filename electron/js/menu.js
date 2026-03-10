@@ -8,24 +8,24 @@ const { getSafeStorage } = require('./safeStorage.js');
 const Separator = { type: 'separator' };
 
 const DEFAULT_SHORTCUTS = {
-	createObject: [ 'CmdOrCtrl', 'N' ],
-	undo: [ 'CmdOrCtrl', 'Z' ],
-	redo: [ 'CmdOrCtrl', 'Shift', 'Z' ],
-	selectAll: [ 'CmdOrCtrl', 'A' ],
-	searchText: [ 'CmdOrCtrl', 'F' ],
-	print: [ 'CmdOrCtrl', 'P' ],
-	newWindow: [ 'CmdOrCtrl', 'Shift', 'N' ],
-	zoomIn: [ 'CmdOrCtrl', '=' ],
-	zoomOut: [ 'CmdOrCtrl', '-' ],
-	zoomReset: [ 'CmdOrCtrl', '0' ],
-	toggleFullScreen: [ 'CmdOrCtrl', 'Shift', 'F' ],
-	shortcut: [ 'Ctrl', 'Space' ],
-	close: [ 'CmdOrCtrl', 'Q' ],
+	createObject: ['CmdOrCtrl', 'N'],
+	undo: ['CmdOrCtrl', 'Z'],
+	redo: ['CmdOrCtrl', 'Shift', 'Z'],
+	selectAll: ['CmdOrCtrl', 'A'],
+	searchText: ['CmdOrCtrl', 'F'],
+	print: ['CmdOrCtrl', 'P'],
+	newWindow: ['CmdOrCtrl', 'Shift', 'N'],
+	zoomIn: ['CmdOrCtrl', '='],
+	zoomOut: ['CmdOrCtrl', '-'],
+	zoomReset: ['CmdOrCtrl', '0'],
+	toggleFullScreen: ['CmdOrCtrl', 'Shift', 'F'],
+	shortcut: ['Ctrl', 'Space'],
+	close: ['CmdOrCtrl', 'Q'],
 	createSpace: [],
-	newTab: [ 'CmdOrCtrl', 'T' ],
-	closeTab: [ 'CmdOrCtrl', 'W' ],
-	nextTab: [ 'CmdOrCtrl', 'Alt', 'Right' ],
-	prevTab: [ 'CmdOrCtrl', 'Alt', 'Left' ],
+	newTab: ['CmdOrCtrl', 'T'],
+	closeTab: ['CmdOrCtrl', 'W'],
+	nextTab: ['CmdOrCtrl', 'Alt', 'Right'],
+	prevTab: ['CmdOrCtrl', 'Alt', 'Left'],
 };
 
 class MenuManager {
@@ -33,15 +33,15 @@ class MenuManager {
 	win = null;
 	menu = null;
 	tray = null;
-	setWindow (win) {
+	setWindow(win) {
 		this.win = win;
 	};
 
-	initShortcuts () {
+	initShortcuts() {
 		this.shortcuts = getSafeStorage().get('shortcuts') || {};
 	};
 
-	getAccelerator (id) {
+	getAccelerator(id) {
 		let keys = this.shortcuts[id];
 
 		if (undefined === keys) {
@@ -57,29 +57,29 @@ class MenuManager {
 			if ((keyLower == 'ctrl') || (keyLower == 'cmd')) {
 				ret.push('CmdOrCtrl');
 			} else
-			if (keyLower == 'shift') {
-				ret.push('Shift');
-			} else
-			if (keyLower == 'alt') {
-				ret.push('Alt');
-			} else
-			if (key == '+') {
-				ret.push('Plus');
-			} else
-			if (arrowKeys[keyLower]) {
-				ret.push(arrowKeys[keyLower]);
-			} else {
-				ret.push(key.toUpperCase());
-			};
+				if (keyLower == 'shift') {
+					ret.push('Shift');
+				} else
+					if (keyLower == 'alt') {
+						ret.push('Alt');
+					} else
+						if (key == '+') {
+							ret.push('Plus');
+						} else
+							if (arrowKeys[keyLower]) {
+								ret.push(arrowKeys[keyLower]);
+							} else {
+								ret.push(key.toUpperCase());
+							};
 		};
 		return ret.join('+');
 	};
 
-	getView () {
+	getView() {
 		return Util.getActiveView(this.win);
 	};
 
-	initMenu () {
+	initMenu() {
 		this.initShortcuts();
 
 		const { config } = ConfigManager;
@@ -129,13 +129,13 @@ class MenuManager {
 
 					Separator,
 
-					{ 
+					{
 						label: Util.translate('electronMenuOpen'), submenu: [
 							{ label: Util.translate('electronMenuWorkDirectory'), click: () => shell.openPath(Util.userPath()) },
 							{ label: Util.translate('electronMenuDataDirectory'), click: () => shell.openPath(Util.dataPath()) },
 							{ label: Util.translate('electronMenuConfigDirectory'), click: () => shell.openPath(Util.defaultUserDataPath()) },
 							{ label: Util.translate('electronMenuLogsDirectory'), click: () => shell.openPath(Util.logPath()) },
-							{ 
+							{
 								label: Util.translate('electronMenuCustomCss'),
 								click: () => {
 									const fp = path.join(Util.userPath(), 'custom.css');
@@ -147,12 +147,12 @@ class MenuManager {
 									shell.openPath(fp);
 								},
 							},
-						] 
+						]
 					},
 
 					Separator,
 
-					{ 
+					{
 						label: Util.translate('electronMenuApplyCustomCss'), type: 'checkbox', checked: !config.disableCss,
 						click: () => {
 							config.disableCss = !config.disableCss;
@@ -184,7 +184,7 @@ class MenuManager {
 				submenu: [
 					{
 						label: Util.translate('electronMenuUndo'), accelerator: this.getAccelerator('undo'),
-						click: () => { 
+						click: () => {
 							if (this.win) {
 								this.getView().webContents.undo();
 								Util.send(this.win, 'commandGlobal', 'undo');
@@ -206,7 +206,7 @@ class MenuManager {
 					{ label: Util.translate('electronMenuCopy'), role: 'copy' },
 					{ label: Util.translate('electronMenuCut'), role: 'cut' },
 					{ label: Util.translate('electronMenuPaste'), role: 'paste' },
-					{ 
+					{
 						label: Util.translate('electronMenuPastePlain'), accelerator: 'CmdOrCtrl+Shift+V',
 						click: () => {
 							if (is.macos) {
@@ -237,15 +237,16 @@ class MenuManager {
 				role: 'windowMenu', label: Util.translate('electronMenuWindow'),
 				submenu: [
 					{ label: Util.translate('electronMenuNewWindow'), accelerator: this.getAccelerator('newWindow'), click: () => WindowManager.createMain({ isChild: true }) },
-					{ label: Util.translate('electronMenuNewTab'), accelerator: this.getAccelerator('newTab'), click: () => {
-						const Api = require('./api.js');
-						const activeView = Util.getActiveView(this.win);
-						const { isPinned, route, ...data } = activeView?.data || {};
+					{
+						label: Util.translate('electronMenuNewTab'), accelerator: this.getAccelerator('newTab'), click: () => {
+							const Api = require('./api.js');
+							const activeView = Util.getActiveView(this.win);
+							const { isPinned, route, ...data } = activeView?.data || {};
 
-						data.route = '/main/void/dashboard';
-						Api.openTab(this.win, data, { fireAnalytics: true });
-					}
-				},
+							data.route = '/main/void/dashboard';
+							Api.openTab(this.win, data, { fireAnalytics: true });
+						}
+					},
 					{ label: Util.translate('electronMenuPrevTab'), accelerator: this.getAccelerator('prevTab'), click: () => WindowManager.prevTab(this.win) },
 					{ label: Util.translate('electronMenuNextTab'), accelerator: this.getAccelerator('nextTab'), click: () => WindowManager.nextTab(this.win) },
 
@@ -259,11 +260,11 @@ class MenuManager {
 						label: Util.translate('electronMenuFullScreen'), accelerator: this.getAccelerator('toggleFullScreen'), type: 'checkbox', checked: this.win.isFullScreen(),
 						click: () => Api.toggleFullScreen(this.win),
 					},
-					{ 
+					{
 						label: Util.translate('electronMenuReload'), accelerator: 'CmdOrCtrl+R', click: () => {
 							this.win.reload();
 							this.getView().webContents.reload();
-						}, 
+						},
 					}
 				]
 			},
@@ -296,9 +297,9 @@ class MenuManager {
 			},
 		];
 
-		const flags = { 
-			ui: Util.translate('electronMenuFlagInterface'), 
-			hiddenObject: Util.translate('electronMenuFlagHidden'), 
+		const flags = {
+			ui: Util.translate('electronMenuFlagInterface'),
+			hiddenObject: Util.translate('electronMenuFlagHidden'),
 			analytics: Util.translate('electronMenuFlagAnalytics'),
 		};
 
@@ -322,7 +323,7 @@ class MenuManager {
 					config.debug[i] = !config.debug[i];
 					Api.setConfig(this.win, { debug: config.debug });
 
-					if ([ 'hiddenObject' ].includes(i)) {
+					if (['hiddenObject'].includes(i)) {
 						this.win.reload();
 						this.getView().webContents.reload();
 					};
@@ -354,27 +355,29 @@ class MenuManager {
 				Separator,
 
 				{ label: Util.translate('electronMenuDebugSpace'), click: () => Util.send(this.win, 'commandGlobal', 'debugSpace') },
-				{ label: Util.translate('electronMenuDebugObject'), click: (item, window, event) => {
-					const unanonymized = event && event.altKey;
-					
-					if (unanonymized) {
-						const { dialog } = require('electron');
-						const result = dialog.showMessageBoxSync(this.win, {
-							type: 'warning',
-							buttons: [ 'Cancel', 'OK' ],
-							defaultId: 0,
-							title: 'Debug without anonymization',
-							message: 'You are exporting this object and all its history of changes without anonymization.',
-							detail: 'This file will contain sensitive data. Only proceed if you understand the privacy implications.'
-						});
-						
-						if (!result) {
-							return; // User clicked Cancel
+				{
+					label: Util.translate('electronMenuDebugObject'), click: (item, window, event) => {
+						const unanonymized = event && event.altKey;
+
+						if (unanonymized) {
+							const { dialog } = require('electron');
+							const result = dialog.showMessageBoxSync(this.win, {
+								type: 'warning',
+								buttons: ['Cancel', 'OK'],
+								defaultId: 0,
+								title: 'Debug without anonymization',
+								message: 'You are exporting this object and all its history of changes without anonymization.',
+								detail: 'This file will contain sensitive data. Only proceed if you understand the privacy implications.'
+							});
+
+							if (!result) {
+								return; // User clicked Cancel
+							};
 						};
-					};
-					
-					Util.send(this.win, 'commandGlobal', 'debugTree', { unanonymized });
-				}},
+
+						Util.send(this.win, 'commandGlobal', 'debugTree', { unanonymized });
+					}
+				},
 				{ label: Util.translate('electronMenuDebugProcess'), click: () => Util.send(this.win, 'commandGlobal', 'debugProcess') },
 				{ label: Util.translate('electronMenuDebugStat'), click: () => Util.send(this.win, 'commandGlobal', 'debugStat') },
 				{ label: Util.translate('electronMenuDebugReconcile'), click: () => Util.send(this.win, 'commandGlobal', 'debugReconcile') },
@@ -385,23 +388,24 @@ class MenuManager {
 				Separator,
 
 				{ label: Util.translate('electronMenuDevTools'), accelerator: 'Alt+CmdOrCtrl+I', click: () => this.getView()?.webContents.toggleDevTools() },
+				{ label: Util.translate('electronMenuDevTools'), accelerator: 'CmdOrCtrl+Shift+I', click: () => this.getView()?.webContents.toggleDevTools(), visible: false },
 			]
 		});
 
 		const channels = ConfigManager.getChannels().map(it => {
-			it.click = () => { 
+			it.click = () => {
 				if (!UpdateManager.isUpdating) {
 					Util.send(this.win, 'commandGlobal', 'releaseChannel', it.id);
 				};
 			};
 			return it;
-		}); 
+		});
 
 		if (channels.length > 1) {
 			menuParam.push({ label: Util.translate('electronMenuVersion'), submenu: channels });
 		};
 
-		const menuSudo = { 
+		const menuSudo = {
 			label: 'Sudo',
 			submenu: [
 				Separator,
@@ -440,7 +444,7 @@ class MenuManager {
 		Menu.setApplicationMenu(this.menu);
 	};
 
-	initDock () {
+	initDock() {
 		if (!is.macos) {
 			return;
 		};
@@ -452,7 +456,7 @@ class MenuManager {
 		]));
 	};
 
-	initTray () {
+	initTray() {
 		const { config } = ConfigManager;
 		const WindowManager = require('./window.js');
 		const Api = require('./api.js');
@@ -467,7 +471,7 @@ class MenuManager {
 
 		const icon = this.getTrayIcon();
 
-		this.tray = new Tray (icon);
+		this.tray = new Tray(icon);
 		this.tray.setToolTip('Anytype');
 		this.tray.setContextMenu(Menu.buildFromTemplate([
 			{ label: Util.translate('electronMenuOpenApp'), click: () => this.winShow() },
@@ -480,7 +484,7 @@ class MenuManager {
 
 			{ label: Util.translate('electronMenuCheckUpdates'), click: () => { this.winShow(); Api.updateCheck(this.win); }, visible: isAllowedUpdate },
 			{ label: Util.translate('commonSettings'), submenu: this.menuSettings() },
-			
+
 			Separator,
 
 			{ label: Util.translate('electronMenuQuit'), click: () => { this.winHide(); Api.exit(this.win, '', false, false); } },
@@ -496,19 +500,19 @@ class MenuManager {
 		});
 	};
 
-	winShow () {
+	winShow() {
 		if (this.win && !this.win.isDestroyed()) {
 			this.win.show();
 		};
 	};
 
-	winHide () {
+	winHide() {
 		if (this.win && !this.win.isDestroyed()) {
 			this.win.hide();
 		};
 	};
 
-	menuSettings () {
+	menuSettings() {
 		const { config } = ConfigManager;
 		const Api = require('./api.js');
 		const Locale = require('../../dist/lib/json/locale.json');
@@ -523,43 +527,43 @@ class MenuManager {
 		};
 
 		return [
-			{ 
-				label: Util.translate('electronMenuAccountSettings'), click: () => { 
-					this.winShow(); 
-					this.openSettings('account'); 
+			{
+				label: Util.translate('electronMenuAccountSettings'), click: () => {
+					this.winShow();
+					this.openSettings('account');
 				}
 			},
-			{ 
-				label: Util.translate('electronMenuSpaceSettings'), click: () => { 
-					this.winShow(); 
+			{
+				label: Util.translate('electronMenuSpaceSettings'), click: () => {
+					this.winShow();
 					this.openSettings('spaceIndex');
 				}
 			},
 
 			Separator,
 
-			{ 
-				label: Util.translate('electronMenuImport'), click: () => { 
-					this.winShow(); 
+			{
+				label: Util.translate('electronMenuImport'), click: () => {
+					this.winShow();
 					this.openSettings('importIndex');
-				} 
+				}
 			},
-			{ 
-				label: Util.translate('electronMenuExport'), click: () => { 
-					this.winShow(); 
+			{
+				label: Util.translate('electronMenuExport'), click: () => {
+					this.winShow();
 					this.openSettings('exportIndex');
-				} 
+				}
 			},
 
 			{ label: Util.translate('electronMenuLanguage'), submenu: langMenu },
-			
+
 			Separator,
 
-			{ 
-				label: Util.translate('electronMenuShowTray'), type: 'checkbox', checked: !config.hideTray, click: () => { 
+			{
+				label: Util.translate('electronMenuShowTray'), type: 'checkbox', checked: !config.hideTray, click: () => {
 					Api.setConfig(this.win, { hideTray: !config.hideTray });
 					this.initTray();
-				} 
+				}
 			},
 
 			(is.windows || is.linux) ? {
@@ -573,16 +577,16 @@ class MenuManager {
 
 			Separator,
 
-			{ 
-				label: Util.translate('commonNewObject'), accelerator:this.getAccelerator('createObject'), click: () => { 
+			{
+				label: Util.translate('commonNewObject'), accelerator: this.getAccelerator('createObject'), click: () => {
 					this.winShow();
-					Util.send(this.win, 'commandGlobal', 'createObject'); 
-				} 
+					Util.send(this.win, 'commandGlobal', 'createObject');
+				}
 			},
 		].filter(it => it);
 	};
 
-	openSettings (page) {
+	openSettings(page) {
 		const Api = require('./api.js');
 
 		if (!Api.hasPinSet || Api.isPinChecked) {
@@ -590,7 +594,7 @@ class MenuManager {
 		};
 	};
 
-	updateTrayIcon () {
+	updateTrayIcon() {
 		if (this.tray && this.tray.setImage) {
 			const icon = this.getTrayIcon();
 			if (icon) {
@@ -599,33 +603,33 @@ class MenuManager {
 		};
 	};
 
-	getTrayIcon () {
+	getTrayIcon() {
 		let icon = '';
 
 		if (is.windows) {
 			icon = path.join('icons', '256x256.ico');
-		} else 
-		if (is.linux) {
-			const env = process.env.ORIGINAL_XDG_CURRENT_DESKTOP || '';
-			const panelAlwaysDark = env.includes('GNOME') || (env == 'Unity'); // for GNOME shell env, including ubuntu -- the panel is always dark
+		} else
+			if (is.linux) {
+				const env = process.env.ORIGINAL_XDG_CURRENT_DESKTOP || '';
+				const panelAlwaysDark = env.includes('GNOME') || (env == 'Unity'); // for GNOME shell env, including ubuntu -- the panel is always dark
 
-            if (panelAlwaysDark) {
-                icon = 'iconTrayWhite.png';
-            } else 
-			if (Util.getTheme() == 'dark') {
-                icon = 'iconTrayWhite.png';
-            } else {
-                icon = 'iconTrayBlack.png';
-            };
-		} else 
-		if (is.macos) {
-			icon = `iconTrayTemplate.png`;
-		};
+				if (panelAlwaysDark) {
+					icon = 'iconTrayWhite.png';
+				} else
+					if (Util.getTheme() == 'dark') {
+						icon = 'iconTrayWhite.png';
+					} else {
+						icon = 'iconTrayBlack.png';
+					};
+			} else
+				if (is.macos) {
+					icon = `iconTrayTemplate.png`;
+				};
 
 		return icon ? fixPathForAsarUnpack(path.join(Util.imagePath(), icon)) : '';
 	};
 
-	destroy () {
+	destroy() {
 		if (this.tray && !this.tray.isDestroyed()) {
 			this.tray.destroy();
 			this.tray = null;

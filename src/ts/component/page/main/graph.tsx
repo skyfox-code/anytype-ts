@@ -3,11 +3,13 @@ import $ from 'jquery';
 import { observer } from 'mobx-react';
 import { I, C, S, U, J, keyboard, sidebar } from 'Lib';
 import { Header, Footer, GraphProvider, GraphTimeline, Loader } from 'Component';
+import PageMainGraphEnhanced from './graphEnhanced';
 
 const PageMainGraph = observer(forwardRef<I.PageRef, I.PageComponent>((props, ref) => {
 
 	const { isPopup } = props;
 	const [ data, setData ] = useState({ edges: [], nodes: [] });
+	const [ isEnhanced, setIsEnhanced ] = useState(() => S.Common.getGraph(J.Constant.graphId.global).enhanced);
 	const nodeRef = useRef(null);
 	const headerRef = useRef(null);
 	const graphRef = useRef(null);
@@ -15,7 +17,7 @@ const PageMainGraph = observer(forwardRef<I.PageRef, I.PageComponent>((props, re
 	const key = J.Constant.graphId.global;
 
 	const unbind = () => {
-		const events = [ 'keydown', 'updateGraphRoot', 'sidebarResize' ];
+		const events = [ 'keydown', 'updateGraphRoot', 'sidebarResize', 'updateGraphView' ];
 		$(window).off(events.map(it => `${it}.${key}`).join(' '));
 	};
 
@@ -26,6 +28,7 @@ const PageMainGraph = observer(forwardRef<I.PageRef, I.PageComponent>((props, re
 		win.on(`keydown.${key}`, e => onKeyDown(e));
 		win.on(`updateGraphRoot.${key}`, (e: any, data: any) => initRootId(data.id));
 		win.on(`sidebarResize.${key}`, () => resize());
+		win.on(`updateGraphView.${key}`, () => setIsEnhanced(S.Common.getGraph(key).enhanced));
 	};
 
 	const onKeyDown = (e: any) => {
@@ -69,7 +72,7 @@ const PageMainGraph = observer(forwardRef<I.PageRef, I.PageComponent>((props, re
 		const height = container.height() - header.height();
 
 		wrapper.css({ height });
-		
+
 		if (isPopup) {
 			const element = $('#popupPage .content');
 			if (element.length) {
@@ -81,7 +84,7 @@ const PageMainGraph = observer(forwardRef<I.PageRef, I.PageComponent>((props, re
 	};
 
 	const initRootId = (id: string) => {
-		rootIdRef.current = id; 
+		rootIdRef.current = id;
 	};
 
 	const getRootId = () => {
@@ -100,7 +103,11 @@ const PageMainGraph = observer(forwardRef<I.PageRef, I.PageComponent>((props, re
 
 	useEffect(() => {
 		rebind();
-		load();
+
+		if (!isEnhanced) {
+			load();
+		};
+
 		initRootId(getRootId());
 		sidebar.rightPanelClose(isPopup, false);
 
@@ -108,25 +115,35 @@ const PageMainGraph = observer(forwardRef<I.PageRef, I.PageComponent>((props, re
 	}, []);
 
 	useEffect(() => {
-		resize();
-		graphRef.current?.init();
+		if (!isEnhanced) {
+			resize();
+			graphRef.current?.init();
+		};
 	}, [ data ]);
 
-	useEffect(() => resize());
+	useEffect(() => {
+		if (!isEnhanced) {
+			resize();
+		};
+	});
+
+	if (isEnhanced) {
+		return <PageMainGraphEnhanced {...props} ref={ref} />;
+	};
 
 	return (
-		<div 
-			ref={nodeRef} 
+		<div
+			ref={nodeRef}
 			className="body"
 		>
-			<Header 
-				{...props} 
-				ref={headerRef} 
-				component="mainGraph" 
-				rootId={rootId} 
-				tabs={U.Menu.getGraphTabs()} 
-				tab="graph" 
-				onTab={onTab} 
+			<Header
+				{...props}
+				ref={headerRef}
+				component="mainGraph"
+				rootId={rootId}
+				tabs={U.Menu.getGraphTabs()}
+				tab="graph"
+				onTab={onTab}
 				layout={I.ObjectLayout.Graph}
 			/>
 

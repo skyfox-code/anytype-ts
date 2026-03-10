@@ -9,6 +9,7 @@ import PageType from './page/type';
 import PageObjectRelation from './page/object/relation';
 import PageObjectTableOfContents from './page/object/tableOfContents';
 import PageWidget from './page/widget';
+import PageAi from './page/ai';
 
 interface Props {
 	isPopup?: boolean;
@@ -23,6 +24,7 @@ const Components = {
 	objectRelation:			 PageObjectRelation,
 	objectTableOfContents:	 PageObjectTableOfContents,
 	widget:					 PageWidget,
+	ai:						 PageAi,
 };
 
 const SidebarRight = observer(forwardRef<SidebarRightRefProps, Props>((props, ref) => {

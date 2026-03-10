@@ -200,6 +200,7 @@ export interface Block {
 	isEmbedBilibili?(): boolean;
 	isEmbedDrawio?():boolean;
 	isEmbedExcalidraw?(): boolean;
+	isEmbedCanvas?(): boolean;
 
 	isText?(): boolean;
 	isTextTitle?(): boolean;

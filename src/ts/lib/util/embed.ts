@@ -602,8 +602,9 @@ class UtilEmbed {
 	};
 
 	allowEmptyContent (p: I.EmbedProcessor) {
-		return [ 
+		return [
 			I.EmbedProcessor.Excalidraw,
+			I.EmbedProcessor.Canvas,
 		].includes(p);
 	};
 

@@ -41,6 +41,7 @@ import MenuBlockLink from './block/link';
 import MenuBlockMention from './block/mention';
 import MenuBlockEmoji from './block/emoji';
 import MenuBlockLayout from './block/layout';
+import MenuBlockAi from './block/ai';
 import MenuBlockLatex from './block/latex';
 import MenuBlockLinkSettings from './block/link/settings';
 
@@ -123,6 +124,7 @@ const Components: any = {
 	blockAction:			 MenuBlockAction,
 	blockStyle:				 MenuBlockStyle,
 	blockAdd:				 MenuBlockAdd,
+	blockAi:				 MenuBlockAi,
 	blockColor:				 MenuBlockColor,
 	blockBackground:		 MenuBlockBackground,
 	blockAlign:				 MenuBlockHAlign,

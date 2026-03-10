@@ -32,11 +32,12 @@ export default {
 		'typeSuggest',
 		'blockAlign'
 	],
-	add: [ 
-		'searchObject', 
-		'blockRelationEdit', 
-		'typeSuggest', 
+	add: [
+		'searchObject',
+		'blockRelationEdit',
+		'typeSuggest',
 		'calendar',
+		'blockAi',
 	],
 	action: [
 		'blockStyle',

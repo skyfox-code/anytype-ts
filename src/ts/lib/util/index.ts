@@ -1,3 +1,4 @@
+import Ai from './ai';
 import Common from './common';
 import Data from './data';
 import Date from './date';
@@ -15,6 +16,7 @@ import String from './string';
 import StickyScrollbar from './stickyScrollbar';
 
 export {
+	Ai,
 	Common,
 	Data,
 	Date,

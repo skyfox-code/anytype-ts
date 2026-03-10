@@ -17,7 +17,7 @@ const { installExtension } = require('@tomjs/electron-devtools-installer');
 
 // Fix notifications app name
 if (is.windows) {
-    app.setAppUserModelId(app.name);
+	app.setAppUserModelId(app.name);
 };
 
 storage.setDataPath(app.getPath('userData'));
@@ -39,7 +39,7 @@ let lastPowerEvent = 'suspend';
 let isReady = false;
 
 for (let i in Cors) {
-	csp.push([ i ].concat(Cors[i]).join(' '));
+	csp.push([i].concat(Cors[i]).join(' '));
 };
 
 app.commandLine.appendSwitch('ignore-connections-limit', 'localhost, 127.0.0.1');
@@ -57,7 +57,7 @@ if (disableGpu) {
 	app.disableHardwareAcceleration();
 	app.commandLine.appendSwitch('disable-gpu');
 	app.commandLine.appendSwitch('disable-gpu-compositing');
-	
+
 	console.log('[GPU] Hardware acceleration disabled');
 };
 
@@ -74,12 +74,12 @@ if (!is.linux) {
 
 if (!is.macos && (process.argv.length >= 2)) {
 	if (process.defaultApp && !is.linux) {
-		app.setAsDefaultProtocolClient(protocol, process.execPath, [ path.resolve(process.argv[1]) ]);
+		app.setAsDefaultProtocolClient(protocol, process.execPath, [path.resolve(process.argv[1])]);
 	};
 	deeplinkingUrl = process.argv.find(arg => arg.startsWith(`${protocol}://`));
 };
 
-powerMonitor.on('suspend', () => {	
+powerMonitor.on('suspend', () => {
 	if (lastPowerEvent == 'suspend') {
 		return;
 	};
@@ -91,7 +91,7 @@ powerMonitor.on('suspend', () => {
 	};
 });
 
-powerMonitor.on('resume', () => {	
+powerMonitor.on('resume', () => {
 	if (lastPowerEvent == 'resume') {
 		return;
 	};
@@ -101,7 +101,7 @@ powerMonitor.on('resume', () => {
 		Util.send(firstWindow, 'power-event', 'resume');
 		lastPowerEvent = 'resume';
 	};
-	
+
 	WindowManager.sendToAll('reload');
 	Util.log('info', '[PowerMonitor] resume');
 });
@@ -121,7 +121,7 @@ if (!is.development && !app.requestSingleInstanceLock()) {
 remote.initialize();
 Util.setAppPath(path.join(__dirname));
 
-function waitForLibraryAndCreateWindows () {
+function waitForLibraryAndCreateWindows() {
 	const { userDataPath } = ConfigManager.config;
 
 	Util.setNativeThemeSource();
@@ -162,7 +162,7 @@ nativeTheme.on('updated', () => {
 	WindowManager.sendToAllTabs('native-theme', isDark);
 });
 
-function createWindow () {
+function createWindow() {
 	mainWindow = WindowManager.createMain({ route: Util.getRouteFromUrl(deeplinkingUrl), isChild: false });
 
 	mainWindow.on('close', e => {
@@ -171,7 +171,7 @@ function createWindow () {
 		if (app.isQuiting) {
 			return;
 		};
-		
+
 		e.preventDefault();
 
 		const onClose = () => {
@@ -226,7 +226,7 @@ function createWindow () {
 		};
 
 		if (Api[cmd]) {
-			return Api[cmd].apply(Api, [ win ].concat(args || []));
+			return Api[cmd].apply(Api, [win].concat(args || []));
 		} else {
 			console.error('[Api] method not defined:', cmd);
 			return null;
@@ -239,15 +239,15 @@ app.on('ready', async () => {
 		callback({
 			responseHeaders: {
 				...details.responseHeaders,
-				'Content-Security-Policy': [ csp.join('; ') ]
+				'Content-Security-Policy': [csp.join('; ')]
 			}
 		});
 	});
 
 	// Intercept requests and add referrer/origin for YouTube only
-	session.defaultSession.webRequest.onBeforeSendHeaders({ 
+	session.defaultSession.webRequest.onBeforeSendHeaders({
 		urls: [
-			'*://www.youtube.com/*', 
+			'*://www.youtube.com/*',
 			'*://www.youtube-nocookie.com/*',
 		],
 	}, (details, callBack) => {
@@ -271,7 +271,6 @@ app.on('ready', async () => {
 	// Load gRPC DevTools extension in development mode
 	if (is.development) {
 		try {
-			// Install the extension using electron-devtools-installer
 			await installExtension(GRPC_DEVTOOLS_ID, {
 				loadExtensionOptions: {
 					allowFileAccess: true
@@ -351,9 +350,9 @@ app.on('activate', () => {
 			app.focus({ steal: true });
 		};
 	} else
-	if (isReady) {
-		createWindow();
-	};
+		if (isReady) {
+			createWindow();
+		};
 });
 
 app.on('open-url', (e, url) => {

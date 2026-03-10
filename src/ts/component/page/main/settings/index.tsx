@@ -10,6 +10,7 @@ import PagePersonal from './personal';
 import PagePhrase from './phrase';
 import PageLanguage from './language';
 import PageApi from './api';
+import PageAi from './ai';
 
 import PageDataIndex from './data/index';
 import PageDataPublish from './data/publish';
@@ -42,46 +43,47 @@ import PageMainArchive from '../archive';
 import PageMembership from './membership/index';
 
 const Components: any = {
-	index: 				 PageAccount,
-	account:			 PageAccount,
-	delete:				 PageDelete,
-	personal:			 PagePersonal,
-	phrase:				 PagePhrase,
-	membership:			 PageMembership,
-	language:			 PageLanguage,
-	api:				 PageApi,
+	index: PageAccount,
+	account: PageAccount,
+	delete: PageDelete,
+	personal: PagePersonal,
+	phrase: PagePhrase,
+	membership: PageMembership,
+	language: PageLanguage,
+	api: PageApi,
+	ai: PageAi,
 
-	pinIndex:			 PagePinIndex,
-	pinSelect:			 PagePinSelect,
-	pinConfirm:			 PagePinConfirm,
+	pinIndex: PagePinIndex,
+	pinSelect: PagePinSelect,
+	pinConfirm: PagePinConfirm,
 
-	dataIndex: 			 PageDataIndex,
-	dataPublish:		 PageDataPublish,
+	dataIndex: PageDataIndex,
+	dataPublish: PageDataPublish,
 
-	importIndex:		 PageImportIndex,
-	importNotion:		 PageImportNotion,
-	importNotionHelp:	 PageImportNotionHelp,
+	importIndex: PageImportIndex,
+	importNotion: PageImportNotion,
+	importNotionHelp: PageImportNotionHelp,
 	importNotionWarning: PageImportNotionWarning,
-	importCsv:			 PageImportCsv,
-	importObsidian:		 PageImportObsidian,
+	importCsv: PageImportCsv,
+	importObsidian: PageImportObsidian,
 
-	exportIndex:		 PageExportIndex,
-	exportProtobuf:		 PageExportProtobuf,
-	exportMarkdown:		 PageExportMarkdown,
+	exportIndex: PageExportIndex,
+	exportProtobuf: PageExportProtobuf,
+	exportMarkdown: PageExportMarkdown,
 
-	spaceIndex:			 PageSpaceIndex,
-	spaceIndexEmpty:	 PageSpaceIndex,
-	spaceStorage:		 PageSpaceStorage,
-	spaceShare:			 PageSpaceShare,
-	spaceList:			 PageSpaceList,
-	spaceNotifications:	 PageSpaceNotifications,
+	spaceIndex: PageSpaceIndex,
+	spaceIndexEmpty: PageSpaceIndex,
+	spaceStorage: PageSpaceStorage,
+	spaceShare: PageSpaceShare,
+	spaceList: PageSpaceList,
+	spaceNotifications: PageSpaceNotifications,
 
-	set:				 PageMainSet,
-	relation:			 PageMainRelation,
-	archive: 			 PageMainArchive,
+	set: PageMainSet,
+	relation: PageMainRelation,
+	archive: PageMainArchive,
 };
 
-const SKIP_CONTAINER = [ 'set', 'relation', 'archive' ];
+const SKIP_CONTAINER = ['set', 'relation', 'archive'];
 
 const PageMainSettingsIndex = observer(forwardRef<{}, I.PageComponent>((props, ref) => {
 
@@ -90,7 +92,7 @@ const PageMainSettingsIndex = observer(forwardRef<{}, I.PageComponent>((props, r
 	const pageId = U.String.toCamelCase(`pageSettings-${id}`);
 	const confirmPinRef = useRef<any>(null);
 	const childRef = useRef(null);
-	const [ dummy, setDummy ] = useState(0);
+	const [dummy, setDummy] = useState(0);
 	const Component = Components[id];
 
 	const init = () => {
@@ -164,7 +166,7 @@ const PageMainSettingsIndex = observer(forwardRef<{}, I.PageComponent>((props, r
 		});
 	};
 
-	useEffect(() => init(), [ id ]);
+	useEffect(() => init(), [id]);
 
 	const resize = () => {
 		childRef.current?.resize?.();
@@ -179,7 +181,7 @@ const PageMainSettingsIndex = observer(forwardRef<{}, I.PageComponent>((props, r
 	};
 
 	let content = (
-		<div id={pageId} className={[ 'settingsPage', pageId ].join(' ')} >
+		<div id={pageId} className={['settingsPage', pageId].join(' ')} >
 			<Component
 				ref={childRef}
 				{...props}
