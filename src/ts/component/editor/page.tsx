@@ -630,32 +630,12 @@ const EditorPage = observer(forwardRef<I.BlockRef, Props>((props, ref) => {
 				};
 			};
 
-			// Open action menu
-			keyboard.shortcut('menuAction', e, () => {
-				S.Menu.closeAll([ 'blockContext', 'blockAdd' ], () => {
-					S.Menu.open('blockAction', {
-						element: `#block-${U.Common.esc(ids[0])}`,
-						classNameWrap: 'fromBlock',
-						offsetX: J.Size.blockMenu,
-						data: {
-							blockId: ids[0],
-							blockIds: ids,
-							rootId,
-						},
-						onClose: () => {
-							selection.clear();
-							focus.apply();
-						}
-					});
-				});
+			// Open action/add menu
+			keyboard.shortcut('menuAction, menuAdd', e, pressed => {
+				const menuId = pressed == 'menuAction' ? 'blockAction' : 'blockAdd';
 
-				ret = true;
-			});
-
-			// Open add menu
-			keyboard.shortcut('menuAdd', e, () => {
-				S.Menu.closeAll([ 'blockContext', 'blockAction' ], () => {
-					S.Menu.open('blockAdd', {
+				S.Menu.closeAll([ 'blockContext', 'blockAdd', 'blockAction' ], () => {
+					S.Menu.open(menuId, {
 						element: `#block-${U.Common.esc(ids[0])}`,
 						classNameWrap: 'fromBlock',
 						offsetX: J.Size.blockMenu,
