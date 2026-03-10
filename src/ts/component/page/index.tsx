@@ -1,36 +1,36 @@
-import React, { forwardRef, useRef, useCallback, useEffect, useLayoutEffect, Suspense } from 'react';
+import React, { forwardRef, useRef, useEffect, useLayoutEffect } from 'react';
 import $ from 'jquery';
 import raf from 'raf';
 import { observer } from 'mobx-react';
 import { Label, Frame, SidebarRight } from 'Component';
 import { I, S, U, J, Onboarding, Storage, analytics, keyboard, sidebar, Preview, Highlight, translate } from 'Lib';
 
-const PageAuthSelect = React.lazy(() => import('./auth/select'));
-const PageAuthLogin = React.lazy(() => import('./auth/login'));
-const PageAuthPinCheck = React.lazy(() => import('./auth/pinCheck'));
-const PageAuthSetup = React.lazy(() => import('./auth/setup'));
-const PageAuthOnboard = React.lazy(() => import('./auth/onboard'));
-const PageAuthDeleted = React.lazy(() => import('./auth/deleted'));
-const PageAuthMigrate = React.lazy(() => import('./auth/migrate'));
+import PageAuthSelect from './auth/select';
+import PageAuthLogin from './auth/login';
+import PageAuthPinCheck from './auth/pinCheck';
+import PageAuthSetup from './auth/setup';
+import PageAuthOnboard from './auth/onboard';
+import PageAuthDeleted from './auth/deleted';
+import PageAuthMigrate from './auth/migrate';
 
-const PageMainBlank = React.lazy(() => import('./main/blank'));
-const PageMainVoid = React.lazy(() => import('./main/void'));
-const PageMainEdit = React.lazy(() => import('./main/edit'));
-const PageMainHistory = React.lazy(() => import('./main/history'));
-const PageMainSet = React.lazy(() => import('./main/set'));
-const PageMainMedia = React.lazy(() => import('./main/media'));
-const PageMainRelation = React.lazy(() => import('./main/relation'));
-const PageMainGraph = React.lazy(() => import('./main/graph'));
-const PageMainNavigation = React.lazy(() => import('./main/navigation'));
-const PageMainArchive = React.lazy(() => import('./main/archive'));
-const PageMainImport = React.lazy(() => import('./main/import'));
-const PageMainInvite = React.lazy(() => import('./main/invite'));
-const PageMainOneToOne = React.lazy(() => import('./main/oneToOne'));
-const PageMainMembership = React.lazy(() => import('./main/membership'));
-const PageMainObject = React.lazy(() => import('./main/object'));
-const PageMainChat = React.lazy(() => import('./main/chat'));
-const PageMainDate = React.lazy(() => import('./main/date'));
-const PageMainSettings = React.lazy(() => import('./main/settings'));
+import PageMainBlank from './main/blank';
+import PageMainVoid from './main/void';
+import PageMainEdit from './main/edit';
+import PageMainHistory from './main/history';
+import PageMainSet from './main/set';
+import PageMainMedia from './main/media';
+import PageMainRelation from './main/relation';
+import PageMainGraph from './main/graph';
+import PageMainNavigation from './main/navigation';
+import PageMainArchive from './main/archive';
+import PageMainImport from './main/import';
+import PageMainInvite from './main/invite';
+import PageMainOneToOne from './main/oneToOne';
+import PageMainMembership from './main/membership';
+import PageMainObject from './main/object';
+import PageMainChat from './main/chat';
+import PageMainDate from './main/date';
+import PageMainSettings from './main/settings';
 
 const Components = {
 	'index/index':			 PageMainBlank,
@@ -153,13 +153,6 @@ const PageIndex = observer(forwardRef<{}, I.PageComponent>((props, ref) => {
 		sidebar.resizePage(isPopup, null, null, false);
 	};
 
-	const childRefCallback = useCallback((node: any) => {
-		childRef.current = node;
-		if (node) {
-			raf(() => resize());
-		};
-	}, []);
-
 	useEffect(() => {
 		init();
 		resize();
@@ -188,38 +181,36 @@ const PageIndex = observer(forwardRef<{}, I.PageComponent>((props, ref) => {
 	};
 
 	return (
-		<div 
-			id="pageFlex" 
+		<div
+			id="pageFlex"
 			className={[ 'pageFlex', U.Common.getContainerClassName(isPopup) ].join(' ')}
 		>
 			{!isPopup ? <div id="sidebarDummyLeft" className="sidebarDummy" /> : ''}
-			<div 
-				id="page" 
+			<div
+				id="page"
 				className={`page ${keyboard.getPageClass('page', isPopup)}`}
 			>
 				{Component ? (
-					<Suspense fallback={null}>
-						<Component
-							ref={childRefCallback}
-							{...props}
-							storageGet={() => Storage.get(pageId) || {}}
-							storageSet={data => Storage.set(pageId, data)}
-						/>
-					</Suspense>
+					<Component
+						ref={childRef}
+						{...props}
+						storageGet={() => Storage.get(pageId) || {}}
+						storageSet={data => Storage.set(pageId, data)}
+					/>
 				) : (
 					<Frame>
 						<Label text={U.String.sprintf(translate('pageMainIndexComponentNotFound'), path)} />
 					</Frame>
 				)}
 			</div>
-			<SidebarRight 
-				ref={ref => S.Common.refSet(`sidebarRight${ns}`, ref)} 
-				key="sidebarRight" 
-				{...props} 
+			<SidebarRight
+				ref={ref => S.Common.refSet(`sidebarRight${ns}`, ref)}
+				key="sidebarRight"
+				{...props}
 			/>
 		</div>
 	);
-	
+
 }));
 
 export default PageIndex;

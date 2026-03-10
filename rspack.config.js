@@ -155,6 +155,9 @@ module.exports = (env, argv) => {
 		].filter(Boolean),
 	};
 
+	// Track compilation hash for ETag-based caching in dev server
+	let appCompilationHash = '';
+
 	// App config: keeps Excalidraw
 	const appConfig = {
 		name: 'app',
@@ -167,15 +170,70 @@ module.exports = (env, argv) => {
 		},
 		output: {
 			path: path.resolve(__dirname, 'dist'),
-			publicPath: './',
+			publicPath: process.env.WEBPACK_SERVE ? '/' : './',
 			chunkFilename: 'js/chunks/[name].js',
+		},
+		optimization: {
+			...base.optimization,
+			splitChunks: {
+				chunks: 'all',
+				cacheGroups: {
+					protobuf: {
+						test: /[\\/]dist[\\/]lib[\\/]pb[\\/]/,
+						name: 'protobuf',
+						chunks: 'all',
+						priority: 30,
+						filename: 'js/chunks/[name].js',
+					},
+					vendor: {
+						test: /[\\/]node_modules[\\/]/,
+						name: 'vendor',
+						chunks: 'all',
+						priority: 20,
+						filename: 'js/chunks/[name].js',
+					},
+				},
+			},
 		},
 		plugins: [
 			...base.plugins.filter(p => !(p instanceof rspack.optimize.LimitChunkCountPlugin)),
+			new rspack.HtmlRspackPlugin({
+				template: path.resolve(__dirname, 'src/html/index.html'),
+				filename: 'index.html',
+				inject: 'head',
+				scriptLoading: 'defer',
+			}),
+			{
+				apply(compiler) {
+					compiler.hooks.done.tap('CompilationHashPlugin', (stats) => {
+						appCompilationHash = stats.hash || Date.now().toString();
+					});
+				}
+			},
 		],
 		devServer: {
 			hot: true,
 			static: ['dist'],
+			setupMiddlewares: (middlewares) => {
+				middlewares.unshift({
+					name: 'etag-cache',
+					middleware: (req, res, next) => {
+						if (req.method === 'GET' && /\.(js|css)$/.test(req.url) && !req.url.includes('.hot-update.')) {
+							const etag = `"${appCompilationHash}"`;
+
+							if (req.headers['if-none-match'] === etag) {
+								res.writeHead(304);
+								return res.end();
+							};
+
+							res.setHeader('ETag', etag);
+							res.setHeader('Cache-Control', 'no-cache');
+						};
+						next();
+					},
+				});
+				return middlewares;
+			},
 			watchFiles: {
 				paths: ['src'],
 				options: {
@@ -405,11 +463,6 @@ module.exports = (env, argv) => {
 			},
 		},
 
-		output: {
-			path: path.resolve(__dirname, 'dist-web'),
-			publicPath: '/',
-		},
-
 		devServer: {
 			hot: true,
 			static: [
@@ -512,16 +565,45 @@ module.exports = (env, argv) => {
 			},
 		},
 
+		output: {
+			path: path.resolve(__dirname, 'dist-web'),
+			publicPath: '/',
+			chunkFilename: 'js/chunks/[name].js',
+		},
+
+		optimization: {
+			...base.optimization,
+			splitChunks: {
+				chunks: 'all',
+				cacheGroups: {
+					protobuf: {
+						test: /[\\/]dist[\\/]lib[\\/]pb[\\/]/,
+						name: 'protobuf',
+						chunks: 'all',
+						priority: 30,
+						filename: 'js/chunks/[name].js',
+					},
+					vendor: {
+						test: /[\\/]node_modules[\\/]/,
+						name: 'vendor',
+						chunks: 'all',
+						priority: 20,
+						filename: 'js/chunks/[name].js',
+					},
+				},
+			},
+		},
+
 		plugins: [
-			...base.plugins,
+			...base.plugins.filter(p => !(p instanceof rspack.optimize.LimitChunkCountPlugin)),
 			new rspack.DefinePlugin({
 				__IS_WEB__: 'true',
 			}),
 			new rspack.HtmlRspackPlugin({
 				template: path.resolve(__dirname, 'dist/index.web.html'),
 				filename: 'index.html',
-				inject: 'body',
-				scriptLoading: 'blocking',
+				inject: 'head',
+				scriptLoading: 'defer',
 			}),
 		],
 	};
