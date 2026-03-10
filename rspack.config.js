@@ -160,11 +160,19 @@ module.exports = (env, argv) => {
 		name: 'app',
 		...base,
 		entry: {
-			app: { 
-				import: './src/ts/entry.tsx', 
+			app: {
+				import: './src/ts/entry.tsx',
 				filename: 'js/main.js',
 			},
 		},
+		output: {
+			path: path.resolve(__dirname, 'dist'),
+			publicPath: './',
+			chunkFilename: 'js/chunks/[name].js',
+		},
+		plugins: [
+			...base.plugins.filter(p => !(p instanceof rspack.optimize.LimitChunkCountPlugin)),
+		],
 		devServer: {
 			hot: true,
 			static: ['dist'],
