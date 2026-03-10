@@ -271,6 +271,7 @@ export interface GraphSettings {
 	filterTypes: string[];
 	typeEdges: boolean;
 	timeline: boolean;
+	enhanced: boolean;
 };
 
 export interface FocusState {

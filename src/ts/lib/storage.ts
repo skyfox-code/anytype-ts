@@ -1,6 +1,6 @@
 import { I, S, U, keyboard } from 'Lib';
 
-const electron = U.Common.getElectron();
+const getElectron = () => U.Common.getElectron();
 
 const ACCOUNT_KEYS = new Set([
 	'spaceId',
@@ -45,6 +45,7 @@ const Api = {
 		};
 
 		let ret = {};
+		const electron = getElectron();
 		if (electron.storeGet && !isLocal) {
 			ret = electron.storeGet(key);
 		} else {
@@ -61,6 +62,7 @@ const Api = {
 
 		cache.set(cacheKey(key, isLocal), clean);
 
+		const electron = getElectron();
 		if (electron.storeSet && !isLocal) {
 			electron.storeSet(key, clean);
 		} else {
@@ -71,6 +73,7 @@ const Api = {
 	delete: (key: string, isLocal: boolean) => {
 		cache.delete(cacheKey(key, isLocal));
 
+		const electron = getElectron();
 		if (electron.storeDelete && !isLocal) {
 			electron.storeDelete(key);
 		} else {
@@ -100,7 +103,7 @@ class Storage {
 	 * @param {string} key - The key to check.
 	 * @returns {boolean} True if the key is a local key.
 	 */
-	isLocal (key: string): boolean {
+	isLocal(key: string): boolean {
 		return LOCAL_KEYS.has(key);
 	};
 
@@ -110,7 +113,7 @@ class Storage {
 	 * @param {boolean} isLocal - Whether to get from local storage.
 	 * @returns {any} The stored value.
 	 */
-	get (key: string, isLocal?: boolean): any {
+	get(key: string, isLocal?: boolean): any {
 		if (!key) {
 			console.log('[Storage].get: key not specified');
 			return;
@@ -118,12 +121,12 @@ class Storage {
 
 		if (this.isSpaceKey(key)) {
 			return this.getSpaceKey(key, isLocal);
-		} else 
-		if (this.isAccountKey(key)) {
-			return this.getAccountKey(key, isLocal);
-		} else {
-			return Api.get(key, isLocal);
-		};
+		} else
+			if (this.isAccountKey(key)) {
+				return this.getAccountKey(key, isLocal);
+			} else {
+				return Api.get(key, isLocal);
+			};
 	};
 
 	/**
@@ -132,7 +135,7 @@ class Storage {
 	 * @param {any} obj - The value to store.
 	 * @param {boolean} isLocal - Whether to store locally.
 	 */
-	set (key: string, obj: any, isLocal?: boolean): void {
+	set(key: string, obj: any, isLocal?: boolean): void {
 		if (!key) {
 			console.log('[Storage].set: key not specified');
 			return;
@@ -140,28 +143,28 @@ class Storage {
 
 		if (this.isSpaceKey(key)) {
 			this.setSpaceKey(key, obj, isLocal);
-		} else 
-		if (this.isAccountKey(key)) {
-			this.setAccountKey(key, obj, isLocal);
-		} else {
-			Api.set(key, obj, isLocal);
-		};
+		} else
+			if (this.isAccountKey(key)) {
+				this.setAccountKey(key, obj, isLocal);
+			} else {
+				Api.set(key, obj, isLocal);
+			};
 	};
-	
+
 	/**
 	 * Deletes a value from storage by key, handling space and account keys.
 	 * @param {string} key - The storage key.
 	 * @param {boolean} isLocal - Whether to delete from local storage.
 	 */
-	delete (key: string, isLocal?: boolean): void {
+	delete(key: string, isLocal?: boolean): void {
 		if (this.isSpaceKey(key)) {
 			this.deleteSpaceKey(key, isLocal);
-		} else 
-		if (this.isAccountKey(key)) {
-			this.deleteAccountKey(key, isLocal);
-		} else {
-			Api.delete(key, isLocal);
-		};
+		} else
+			if (this.isAccountKey(key)) {
+				this.deleteAccountKey(key, isLocal);
+			} else {
+				Api.delete(key, isLocal);
+			};
 	};
 
 	/**
@@ -169,7 +172,7 @@ class Storage {
 	 * @param {string} key - The key to check.
 	 * @returns {boolean} True if the key is a space key.
 	 */
-	isSpaceKey (key: string): boolean {
+	isSpaceKey(key: string): boolean {
 		return SPACE_KEYS.has(key);
 	};
 
@@ -180,7 +183,7 @@ class Storage {
 	 * @param {boolean} isLocal - Whether to set in local storage.
 	 * @param {string} [spaceId] - The space ID (optional).
 	 */
-	setSpaceKey (key: string, value: any, isLocal: boolean, spaceId?: string) {
+	setSpaceKey(key: string, value: any, isLocal: boolean, spaceId?: string) {
 		spaceId = spaceId || S.Common.space;
 
 		const obj = this.getSpace(isLocal, spaceId);
@@ -199,7 +202,7 @@ class Storage {
 	 * @param {string} [spaceId] - The space ID (optional).
 	 * @returns {any} The value for the space key.
 	 */
-	getSpaceKey (key: string, isLocal: boolean, spaceId?: string) {
+	getSpaceKey(key: string, isLocal: boolean, spaceId?: string) {
 		spaceId = spaceId || S.Common.space;
 		if (!spaceId) {
 			return;
@@ -215,12 +218,12 @@ class Storage {
 	 * @param {string} key - The space key.
 	 * @param {string} [spaceId] - The space ID (optional).
 	 */
-	deleteSpaceKey (key: string, isLocal: boolean, spaceId?: string) {
+	deleteSpaceKey(key: string, isLocal: boolean, spaceId?: string) {
 		spaceId = spaceId || S.Common.space;
 
 		const obj = this.getSpace(isLocal, spaceId);
 
-		delete(obj[spaceId][key]);
+		delete (obj[spaceId][key]);
 		this.setSpace(obj, isLocal);
 	};
 
@@ -230,7 +233,7 @@ class Storage {
 	 * @param {string} [spaceId] - The space ID (optional).
 	 * @returns {any} The space object.
 	 */
-	getSpace (isLocal: boolean, spaceId?: string) {
+	getSpace(isLocal: boolean, spaceId?: string) {
 		spaceId = spaceId || S.Common.space;
 
 		const obj = this.get('space', isLocal) || {};
@@ -245,7 +248,7 @@ class Storage {
 	 * @param {any} obj - The space object to set.
 	 * @param {boolean} isLocal - Whether to set in local storage.
 	 */
-	setSpace (obj: any, isLocal: boolean) {
+	setSpace(obj: any, isLocal: boolean) {
 		this.set('space', obj, isLocal);
 	};
 
@@ -253,10 +256,10 @@ class Storage {
 	 * Deletes a space by ID from storage.
 	 * @param {string} id - The space ID to delete.
 	 */
-	deleteSpace (id: string, isLocal: boolean) {
+	deleteSpace(id: string, isLocal: boolean) {
 		const obj = this.getSpace(isLocal);
 
-		delete(obj[id]);
+		delete (obj[id]);
 
 		this.setSpace(obj, isLocal);
 	};
@@ -264,7 +267,7 @@ class Storage {
 	/**
 	 * Clears all deleted spaces from storage.
 	 */
-	clearDeletedSpaces (isLocal: boolean) {
+	clearDeletedSpaces(isLocal: boolean) {
 		const keys = Object.keys(this.getSpace(isLocal));
 		keys.forEach(key => {
 			const spaceview = U.Space.getSpaceviewBySpaceId(key);
@@ -279,7 +282,7 @@ class Storage {
 	 * @param {string} key - The key to check.
 	 * @returns {boolean} True if the key is an account key.
 	 */
-	isAccountKey (key: string): boolean {
+	isAccountKey(key: string): boolean {
 		return ACCOUNT_KEYS.has(key);
 	};
 
@@ -288,7 +291,7 @@ class Storage {
 	 * @param {string} key - The account key.
 	 * @param {any} value - The value to set.
 	 */
-	setAccountKey (key: string, value: any, isLocal: boolean) {
+	setAccountKey(key: string, value: any, isLocal: boolean) {
 		const obj = this.getAccount(isLocal);
 		const accountId = this.getAccountId();
 
@@ -304,7 +307,7 @@ class Storage {
 	 * @param {string} key - The account key.
 	 * @returns {any} The value for the account key.
 	 */
-	getAccountKey (key: string, isLocal: boolean) {
+	getAccountKey(key: string, isLocal: boolean) {
 		const accountId = this.getAccountId();
 		if (!accountId) {
 			return;
@@ -319,7 +322,7 @@ class Storage {
 	 * Gets the account object from storage.
 	 * @returns {any} The account object.
 	 */
-	getAccount (isLocal: boolean) {
+	getAccount(isLocal: boolean) {
 		const obj = this.get('account', isLocal) || {};
 		const accountId = this.getAccountId();
 
@@ -332,7 +335,7 @@ class Storage {
 	 * Sets the account object in storage.
 	 * @param {any} obj - The account object to set.
 	 */
-	setAccount (obj: any, isLocal: boolean) {
+	setAccount(obj: any, isLocal: boolean) {
 		this.set('account', obj, isLocal);
 	};
 
@@ -340,10 +343,10 @@ class Storage {
 	 * Deletes an account by ID from storage.
 	 * @param {string} id - The account ID to delete.
 	 */
-	deleteAccount (id: string, isLocal: boolean) {
+	deleteAccount(id: string, isLocal: boolean) {
 		const obj = this.getAccount(isLocal);
 
-		delete(obj[id]);
+		delete (obj[id]);
 
 		this.setAccount(obj, isLocal);
 	};
@@ -352,11 +355,11 @@ class Storage {
 	 * Deletes an account key for the current account.
 	 * @param {string} key - The account key to delete.
 	 */
-	deleteAccountKey (key: string, isLocal: boolean) {
+	deleteAccountKey(key: string, isLocal: boolean) {
 		const obj = this.getAccount(isLocal);
 		const accountId = this.getAccountId();
 
-		delete(obj[accountId][key]);
+		delete (obj[accountId][key]);
 
 		this.setAccount(obj, isLocal);
 	};
@@ -365,7 +368,7 @@ class Storage {
 	 * Gets the current account ID.
 	 * @returns {string} The account ID.
 	 */
-	getAccountId (): string {
+	getAccountId(): string {
 		const { account } = S.Auth;
 		return account ? account.id : '';
 	};
@@ -374,7 +377,7 @@ class Storage {
 	 * Gets the last opened objects from storage.
 	 * @returns {any} The last opened objects.
 	 */
-	getLastOpened () {
+	getLastOpened() {
 		return this.get('lastOpenedSimple', this.isLocal('lastOpenedSimple')) || {};
 	};
 
@@ -382,7 +385,7 @@ class Storage {
 	 * Sets the last opened object for a window.
 	 * @param {any} param - The parameters to set.
 	 */
-	setLastOpened (param: any) {
+	setLastOpened(param: any) {
 		this.set('lastOpenedSimple', param, this.isLocal('lastOpenedSimple'));
 	};
 
@@ -392,19 +395,19 @@ class Storage {
 	 * @param {string} id - The block ID.
 	 * @param {boolean} value - The toggle value.
 	 */
-	setToggle (rootId: string, id: string, value: boolean) {
+	setToggle(rootId: string, id: string, value: boolean) {
 		let obj = this.get('toggle', this.isLocal('toggle')) || {};
 		if (!obj || U.Common.hasProperty(obj, 'length')) {
 			obj = {};
 		};
-		
+
 		let list = obj[rootId] || [];
 		if (value) {
-			list = list.concat([ id ]);
+			list = list.concat([id]);
 		} else {
 			list = list.filter(it => it != id);
 		};
-		list = [ ...new Set(list) ];
+		list = [...new Set(list)];
 
 		obj[rootId] = list;
 
@@ -417,7 +420,7 @@ class Storage {
 	 * @param {string} rootId - The root object ID.
 	 * @returns {any} The toggle values.
 	 */
-	getToggle (rootId: string) {
+	getToggle(rootId: string) {
 		const obj = this.get('toggle', this.isLocal('toggle')) || {};
 		return obj[rootId] || [];
 	};
@@ -428,7 +431,7 @@ class Storage {
 	 * @param {string} id - The block ID.
 	 * @returns {boolean} True if toggled.
 	 */
-	checkToggle (rootId: string, id: string): boolean {
+	checkToggle(rootId: string, id: string): boolean {
 		return this.getToggle(rootId).includes(id);
 	};
 
@@ -439,7 +442,7 @@ class Storage {
 	 * @param {boolean} [value] - Optional value to set. If not provided, toggles current value.
 	 * @returns {any} The updated toggle object.
 	 */
-	toggleViewFilter (rootId: string, viewId: string, value?: boolean): any {
+	toggleViewFilter(rootId: string, viewId: string, value?: boolean): any {
 		const filtersId = U.String.toCamelCase(`view-${viewId}-filters`);
 		const newValue = value !== undefined ? value : !this.checkToggle(rootId, filtersId);
 
@@ -450,10 +453,10 @@ class Storage {
 	 * Deletes toggle values for a root object.
 	 * @param {string} rootId - The root object ID.
 	 */
-	deleteToggle (rootId: string) {
+	deleteToggle(rootId: string) {
 		const obj = this.get('toggle', this.isLocal('toggle')) || {};
 
-		delete(obj[rootId]);
+		delete (obj[rootId]);
 		this.set('toggle', obj, this.isLocal('toggle'));
 	};
 
@@ -464,7 +467,7 @@ class Storage {
 	 * @param {number} scroll - The scroll position.
 	 * @param {boolean} isPopup - Whether the context is a popup.
 	 */
-	setScroll (key: string, rootId: string, scroll: number, isPopup: boolean) {
+	setScroll(key: string, rootId: string, scroll: number, isPopup: boolean) {
 		key = this.getScrollKey(key, isPopup);
 
 		const obj = this.get('scroll', this.isLocal('scroll')) || {};
@@ -484,7 +487,7 @@ class Storage {
 	 * @param {boolean} isPopup - Whether the context is a popup.
 	 * @returns {number} The scroll position.
 	 */
-	getScroll (key: string, rootId: string, isPopup: boolean) {
+	getScroll(key: string, rootId: string, isPopup: boolean) {
 		key = this.getScrollKey(key, isPopup);
 
 		const obj = this.get('scroll', this.isLocal('scroll')) || {};
@@ -497,7 +500,7 @@ class Storage {
 	 * @param {boolean} isPopup - Whether the context is a popup.
 	 * @returns {string} The scroll key.
 	 */
-	getScrollKey (key: string, isPopup: boolean) {
+	getScrollKey(key: string, isPopup: boolean) {
 		return isPopup ? `${key}Popup` : key;
 	};
 
@@ -506,7 +509,7 @@ class Storage {
 	 * @param {string} rootId - The root object ID.
 	 * @param {I.FocusState} state - The focus state to set.
 	 */
-	setFocus (rootId: string, state: I.FocusState) {
+	setFocus(rootId: string, state: I.FocusState) {
 		const obj = this.get('focus', this.isLocal('focus')) || {};
 
 		obj[rootId] = state;
@@ -519,7 +522,7 @@ class Storage {
 	 * @param {string} rootId - The root object ID.
 	 * @returns {I.FocusState} The focus state.
 	 */
-	getFocus (rootId: string): I.FocusState {
+	getFocus(rootId: string): I.FocusState {
 		const obj = this.get('focus', this.isLocal('focus')) || {};
 		return obj[rootId];
 	};
@@ -528,7 +531,7 @@ class Storage {
 	 * Sets onboarding state for a key.
 	 * @param {string} key - The onboarding key.
 	 */
-	setOnboarding (key: string) {
+	setOnboarding(key: string) {
 		const keys = this.get('onboarding', this.isLocal('onboarding')) || [];
 
 		if (!this.getOnboarding(key)) {
@@ -542,7 +545,7 @@ class Storage {
 	/**
 	 * Resets onboarding
 	 */
-	clearOnboarding () {
+	clearOnboarding() {
 		this.set('onboarding', [], this.isLocal('onboarding'));
 	};
 
@@ -551,7 +554,7 @@ class Storage {
 	 * @param {string} key - The onboarding key.
 	 * @returns {any} The onboarding state.
 	 */
-	getOnboarding (key: string) {
+	getOnboarding(key: string) {
 		return (this.get('onboarding', this.isLocal('onboarding')) || []).includes(key);
 	};
 
@@ -560,7 +563,7 @@ class Storage {
 	 * @param {string} key - The highlight key.
 	 * @returns {boolean} The highlight state.
 	 */
-	getHighlight (key: string): boolean {
+	getHighlight(key: string): boolean {
 		const highlights = this.get('highlights', this.isLocal('highlights')) || {};
 
 		return Boolean(highlights[key]) || false;
@@ -571,7 +574,7 @@ class Storage {
 	 * @param {string} key - The highlight key.
 	 * @param {boolean} value - The highlight value.
 	 */
-	setHighlight (key: string, value: boolean) {
+	setHighlight(key: string, value: boolean) {
 		const highlights = this.get('highlights', this.isLocal('highlights')) || {};
 
 		highlights[key] = value;
@@ -584,7 +587,7 @@ class Storage {
 	 * @param {I.SurveyType} type - The survey type.
 	 * @returns {any} The survey state.
 	 */
-	getSurvey (type: I.SurveyType) {
+	getSurvey(type: I.SurveyType) {
 		const obj = this.get('survey', this.isLocal('survey')) || {};
 		return obj[type] || {};
 	};
@@ -594,7 +597,7 @@ class Storage {
 	 * @param {I.SurveyType} type - The survey type.
 	 * @param {any} param - The survey parameters.
 	 */
-	setSurvey (type: I.SurveyType, param: any) {
+	setSurvey(type: I.SurveyType, param: any) {
 		const obj = this.get('survey', this.isLocal('survey')) || {};
 		obj[type] = Object.assign(obj[type] || {}, param);
 		this.set('survey', obj, this.isLocal('survey'));
@@ -604,7 +607,7 @@ class Storage {
 	 * Clears the survey state for a survey type.
 	 * @param {I.SurveyType} type - The survey type.
 	 */
-	clearSurvey (type: I.SurveyType) {
+	clearSurvey(type: I.SurveyType) {
 		const obj = this.get('survey', this.isLocal('survey')) || {};
 		delete obj[type];
 		this.set('survey', obj, this.isLocal('survey'));
@@ -615,8 +618,8 @@ class Storage {
 	 * @param {any} a - The array to check.
 	 * @returns {boolean} True if valid.
 	 */
-	checkArray (a) {
-		if (('object' != typeof(a)) || !U.Common.hasProperty(a, 'length')) {
+	checkArray(a) {
+		if (('object' != typeof (a)) || !U.Common.hasProperty(a, 'length')) {
 			return [];
 		};
 		return a;
@@ -625,8 +628,8 @@ class Storage {
 	/**
 	 * Logs out the current user and clears storage.
 	 */
-	logout () {
-		const keys = [ 
+	logout() {
+		const keys = [
 			'accountId',
 			'pin',
 		];
@@ -639,7 +642,7 @@ class Storage {
 	 * @param {string} id - The chat ID.
 	 * @param {any} obj - The chat data to set.
 	 */
-	setChat (id: string, obj: any) {
+	setChat(id: string, obj: any) {
 		if (!id) {
 			return;
 		};
@@ -655,7 +658,7 @@ class Storage {
 	 * @param {string} id - The chat ID.
 	 * @returns {any} The chat data.
 	 */
-	getChat (id: string) {
+	getChat(id: string) {
 		const map = this.get('chat', this.isLocal('chat')) || {};
 		return map[id] || {};
 	};
@@ -664,7 +667,7 @@ class Storage {
 	 * Gets the list of keyboard shortcuts from storage.
 	 * @returns {any} The shortcuts data.
 	 */
-	getShortcuts () {
+	getShortcuts() {
 		return this.get('shortcuts', this.isLocal('shortcuts')) || {};
 	};
 
@@ -672,7 +675,7 @@ class Storage {
 	 * Sets the list of keyboard shortcuts in storage.
 	 * @param {any} data - The shortcuts data to set.
 	 */
-	setShortcuts (data: any) {
+	setShortcuts(data: any) {
 		this.set('shortcuts', data, this.isLocal('shortcuts'));
 		keyboard.initShortcuts();
 	};
@@ -682,7 +685,7 @@ class Storage {
 	 * @param {string} id - The shortcut ID.
 	 * @param {string[]} keys - The new keys for the shortcut.
 	 */
-	updateShortcuts (id: string, keys: string[]) {
+	updateShortcuts(id: string, keys: string[]) {
 		const list = this.getShortcuts();
 		this.setShortcuts({ ...list, [id]: keys });
 	};
@@ -691,10 +694,10 @@ class Storage {
 	 * Resets a keyboard shortcut by ID to default.
 	 * @param {string} id - The shortcut ID.
 	 */
-	resetShortcut (id: string) {
+	resetShortcut(id: string) {
 		const list = this.getShortcuts();
 
-		delete(list[id]);
+		delete (list[id]);
 		this.setShortcuts(list);
 	};
 
@@ -702,26 +705,26 @@ class Storage {
 	 * Removes a keyboard shortcut by ID.
 	 * @param {string} id - The shortcut ID.
 	 */
-	removeShortcut (id: string) {
+	removeShortcut(id: string) {
 		this.updateShortcuts(id, []);
 	};
 
 	/**
 	 * Resets all keyboard shortcuts to default.
 	 */
-	resetShortcuts () {
+	resetShortcuts() {
 		this.delete('shortcuts', this.isLocal('shortcuts'));
 		keyboard.initShortcuts();
 	};
 
-	setGraphData (data: any) {
+	setGraphData(data: any) {
 		const isLocal = this.isLocal('graphData');
 		const obj = this.get('graphData', isLocal) || {};
 
 		this.set('graphData', Object.assign(obj, data), isLocal);
 	};
 
-	getGraphData () {
+	getGraphData() {
 		const obj = this.get('graphData', this.isLocal('graphData')) || {};
 
 		obj.zoom = obj.zoom || {};
@@ -732,14 +735,14 @@ class Storage {
 		return obj;
 	};
 
-	clearOldKeys () {
+	clearOldKeys() {
 		const spaces = U.Space.getList();
 
 		spaces.forEach(space => {
 			this.deleteSpaceKey('lastOpenedObject', false, space.targetSpaceId);
 		});
 	};
-	
+
 };
 
 export default new Storage();

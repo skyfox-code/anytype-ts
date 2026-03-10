@@ -10,6 +10,7 @@ import { I, C, S, U, J, keyboard, focus, Action, translate } from 'Lib';
 
 const MediaMermaid = React.lazy(() => import('Component/util/media/mermaid'));
 const MediaExcalidraw = React.lazy(() => import('Component/util/media/excalidraw'));
+const MediaCanvas = React.lazy(() => import('Component/util/media/canvas'));
 
 let _katex: any = null;
 let _katexLoading: Promise<any> | null = null;
@@ -77,11 +78,21 @@ const BlockEmbed = observer(forwardRef<I.BlockRef, I.BlockComponent>((props, ref
 	const resizeStartRef = useRef({ x: 0, y: 0, w: 0, h: 0 });
 	const scrollTopRef = useRef(0);
 	const isExcalidraw = block.isEmbedExcalidraw();
+	const isCanvas = block.isEmbedCanvas();
 
 	const excalidrawCss: any = {};
+	const canvasCss: any = {};
 
 	if (width) {
 		css.width = (width * 100) + '%';
+	};
+
+	if (isCanvas) {
+		if (fieldHeight) {
+			canvasCss.height = Math.max(300, fieldHeight);
+		} else {
+			canvasCss.height = 400;
+		};
 	};
 
 	if (isExcalidraw) {
@@ -470,7 +481,7 @@ const BlockEmbed = observer(forwardRef<I.BlockRef, I.BlockComponent>((props, ref
 		const win = $(window);
 		const element = value.get(0) as HTMLElement;
 
-		if ([ I.EmbedProcessor.Mermaid, I.EmbedProcessor.Excalidraw ].includes(processor) && !rootRef.current) {
+		if ([ I.EmbedProcessor.Mermaid, I.EmbedProcessor.Excalidraw, I.EmbedProcessor.Canvas ].includes(processor) && !rootRef.current) {
 			rootRef.current = createRoot(element);
 		};
 
@@ -684,6 +695,31 @@ const BlockEmbed = observer(forwardRef<I.BlockRef, I.BlockComponent>((props, ref
 				break;
 			};
 
+			case I.EmbedProcessor.Canvas: {
+				let data = null;
+				try {
+					data = JSON.parse(text || 'null');
+				} catch (e) {
+					console.warn('Invalid Canvas data:', e);
+				};
+
+				rootRef.current.render(
+					<Suspense fallback={<Loader />}>
+						<MediaCanvas
+							data={data}
+							onChange={(snapshot) => {
+								window.clearTimeout(timeoutSaveRef.current);
+								timeoutSaveRef.current = window.setTimeout(() => {
+									C.BlockLatexSetText(rootId, block.id, JSON.stringify(snapshot));
+								}, 1000);
+							}}
+							readonly={readonly}
+						/>
+					</Suspense>
+				);
+				break;
+			};
+
 			case I.EmbedProcessor.Graphviz: {
 				getViz().then(instance => {
 					return instance();
@@ -712,7 +748,7 @@ const BlockEmbed = observer(forwardRef<I.BlockRef, I.BlockComponent>((props, ref
 		e.preventDefault();
 		e.stopPropagation();
 
-		if (processor != I.EmbedProcessor.Excalidraw) {
+		if ((processor != I.EmbedProcessor.Excalidraw) && (processor != I.EmbedProcessor.Canvas)) {
 			setIsEditing(true);
 		};
 	};
@@ -774,6 +810,15 @@ const BlockEmbed = observer(forwardRef<I.BlockRef, I.BlockComponent>((props, ref
 				w: Number(fields.width) || 1,
 				h: media.length ? media.height() : 400,
 			};
+		} else
+		if (isCanvas) {
+			const media = node.find('.mediaCanvas');
+			resizeStartRef.current = {
+				x: e.pageX,
+				y: e.pageY,
+				w: Number(fields.width) || 1,
+				h: media.length ? media.height() : 400,
+			};
 		};
 
 		node.addClass('isResizing');
@@ -797,11 +842,11 @@ const BlockEmbed = observer(forwardRef<I.BlockRef, I.BlockComponent>((props, ref
 
 		wrap.css({ width: (w * 100) + '%' });
 
-		if (isExcalidraw) {
+		if (isExcalidraw || isCanvas) {
 			const start = resizeStartRef.current;
 			const dy = e.pageY - start.y;
 			const newHeight = Math.max(200, start.h + dy);
-			
+
 			node.find('#value').css({ height: newHeight });
 		};
 	};
@@ -830,7 +875,7 @@ const BlockEmbed = observer(forwardRef<I.BlockRef, I.BlockComponent>((props, ref
 
 		const newFields: any = { ...fields, width: w };
 
-		if (isExcalidraw) {
+		if (isExcalidraw || isCanvas) {
 			const start = resizeStartRef.current;
 			const dy = e.pageY - start.y;
 			newFields.height = Math.max(200, start.h + dy);
@@ -867,11 +912,11 @@ const BlockEmbed = observer(forwardRef<I.BlockRef, I.BlockComponent>((props, ref
 	let empty = '';
 	let placeholder = '';
 
-	if (U.Embed.allowBlockResize(processor) && (text || isExcalidraw)) {
+	if (U.Embed.allowBlockResize(processor) && (text || isExcalidraw || isCanvas)) {
 		resizeIcon = <Icon className="resize" onMouseDown={e => onResizeStart(e, false)} />;
 	};
 
-	if (isExcalidraw) {
+	if (isExcalidraw || isCanvas) {
 		expandIcon = <Icon className="expand withBackground" onMouseDown={() => setIsFullScreen(!isFullScreen)} />;
 	};
 
@@ -979,7 +1024,7 @@ const BlockEmbed = observer(forwardRef<I.BlockRef, I.BlockComponent>((props, ref
 	let onKeyUpProp;
 	let onFocusProp;
 
-	if (!isExcalidraw) {
+	if (!isExcalidraw && !isCanvas) {
 		tabIndex = 0;
 		onKeyDownProp = onKeyDownBlock;
 		onKeyUpProp = onKeyUpBlock;
@@ -1011,7 +1056,7 @@ const BlockEmbed = observer(forwardRef<I.BlockRef, I.BlockComponent>((props, ref
 						<div id="preview" className={[ 'preview', U.Data.blockEmbedClass(processor) ].join(' ')} onClick={() => setIsShowing(true)}>
 							<Label text={translate('blockEmbedOffline')} />
 						</div>
-						<div id="value" style={excalidrawCss} onMouseDown={onEdit} />
+						<div id="value" style={isCanvas ? canvasCss : excalidrawCss} onMouseDown={onEdit} />
 
 						{empty ? <Label text={empty} className="label empty" onMouseDown={onEdit} /> : ''}
 						{resizeIcon}

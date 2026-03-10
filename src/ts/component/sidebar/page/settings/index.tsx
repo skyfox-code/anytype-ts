@@ -17,7 +17,7 @@ const SidebarPageSettingsIndex = observer(forwardRef<{}, I.SidebarPageComponent>
 	const { data } = S.Membership;
 	const product = data?.getTopProduct();
 	const { space, isOnline } = S.Common;
-	const [ activeId, setActiveId ] = useState('');
+	const [activeId, setActiveId] = useState('');
 	const profile = U.Space.getProfile();
 	const participant = U.Space.getParticipant() || profile;
 	const param = keyboard.getMatch().params;
@@ -43,11 +43,11 @@ const SidebarPageSettingsIndex = observer(forwardRef<{}, I.SidebarPageComponent>
 		const map = U.Menu.settingsSectionsMap();
 		const { notSyncedCounter } = S.Auth.getSyncStatus();
 		const importExport = [
-			{ id: 'exportIndex', icon: 'export', subPages: [ 'exportProtobuf', 'exportMarkdown' ] },
+			{ id: 'exportIndex', icon: 'export', subPages: ['exportProtobuf', 'exportMarkdown'] },
 		];
 
 		if (canWrite) {
-			importExport.unshift({ id: 'importIndex', icon: 'import', subPages: [ 'importNotion', 'importNotionHelp', 'importNotionWarning', 'importCsv' ] });
+			importExport.unshift({ id: 'importIndex', icon: 'import', subPages: ['importNotion', 'importNotionHelp', 'importNotionWarning', 'importCsv'] });
 		};
 
 		const isOwner = U.Space.isMyOwner();
@@ -68,13 +68,14 @@ const SidebarPageSettingsIndex = observer(forwardRef<{}, I.SidebarPageComponent>
 					{ id: 'archive', icon: 'bin' },
 				],
 			},
-			{ id: 'contentModel', name: translate('pageSettingsSpaceManageContent'), children: [
+			{
+				id: 'contentModel', name: translate('pageSettingsSpaceManageContent'), children: [
 					{ id: 'types', icon: 'type' },
 					{ id: 'relations', icon: 'relation' },
 				],
 			},
 			{ id: 'integrations', name: translate('pageSettingsSpaceIntegrations'), children: importExport },
-			leaveOrRemove ? { id: 'delete', isDiv: true, children: [ leaveOrRemove ] } : null,
+			leaveOrRemove ? { id: 'delete', isDiv: true, children: [leaveOrRemove] } : null,
 		].filter(it => it).map(s => {
 			s.children = s.children.filter(it => it).map((c: any) => {
 				c.name = map[c.id] || c.name;
@@ -88,8 +89,8 @@ const SidebarPageSettingsIndex = observer(forwardRef<{}, I.SidebarPageComponent>
 		const map = U.Menu.settingsSectionsMap();
 
 		return [
-			{ 
-				id: 'account', children: [ 
+			{
+				id: 'account', children: [
 					{ id: 'account' },
 				],
 			},
@@ -97,12 +98,12 @@ const SidebarPageSettingsIndex = observer(forwardRef<{}, I.SidebarPageComponent>
 				id: 'basicSettings', name: translate('popupSettingsApplicationTitle'), children: [
 					{ id: 'personal' },
 					{ id: 'language' },
-					{ id: 'pinIndex', icon: 'pin', subPages: [ 'pinSelect', 'pinConfirm' ] },
+					{ id: 'pinIndex', icon: 'pin', subPages: ['pinSelect', 'pinConfirm'] },
 				],
 			},
 			{
 				id: 'vaultSettings', name: translate('popupSettingsAccountAndKeyTitle'), children: [
-					{ id: 'phrase', subPages: [ 'delete' ] },
+					{ id: 'phrase', subPages: ['delete'] },
 					withMembership ? { id: 'membership', icon: 'membership' } : null,
 				],
 			},
@@ -112,6 +113,7 @@ const SidebarPageSettingsIndex = observer(forwardRef<{}, I.SidebarPageComponent>
 					{ id: 'spaceList', icon: 'spaces' },
 					{ id: 'dataPublish', icon: 'sites' },
 					{ id: 'api', icon: 'api' },
+					{ id: 'ai', icon: 'ai' },
 				],
 			},
 		].map(s => {
@@ -130,16 +132,16 @@ const SidebarPageSettingsIndex = observer(forwardRef<{}, I.SidebarPageComponent>
 
 		sections.forEach((section, idx) => {
 			if (section.name) {
-				items.push({ 
-					id: section.id, 
-					name: section.name, 
-					isSection: true, 
+				items.push({
+					id: section.id,
+					name: section.name,
+					isSection: true,
 					isFirst: idx === 0,
 				});
-			} else 
-			if (section.isDiv) {
-				items.push({ isDiv: true });
-			};
+			} else
+				if (section.isDiv) {
+					items.push({ isDiv: true });
+				};
 
 			items = items.concat(section.children ? section.children : []);
 		});
@@ -164,12 +166,12 @@ const SidebarPageSettingsIndex = observer(forwardRef<{}, I.SidebarPageComponent>
 		if (item.id == 'remove') {
 			Action.removeSpace(S.Common.space, analytics.route.settings);
 		} else
-		if ([ 'types', 'relations' ].includes(item.id)) {
-			S.Common.setLeftSidebarState('vault', `settings/${item.id}`);
-		} else {
-			setActiveId(item.id);
-			Action.openSettings(item.id, analytics.route.settings);
-		};
+			if (['types', 'relations'].includes(item.id)) {
+				S.Common.setLeftSidebarState('vault', `settings/${item.id}`);
+			} else {
+				setActiveId(item.id);
+				Action.openSettings(item.id, analytics.route.settings);
+			};
 	};
 
 	const onBack = () => {
@@ -187,7 +189,7 @@ const SidebarPageSettingsIndex = observer(forwardRef<{}, I.SidebarPageComponent>
 		let content = null;
 
 		if (item.isSection) {
-			const cn = [ 'itemSection' ];
+			const cn = ['itemSection'];
 
 			if (item.isFirst) {
 				cn.push('isFirst');
@@ -198,79 +200,79 @@ const SidebarPageSettingsIndex = observer(forwardRef<{}, I.SidebarPageComponent>
 					<div className="name">{item.name}</div>
 				</div>
 			);
-		} else 
-		if (item.isDiv) {
-			content = <div style={style} />;
-		} else {
-			const cn = [ 'item' ];
-			const ccn = [ 'caption' ];
+		} else
+			if (item.isDiv) {
+				content = <div style={style} />;
+			} else {
+				const cn = ['item'];
+				const ccn = ['caption'];
 
-			let icon = null;
-			let name = null;
-			let caption = '';
+				let icon = null;
+				let name = null;
+				let caption = '';
 
-			if (item.id == currentId || (item.subPages && item.subPages.includes(currentId))) {
-				cn.push('active');
-			};
-
-			if (item.color) {
-				cn.push(`textColor-${item.color}`);
-			};
-
-			if (item.id == 'account') {
-				if ('index' == currentId) {
+				if (item.id == currentId || (item.subPages && item.subPages.includes(currentId))) {
 					cn.push('active');
 				};
 
-				if (participant) {
-					name = (
-						<>
-							<Label className="userName" text={participant.name} />
-							{participant.globalName ? <Label className="anyName" text={participant.globalName} /> : ''}
-						</>
-					);
-
-					icon = (
-						<IconObject 
-							object={{ ...participant, name: participant.globalName || participant.name }} 
-							size={40} 
-							iconSize={40} 
-						/>
-					);
+				if (item.color) {
+					cn.push(`textColor-${item.color}`);
 				};
 
-				cn.push('itemAccount');
-			} else {
-				icon = <Icon className={`settings-${item.icon || item.id}`} />;
-				name = item.name;
-			};
+				if (item.id == 'account') {
+					if ('index' == currentId) {
+						cn.push('active');
+					};
 
-			if (item.id == 'membership') {
-				if (!product || product.isIntro) {
-					caption = translate(`commonJoin`);
-					ccn.push('join');
+					if (participant) {
+						name = (
+							<>
+								<Label className="userName" text={participant.name} />
+								{participant.globalName ? <Label className="anyName" text={participant.globalName} /> : ''}
+							</>
+						);
+
+						icon = (
+							<IconObject
+								object={{ ...participant, name: participant.globalName || participant.name }}
+								size={40}
+								iconSize={40}
+							/>
+						);
+					};
+
+					cn.push('itemAccount');
 				} else {
-					caption = product.name;
+					icon = <Icon className={`settings-${item.icon || item.id}`} />;
+					name = item.name;
 				};
-			} else
-			if (item.alert) {
-				caption = item.alert;
-				ccn.push('alert');
-			};
 
-			content = (
-				<div
-					id={`item-${item.id}`}
-					className={cn.join(' ')}
-					onClick={() => onClick(item)}
-					style={style}
-				>
-					{icon}
-					<div className="name">{name}</div>
-					{caption ? <div className={ccn.join(' ')}>{caption}</div> : ''}
-				</div>
-			);
-		};
+				if (item.id == 'membership') {
+					if (!product || product.isIntro) {
+						caption = translate(`commonJoin`);
+						ccn.push('join');
+					} else {
+						caption = product.name;
+					};
+				} else
+					if (item.alert) {
+						caption = item.alert;
+						ccn.push('alert');
+					};
+
+				content = (
+					<div
+						id={`item-${item.id}`}
+						className={cn.join(' ')}
+						onClick={() => onClick(item)}
+						style={style}
+					>
+						{icon}
+						<div className="name">{name}</div>
+						{caption ? <div className={ccn.join(' ')}>{caption}</div> : ''}
+					</div>
+				);
+			};
 
 		return (
 			<CellMeasurer
@@ -299,13 +301,13 @@ const SidebarPageSettingsIndex = observer(forwardRef<{}, I.SidebarPageComponent>
 				</div>
 				<div className="side center" />
 			</div>
-			
+
 			<div id="body" className="body">
 				<div className="list">
 					<div className="inner">
 						<InfiniteLoader
 							rowCount={items.length}
-							loadMoreRows={() => {}}
+							loadMoreRows={() => { }}
 							isRowLoaded={() => true}
 							threshold={LIMIT}
 						>

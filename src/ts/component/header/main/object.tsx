@@ -27,6 +27,7 @@ const HeaderMainObject = observer(forwardRef<{}, I.HeaderComponent>((props, ref)
 	const readonly = object.isArchived || isLocked;
 	const hasWidget = !!S.Block.getWidgetsForTarget(rootId).length;
 	const isRelationOpen = (rightSidebar.page == 'object/relation');
+	const isAiOpen = (rightSidebar.page == 'ai');
 	const isSearchMenuOpen = S.Menu.isOpenList([ 'searchText', 'searchChat' ]);
 	const cnc = [ 'side', 'center' ];
 
@@ -108,6 +109,10 @@ const HeaderMainObject = observer(forwardRef<{}, I.HeaderComponent>((props, ref)
 		analytics.event('ClickShareObject', { objectType: object.type });
 	};
 
+	const onAi = () => {
+		sidebar.rightPanelToggle(isPopup, { page: 'ai', rootId });
+	};
+
 	const onRelation = () => {
 		sidebar.rightPanelToggle(isPopup, { page: 'object/relation', rootId, readonly });
 	};
@@ -170,6 +175,16 @@ const HeaderMainObject = observer(forwardRef<{}, I.HeaderComponent>((props, ref)
 						}}
 						className={[ (hasWidget ? 'unpin' : 'pin'), 'withBackground' ].join(' ')}
 						onClick={onPin}
+						onDoubleClick={e => e.stopPropagation()}
+					/>
+				) : ''}
+
+				{showRelations ? (
+					<Icon
+						id="button-header-ai"
+						tooltipParam={{ text: translate('headerTooltipAi'), typeY: I.MenuDirection.Bottom }}
+						className={[ 'ai', 'withBackground', (isAiOpen ? 'active' : '') ].join(' ')}
+						onClick={onAi}
 						onDoubleClick={e => e.stopPropagation()}
 					/>
 				) : ''}

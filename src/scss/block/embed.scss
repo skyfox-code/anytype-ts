@@ -80,6 +80,7 @@
 		.preview.isCodepen { background-image: url('~img/icon/block/embed/codepen.svg'); }
 		.preview.isBilibili { background-image: url('~img/icon/block/embed/bilibili.svg'); }
 		.preview.isExcalidraw { background-image: url('~img/icon/block/embed/excalidraw.svg'); }
+		.preview.isCanvas { background-image: url('~img/icon/block/embed/canvas.svg'); }
 		.preview.isKroki { background-image: url('~img/icon/block/embed/kroki.svg'); }
 		.preview.isGraphviz { background-image: url('~img/icon/block/embed/graphviz.svg'); }
 		.preview.isSketchfab { background-image: url('~img/icon/block/embed/sketchfab.svg'); }
@@ -180,6 +181,26 @@
 		.mediaExcalidraw { height: 100%;
 			.LaserToolOverlay { display: none !important; }
 		}
+	}
+
+	.block.blockEmbed.isCanvas {
+		.icon.source { display: none !important; }
+		> .wrapContent .selectionTarget.isKeyboardFocused::after { display: none; }
+		#value { position: relative; z-index: 0; }
+		.icon.expand { z-index: 1; }
+		.mediaCanvas { height: 100%; }
+	}
+
+	.block.blockEmbed.isCanvas .wrap.isFullScreen {
+		position: fixed; inset: 0; z-index: 100;
+		background: var(--color-bg-primary);
+		padding: 0;
+
+		.valueWrap { width: 100% !important; height: 100%; }
+		#value { height: 100% !important; }
+		.mediaCanvas { height: 100% !important; }
+		.icon.expand { position: fixed; top: 20px; right: 16px; opacity: 1; z-index: 101; }
+		.icon.resize { display: none; }
 	}
 
 	.block.blockEmbed.isExcalidraw .wrap.isFullScreen {

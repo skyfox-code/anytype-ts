@@ -28,6 +28,7 @@ export enum EmbedProcessor {
 	Spotify			 = 24,
 	Bandcamp		 = 25,
 	AppleMusic 		 = 26,
+	Canvas			 = 27,
 };
 
 export interface ContentEmbed {

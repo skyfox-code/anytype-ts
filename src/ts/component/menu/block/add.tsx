@@ -140,7 +140,21 @@ const MenuBlockAdd = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 			};
 		});
 
+		const aiChildren = [
+			{
+				id: 'aiCommands',
+				itemId: 'aiCommands',
+				icon: 'ai-command',
+				name: translate('blockNameAi'),
+				description: translate('blockTextAi'),
+				arrow: true,
+				isAi: true,
+				aliases: [ 'ai', 'grammar', 'summarize', 'expand', 'translate', 'tone', 'rewrite' ],
+			},
+		];
+
 		let sections: any[] = [
+			{ id: 'ai', name: translate('menuBlockAddSectionAi'), children: aiChildren },
 			{ id: 'text', name: translate('menuBlockAddSectionText'), children: U.Menu.getBlockText() },
 			{ id: 'list', name: translate('menuBlockAddSectionList'), children: U.Menu.getBlockList() },
 			{ id: 'link', name: translate('menuBlockAddSectionLink'), children: U.Menu.getBlockLink() },
@@ -150,11 +164,11 @@ const MenuBlockAdd = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 			{ id: 'relation', name: translate('menuBlockAddSectionRelations'), children: getRelations() },
 			{ id: 'object', name: translate('menuBlockAddSectionObject'), children: items },
 			{ id: 'embed', name: translate('menuBlockAddSectionEmbed'), children: U.Menu.getBlockEmbed() },
-		].map(s => ({ 
-			...s, 
+		].map(s => ({
+			...s,
 			children: s.children.map(c => ({
 				...s,
-				...c, 
+				...c,
 			})),
 		}));
 		
@@ -267,13 +281,13 @@ const MenuBlockAdd = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 
 		let menuId = '';
 
-		switch (item.itemId) {	
+		switch (item.itemId) {
 			case 'move': {
 				menuId = 'searchObject';
 				menuParam.offsetY = -36;
 
 				menuParam.data = Object.assign(menuParam.data, {
-					type: I.NavigationType.Move, 
+					type: I.NavigationType.Move,
 					filters: [
 						{ relationKey: 'resolvedLayout', condition: I.FilterCondition.In, value: U.Object.getPageLayouts() },
 					],
@@ -294,6 +308,14 @@ const MenuBlockAdd = observer(forwardRef<I.MenuRef, I.Menu>((props, ref) => {
 						moveToPage(item.id);
 						close();
 					},
+				});
+				break;
+			};
+
+			case 'aiCommands': {
+				menuId = 'blockAi';
+				menuParam.data = Object.assign(menuParam.data, {
+					blockText: text,
 				});
 				break;
 			};
