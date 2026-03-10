@@ -1050,10 +1050,6 @@ class Dispatcher {
 
 					mapped.subIds = S.Chat.checkVaultSubscriptionIds(mapped.subIds, spaceId, rootId);
 					mapped.subIds.forEach(subId => {
-						dependencies.forEach((details, id) => {
-							S.Detail.update(subId, { id, details }, false);
-						});
-
 						const list = S.Chat.getList(subId);
 
 						let idx = list.findIndex(it => it.orderId == orderId);
@@ -1326,7 +1322,7 @@ class Dispatcher {
 	 * @returns Array of unique base subscription IDs
 	 */
 	getUniqueSubIds (subIds: string[]) {
-		return U.Common.arrayUnique((subIds || []).map(it => it.split('/')[0].replace(/-deps$/, '')));
+		return U.Common.arrayUnique((subIds || []).map(it => it.split('/')[0]));
 	};
 
 	/**
